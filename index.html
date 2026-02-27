@@ -480,7 +480,11 @@ let S;
 function load(){try{const r=localStorage.getItem(SK);return r?JSON.parse(r):{kids:[],activeId:null};}catch(e){return{kids:[],activeId:null};}}
 
 /* ══ FIREBASE ══ */
-let db=null, fbUnsub=null, saveTimer=null, ownWrite=false;
+let db=null, fbUnsub=null, saveTimer=null;
+// Write-token approach: each save stamps a unique token into the document.
+// The snapshot listener checks if the incoming token matches our last write
+// and skips it (echo of our own write). Any OTHER token = remote change = accept.
+let pendingWriteToken=null;
 
 function setSyncUI(cls,label){
   const p=document.getElementById('syncPill');
@@ -505,10 +509,18 @@ function startListener(hid){
   if(fbUnsub){fbUnsub();fbUnsub=null;}
   setSyncUI('syncing','Connecting…');
   fbUnsub=db.collection('chorequest').doc(hid).onSnapshot(snap=>{
-    if(ownWrite)return;
     if(snap.exists){
-      const remote=snap.data().data;
-      if(remote&&JSON.stringify(remote)!==JSON.stringify(S)){S=remote;if(!S.kids)S.kids=[];saveLocal();renderAll();}
+      const d=snap.data();
+      // Skip only if this is the echo of our own pending write
+      if(d._writeToken && d._writeToken===pendingWriteToken){
+        setSyncUI('synced','Synced ✓');
+        return;
+      }
+      const remote=d.data;
+      if(remote&&JSON.stringify(remote)!==JSON.stringify(S)){
+        S=remote;if(!S.kids)S.kids=[];
+        saveLocal();renderAll();
+      }
     }else{save();}
     setSyncUI('synced','Synced ✓');
   },err=>{console.error(err);setSyncUI('error','Offline');});
@@ -517,7 +529,8 @@ function startListener(hid){
 function disconnectFirebase(){
   if(fbUnsub){fbUnsub();fbUnsub=null;}
   firebase.apps.slice().forEach(a=>a.delete().catch(()=>{}));
-  db=null;localStorage.removeItem('cq_fbcfg');localStorage.removeItem('cq_hid');
+  db=null;pendingWriteToken=null;
+  localStorage.removeItem('cq_fbcfg');localStorage.removeItem('cq_hid');
   setSyncUI('','Local only');
 }
 
@@ -534,12 +547,17 @@ function save(){
   clearTimeout(saveTimer);
   setSyncUI('syncing','Saving…');
   saveTimer=setTimeout(async()=>{
+    const token=Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+    pendingWriteToken=token;
     try{
-      ownWrite=true;
-      await db.collection('chorequest').doc(localStorage.getItem('cq_hid')).set({data:S,ts:firebase.firestore.FieldValue.serverTimestamp()});
+      await db.collection('chorequest').doc(localStorage.getItem('cq_hid'))
+        .set({data:S,_writeToken:token,ts:firebase.firestore.FieldValue.serverTimestamp()});
       setSyncUI('synced','Synced ✓');
     }catch(e){console.error(e);setSyncUI('error','Sync error');}
-    finally{setTimeout(()=>{ownWrite=false;},600);}
+    finally{
+      // Clear token after snapshot echo has had time to arrive (3s is generous)
+      setTimeout(()=>{if(pendingWriteToken===token)pendingWriteToken=null;},3000);
+    }
   },700);
 }
 S=(()=>{try{const r=localStorage.getItem(SK);return r?JSON.parse(r):{kids:[],activeId:null};}catch(e){return{kids:[],activeId:null};}})();
