@@ -85,24 +85,35 @@ jobs:
           echo "📋 twa-manifest.json:"
           cat twa-manifest.json
 
-      # ── Generate Android project from existing twa-manifest.json ─
-      # 'bubblewrap update' reads the local twa-manifest.json and
-      # generates the Gradle project without interactive package ID prompts.
-      # (bubblewrap init asks for package ID, name, etc. interactively)
+      # ── Generate Android project from twa-manifest.json ──────────
+      # bubblewrap init generates the full Gradle/Android project.
+      #   • `yes ""` sends unlimited EMPTY lines (= pressing Enter)
+      #     which accepts the defaults already in twa-manifest.json.
+      #   • DON'T use `yes` (sends "y") or `yes n` — those fill text
+      #     prompts like packageId with garbage.
+      #   • DON'T use `bubblewrap update` — it requires an existing
+      #     Android project which doesn't exist in a fresh checkout.
       - name: Generate TWA project
         working-directory: twa
         run: |
-          # Accept the "regenerate project?" prompt with yes
-          yes | npx bubblewrap update --skipPwaValidation || true
-          echo "📁 Generated project files:"
+          yes "" | npx bubblewrap init \
+            --manifest="https://sundaran-rm.github.io/Kids-Chore-Tracker-Mobile/pwa/manifest.json" \
+            --skipPwaValidation
+          echo "📁 Generated project structure:"
           ls -la
+          echo ""
+          # Verify the Android project was actually created
+          if [ ! -f "build.gradle" ] && [ ! -f "app/build.gradle" ]; then
+            echo "❌ Android project was NOT generated!"
+            exit 1
+          fi
+          echo "✅ Android project generated successfully"
 
-      # ── Build with Bubblewrap (non-interactive) ──────────────────
+      # ── Build APK ────────────────────────────────────────────────
       - name: Build TWA
         working-directory: twa
         run: |
-          # 'yes n' feeds "n" to skip project regeneration prompts
-          yes n | npx bubblewrap build \
+          yes "" | npx bubblewrap build \
             --skipPwaValidation \
             --signingKeyPath="${{ github.workspace }}/release-keystore.jks" \
             --signingKeyAlias="${{ secrets.KEY_ALIAS }}"
