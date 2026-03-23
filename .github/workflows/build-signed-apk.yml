@@ -1,0 +1,76 @@
+name: Build & Sign APK
+
+# Manual trigger only — no builds on push
+on:
+  workflow_dispatch:
+    inputs:
+      versionCode:
+        description: 'Version code for APK (optional)'
+        required: false
+        default: '1'
+      releaseType:
+        description: 'Release type: debug or release'
+        required: true
+        default: 'release'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout repo
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2️⃣ Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      # 3️⃣ Setup Java (required by Bubblewrap)
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+
+      # 4️⃣ Install Bubblewrap CLI
+      - name: Install Bubblewrap
+        run: npm install -g @bubblewrap/cli
+
+      # 5️⃣ Decode keystore from secrets
+      - name: Prepare Keystore
+        run: |
+          echo $KEYSTORE_BASE64 | base64 --decode > ./twa/keystore.jks
+
+      # 6️⃣ Update versionCode (optional)
+      - name: Update versionCode
+        run: |
+          if [ "${{ github.event.inputs.versionCode }}" != "" ]; then
+            sed -i "s/\"versionCode\": [0-9]\+/\"versionCode\": ${{ github.event.inputs.versionCode }}/" ./twa/twa-manifest.json
+          fi
+
+      # 7️⃣ Build APK
+      - name: Build APK
+        working-directory: ./twa
+        run: bubblewrap build --${{ github.event.inputs.releaseType }}
+
+      # 8️⃣ Sign APK
+      - name: Sign APK
+        working-directory: ./twa
+        run: |
+          jarsigner -verbose -keystore ./keystore.jks \
+          -storepass $KEYSTORE_PASSWORD \
+          -keypass $KEY_PASSWORD \
+          ./app-release-unsigned.apk $KEY_ALIAS
+
+          # Align APK for Play Store
+          zipalign -v 4 ./app-release-unsigned.apk ./app-release.apk
+
+      # 9️⃣ Upload signed APK
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: chore-quest-apk
+          path: ./twa/app-release.apk
