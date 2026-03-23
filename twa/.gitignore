@@ -1,0 +1,4 @@
+node_modules/
+app-release.apk
+app-release-unsigned.apk
+keystore.jks

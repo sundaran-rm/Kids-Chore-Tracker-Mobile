@@ -1,0 +1,11 @@
+{
+  "name": "chore-quest-twa",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@bubblewrap/cli": "^1.7.0"
+  },
+  "scripts": {
+    "build": "bubblewrap build --release"
+  }
+}
