@@ -1,6 +1,6 @@
 name: Build & Sign APK
 
-# Manual trigger only — no builds on push
+# Manual trigger only
 on:
   workflow_dispatch:
     inputs:
@@ -16,17 +16,19 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # future-proof Node 24
 
     steps:
-      # 1️⃣ Checkout repo
+      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2️⃣ Setup Node.js
+      # 2️⃣ Setup Node.js 24
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: '24'
 
       # 3️⃣ Setup Java (required by Bubblewrap)
       - name: Setup Java
@@ -39,36 +41,36 @@ jobs:
       - name: Install Bubblewrap
         run: npm install -g @bubblewrap/cli
 
-      # 5️⃣ Decode keystore from secrets
+      # 5️⃣ Decode keystore from secret
       - name: Prepare Keystore
         run: |
-          echo $KEYSTORE_BASE64 | base64 --decode > ./twa/keystore.jks
+          echo "$KEYSTORE_BASE64" | base64 --decode > ./twa/keystore.jks
 
-      # 6️⃣ Update versionCode (optional)
+      # 6️⃣ Update versionCode in twa-manifest.json (optional)
       - name: Update versionCode
         run: |
           if [ "${{ github.event.inputs.versionCode }}" != "" ]; then
             sed -i "s/\"versionCode\": [0-9]\+/\"versionCode\": ${{ github.event.inputs.versionCode }}/" ./twa/twa-manifest.json
           fi
 
-      # 7️⃣ Build APK
+      # 7️⃣ Build APK (skip JDK interactive check)
       - name: Build APK
         working-directory: ./twa
-        run: bubblewrap build --${{ github.event.inputs.releaseType }}
+        run: bubblewrap build --${{ github.event.inputs.releaseType }} --skip-checks
 
       # 8️⃣ Sign APK
       - name: Sign APK
         working-directory: ./twa
         run: |
           jarsigner -verbose -keystore ./keystore.jks \
-          -storepass $KEYSTORE_PASSWORD \
-          -keypass $KEY_PASSWORD \
-          ./app-release-unsigned.apk $KEY_ALIAS
+          -storepass "$KEYSTORE_PASSWORD" \
+          -keypass "$KEY_PASSWORD" \
+          ./app-release-unsigned.apk "$KEY_ALIAS"
 
           # Align APK for Play Store
           zipalign -v 4 ./app-release-unsigned.apk ./app-release.apk
 
-      # 9️⃣ Upload signed APK
+      # 9️⃣ Upload signed APK artifact
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
