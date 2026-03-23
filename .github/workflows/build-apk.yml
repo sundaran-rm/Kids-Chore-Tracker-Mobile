@@ -77,6 +77,12 @@ jobs:
               "Do you want Bubblewrap to install" {
                 send "\r"
               }
+              "terms and conditions" {
+                send "y\r"
+              }
+              "Do you agree" {
+                send "y\r"
+              }
               "First and Last names" {
                 send "John Doe\r"
               }
