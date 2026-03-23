@@ -15,45 +15,49 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
+      # 1️⃣ Checkout repo
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # 2️⃣ Setup Node.js 20 (Bubblewrap works correctly)
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '24'
+          node-version: '20'
 
+      # 3️⃣ Setup Java JDK 17
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: 17
 
+      # 4️⃣ Install Bubblewrap CLI
       - name: Install Bubblewrap
         run: npm install -g @bubblewrap/cli
 
+      # 5️⃣ Decode keystore from secret
       - name: Prepare Keystore
         run: |
           echo "$KEYSTORE_BASE64" | base64 --decode > ./twa/keystore.jks
 
+      # 6️⃣ Update versionCode in twa-manifest.json (optional)
       - name: Update versionCode
         run: |
           if [ "${{ github.event.inputs.versionCode }}" != "" ]; then
             sed -i "s/\"versionCode\": [0-9]\+/\"versionCode\": ${{ github.event.inputs.versionCode }}/" ./twa/twa-manifest.json
           fi
 
-      - name: Build APK (non-interactive)
+      # 7️⃣ Build APK (non-interactive)
+      - name: Build APK
         working-directory: ./twa
         env:
           JAVA_HOME: ${{ env.JAVA_HOME }}
-          BUBBLEWRAP_SKIP_CHECKS: true
-          BUBBLEWRAP_NON_INTERACTIVE: true
         run: bubblewrap build --${{ github.event.inputs.releaseType }} --skip-checks
 
+      # 8️⃣ Sign APK
       - name: Sign APK
         working-directory: ./twa
         run: |
@@ -64,6 +68,7 @@ jobs:
 
           zipalign -v 4 ./app-release-unsigned.apk ./app-release.apk
 
+      # 9️⃣ Upload signed APK artifact
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
