@@ -1,4 +1,4 @@
-name: Build & Sign APK
+name: Build & Sign APK (Docker)
 
 on:
   workflow_dispatch:
@@ -15,49 +15,40 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/bubblewrap/bubblewrap:latest
+      # This container comes with Node.js, Java JDK, Bubblewrap installed
+
+    env:
+      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
     steps:
-      # 1️⃣ Checkout repo
-      - name: Checkout repository
+      # 1️⃣ Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v3
 
-      # 2️⃣ Setup Node.js 20 (Bubblewrap works correctly)
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-
-      # 3️⃣ Setup Java JDK 17
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: 17
-
-      # 4️⃣ Install Bubblewrap CLI
-      - name: Install Bubblewrap
-        run: npm install -g @bubblewrap/cli
-
-      # 5️⃣ Decode keystore from secret
+      # 2️⃣ Decode keystore
       - name: Prepare Keystore
         run: |
+          mkdir -p ./twa
           echo "$KEYSTORE_BASE64" | base64 --decode > ./twa/keystore.jks
 
-      # 6️⃣ Update versionCode in twa-manifest.json (optional)
+      # 3️⃣ Update versionCode in TWA manifest (optional)
       - name: Update versionCode
         run: |
           if [ "${{ github.event.inputs.versionCode }}" != "" ]; then
             sed -i "s/\"versionCode\": [0-9]\+/\"versionCode\": ${{ github.event.inputs.versionCode }}/" ./twa/twa-manifest.json
           fi
 
-      # 7️⃣ Build APK (non-interactive)
+      # 4️⃣ Build APK (fully non-interactive)
       - name: Build APK
         working-directory: ./twa
-        env:
-          JAVA_HOME: ${{ env.JAVA_HOME }}
-        run: bubblewrap build --${{ github.event.inputs.releaseType }} --skip-checks
+        run: |
+          bubblewrap build --${{ github.event.inputs.releaseType }} --skip-checks
 
-      # 8️⃣ Sign APK
+      # 5️⃣ Sign APK
       - name: Sign APK
         working-directory: ./twa
         run: |
@@ -66,9 +57,10 @@ jobs:
           -keypass "$KEY_PASSWORD" \
           ./app-release-unsigned.apk "$KEY_ALIAS"
 
+          # Align APK
           zipalign -v 4 ./app-release-unsigned.apk ./app-release.apk
 
-      # 9️⃣ Upload signed APK artifact
+      # 6️⃣ Upload signed APK
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
