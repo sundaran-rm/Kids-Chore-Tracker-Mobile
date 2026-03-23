@@ -85,14 +85,15 @@ jobs:
           echo "📋 twa-manifest.json:"
           cat twa-manifest.json
 
-      # ── Initialize the Android project from twa-manifest ────────
-      # bubblewrap init generates the Gradle project; without this,
-      # bubblewrap build fails with "Cannot read properties of undefined"
-      - name: Initialize TWA project
+      # ── Generate Android project from existing twa-manifest.json ─
+      # 'bubblewrap update' reads the local twa-manifest.json and
+      # generates the Gradle project without interactive package ID prompts.
+      # (bubblewrap init asks for package ID, name, etc. interactively)
+      - name: Generate TWA project
         working-directory: twa
         run: |
-          # 'yes' feeds unlimited "y" answers to all interactive prompts
-          yes | npx bubblewrap init --manifest="https://sundaran-rm.github.io/Kids-Chore-Tracker-Mobile/pwa/manifest.json" --directory=. || true
+          # Accept the "regenerate project?" prompt with yes
+          yes | npx bubblewrap update --skipPwaValidation || true
           echo "📁 Generated project files:"
           ls -la
 
