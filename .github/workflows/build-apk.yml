@@ -69,20 +69,25 @@ jobs:
 
           spawn npx bubblewrap init --manifest https://sundaran-rm.github.io/Kids-Chore-Tracker-Mobile/pwa/manifest.json --skipPwaValidation
 
+          # ── Phase 1: JDK install (sequential) ──────────────────
+          # Wait for JDK prompt, press Enter to accept default (Y)
+          expect "install*JDK"
+          send "\r"
+
+          # ── Phase 2: Android SDK install (sequential) ──────────
+          # After JDK download, SDK prompt appears
+          expect "install*Android"
+          send "\r"
+
+          # ── Phase 3: Accept SDK terms (sequential) ─────────────
+          # The T&C prompt defaults to No (y/N), must send "y"
+          expect "Do you agree"
+          send "y\r"
+
+          # ── Phase 4: Config & signing prompts (while loop) ─────
+          # T&C is already handled above — the catch-all is now safe
           while {1} {
             expect {
-              "Do you want Bubblewrap to install the JDK" {
-                send "\r"
-              }
-              "Do you want Bubblewrap to install" {
-                send "\r"
-              }
-              "terms and conditions" {
-                send "y\r"
-              }
-              "Do you agree" {
-                send "y\r"
-              }
               "First and Last names" {
                 send "John Doe\r"
               }
