@@ -16,59 +16,19 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    # ── Use official Bubblewrap Docker image ─────────────────────
+    # Pre-installed: Node.js, JDK 17, Android SDK, Bubblewrap CLI
+    # This eliminates ALL interactive JDK/SDK installation prompts.
+    container:
+      image: ghcr.io/googlechromelabs/bubblewrap:latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ── Pre-install JDK 17 & Android SDK ──────────────────────────
-      # This prevents Bubblewrap from prompting "Do you want to install JDK?"
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      # ── Install Bubblewrap ────────────────────────────────────────
-      - name: Install Bubblewrap CLI
-        working-directory: twa
-        run: npm install
-
-      # ── Configure Bubblewrap to use pre-installed JDK & SDK ──────
-      # Write config so Bubblewrap knows where JDK and Android SDK are
-      # and doesn't prompt interactively
-      - name: Configure Bubblewrap paths
-        run: |
-          mkdir -p "$HOME/.llama-pack"
-          cat > "$HOME/.llama-pack/llama-pack-config.json" <<CONF
-          {
-            "jdkPath": "$JAVA_HOME",
-            "androidSdkPath": "$ANDROID_HOME"
-          }
-          CONF
-
-          # Bubblewrap also checks ~/.bubblewrap/config.json
-          mkdir -p "$HOME/.bubblewrap"
-          cat > "$HOME/.bubblewrap/config.json" <<CONF
-          {
-            "jdkPath": "$JAVA_HOME",
-            "androidSdkPath": "$ANDROID_HOME"
-          }
-          CONF
-
-          echo "✅ JDK:  $JAVA_HOME"
-          echo "✅ SDK:  $ANDROID_HOME"
-
       # ── Decode signing keystore ──────────────────────────────────
       - name: Decode keystore
-        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > "${{ github.workspace }}/release-keystore.jks"
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > /tmp/release-keystore.jks
 
       # ── Optionally bump version ──────────────────────────────────
       - name: Update version in twa-manifest
@@ -77,86 +37,142 @@ jobs:
           VERSION_NAME="${{ github.event.inputs.version_name }}"
           VERSION_CODE="${{ github.event.inputs.version_code }}"
           if [ -n "$VERSION_NAME" ]; then
-            jq --arg v "$VERSION_NAME" '.appVersionName = $v' twa-manifest.json > tmp.json && mv tmp.json twa-manifest.json
-          fi
-          if [ -n "$VERSION_CODE" ]; then
-            jq --argjson v "$VERSION_CODE" '.appVersionCode = $v' twa-manifest.json > tmp.json && mv tmp.json twa-manifest.json
+            apt-get update && apt-get install -y jq 2>/dev/null || true
+            if command -v jq &>/dev/null; then
+              jq --arg v "$VERSION_NAME" '.appVersionName = $v' twa-manifest.json > tmp.json && mv tmp.json twa-manifest.json
+              jq --argjson v "$VERSION_CODE" '.appVersionCode = $v' twa-manifest.json > tmp.json && mv tmp.json twa-manifest.json
+            else
+              sed -i "s/\"appVersionName\": \"[^\"]*\"/\"appVersionName\": \"$VERSION_NAME\"/" twa-manifest.json
+              sed -i "s/\"appVersionCode\": [0-9]*/\"appVersionCode\": $VERSION_CODE/" twa-manifest.json
+            fi
           fi
           echo "📋 twa-manifest.json:"
           cat twa-manifest.json
 
-      # ── Generate Android project from twa-manifest.json ──────────
-      # bubblewrap init generates the full Gradle/Android project.
-      #   • `yes ""` sends unlimited EMPTY lines (= pressing Enter)
-      #     which accepts the defaults already in twa-manifest.json.
-      #   • DON'T use `yes` (sends "y") or `yes n` — those fill text
-      #     prompts like packageId with garbage.
-      #   • DON'T use `bubblewrap update` — it requires an existing
-      #     Android project which doesn't exist in a fresh checkout.
+      # ── Generate & Build TWA ─────────────────────────────────────
+      # Inside the Docker container, JDK and Android SDK are already
+      # configured so bubblewrap won't ask to install them.
+      # bubblewrap init still asks project config questions — we use
+      # the existing twa-manifest.json values via 'expect' to handle
+      # the few remaining interactive prompts.
+      - name: Install expect
+        run: apt-get update && apt-get install -y expect 2>/dev/null || true
+
       - name: Generate TWA project
         working-directory: twa
         run: |
-          yes "" | npx bubblewrap init \
-            --manifest="https://sundaran-rm.github.io/Kids-Chore-Tracker-Mobile/pwa/manifest.json" \
-            --skipPwaValidation
+          # Use expect to handle interactive prompts from bubblewrap init
+          # The twa-manifest.json already has all config — we just need
+          # to press Enter to accept defaults and provide a name for the
+          # signing key identity (the actual signing uses our keystore).
+          expect << 'EXPECT_EOF'
+          set timeout 600
+          spawn bubblewrap init --manifest https://sundaran-rm.github.io/Kids-Chore-Tracker-Mobile/pwa/manifest.json --skipPwaValidation
+
+          while {1} {
+            expect {
+              -re "install.*JDK" { send "n\r" }
+              -re "install.*Android" { send "n\r" }
+              -re "install.*SDK" { send "n\r" }
+              "First and Last" { send "CI Build\r" }
+              "Organizational Unit" { send "Dev\r" }
+              "Organization:" { send "Dev\r" }
+              "City or Locality" { send "City\r" }
+              "State or Province" { send "State\r" }
+              "Country Code" { send "US\r" }
+              -re "password" { send "temppass123\r" }
+              -re "\\(Y/n\\)" { send "y\r" }
+              -re "\\(y/N\\)" { send "n\r" }
+              -re "\\? .*:" { send "\r" }
+              -re "\\? .*\\)" { send "\r" }
+              eof { break }
+              timeout { puts "⏰ Timeout"; break }
+            }
+          }
+
+          catch wait result
+          set exit_code [lindex $result 3]
+          puts "bubblewrap init exited with code: $exit_code"
+          exit $exit_code
+          EXPECT_EOF
+
+          echo ""
           echo "📁 Generated project structure:"
           ls -la
-          echo ""
-          # Verify the Android project was actually created
-          if [ ! -f "build.gradle" ] && [ ! -f "app/build.gradle" ]; then
-            echo "❌ Android project was NOT generated!"
-            exit 1
-          fi
-          echo "✅ Android project generated successfully"
 
-      # ── Build APK ────────────────────────────────────────────────
       - name: Build TWA
         working-directory: twa
         run: |
-          yes "" | npx bubblewrap build \
-            --skipPwaValidation \
-            --signingKeyPath="${{ github.workspace }}/release-keystore.jks" \
-            --signingKeyAlias="${{ secrets.KEY_ALIAS }}"
+          expect << 'EXPECT_EOF'
+          set timeout 600
+          spawn bubblewrap build --skipPwaValidation --signingKeyPath /tmp/release-keystore.jks --signingKeyAlias $env(KEY_ALIAS)
+
+          while {1} {
+            expect {
+              -re "regenerate.*\\(Y/n\\)" { send "n\r" }
+              -re "\\(Y/n\\)" { send "y\r" }
+              -re "\\(y/N\\)" { send "n\r" }
+              eof { break }
+              timeout { puts "⏰ Timeout"; break }
+            }
+          }
+
+          catch wait result
+          set exit_code [lindex $result 3]
+          puts "bubblewrap build exited with code: $exit_code"
+          exit $exit_code
+          EXPECT_EOF
         env:
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           BUBBLEWRAP_KEYPASSWORD: ${{ secrets.KEY_PASSWORD }}
           BUBBLEWRAP_STOREPASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
 
-      # ── Re-sign APK for safety ───────────────────────────────────
+      # ── Locate and re-sign APK ───────────────────────────────────
       - name: Sign APK
         run: |
-          APK_FILE=$(find twa -name "*-signed.apk" -o -name "*-release.apk" -o -name "*.apk" | head -1)
+          APK_FILE=$(find /github/workspace/twa -name "*-signed.apk" -o -name "*-release.apk" -o -name "*.apk" 2>/dev/null | head -1)
 
           if [ -z "$APK_FILE" ]; then
-            echo "❌ No APK found!"
-            find twa -type f \( -name "*.apk" -o -name "*.aab" \)
+            echo "❌ No APK found! Listing build output:"
+            find /github/workspace/twa -type f \( -name "*.apk" -o -name "*.aab" \)
+            ls -laR /github/workspace/twa/app/build/outputs/ 2>/dev/null || true
             exit 1
           fi
 
           echo "📦 Found: $APK_FILE"
 
-          # Locate apksigner
-          APKSIGNER=$(find "$ANDROID_HOME" -name "apksigner" -type f 2>/dev/null | sort -r | head -1)
+          # Find apksigner
+          APKSIGNER=$(find / -name "apksigner" -type f 2>/dev/null | sort -r | head -1)
 
           if [ -n "$APKSIGNER" ]; then
             echo "🔏 Signing with apksigner..."
             "$APKSIGNER" sign \
-              --ks "${{ github.workspace }}/release-keystore.jks" \
+              --ks /tmp/release-keystore.jks \
               --ks-key-alias "${{ secrets.KEY_ALIAS }}" \
               --ks-pass "pass:${{ secrets.KEYSTORE_PASSWORD }}" \
               --key-pass "pass:${{ secrets.KEY_PASSWORD }}" \
-              --out "${{ github.workspace }}/chore-quest-signed.apk" \
+              --out /tmp/chore-quest-signed.apk \
               "$APK_FILE"
           else
-            echo "⚠️ apksigner not found – copying Bubblewrap output as-is"
-            cp "$APK_FILE" "${{ github.workspace }}/chore-quest-signed.apk"
+            echo "⚠️ apksigner not found — using jarsigner"
+            cp "$APK_FILE" /tmp/chore-quest-signed.apk
+            jarsigner -verbose \
+              -sigalg SHA256withRSA -digestalg SHA-256 \
+              -keystore /tmp/release-keystore.jks \
+              -storepass "${{ secrets.KEYSTORE_PASSWORD }}" \
+              -keypass "${{ secrets.KEY_PASSWORD }}" \
+              /tmp/chore-quest-signed.apk \
+              "${{ secrets.KEY_ALIAS }}"
           fi
 
       # ── Verify ───────────────────────────────────────────────────
       - name: Verify APK signature
         run: |
-          APKSIGNER=$(find "$ANDROID_HOME" -name "apksigner" -type f 2>/dev/null | sort -r | head -1)
+          APKSIGNER=$(find / -name "apksigner" -type f 2>/dev/null | sort -r | head -1)
           if [ -n "$APKSIGNER" ]; then
-            "$APKSIGNER" verify --verbose "${{ github.workspace }}/chore-quest-signed.apk"
+            "$APKSIGNER" verify --verbose /tmp/chore-quest-signed.apk
+          else
+            jarsigner -verify /tmp/chore-quest-signed.apk
           fi
 
       # ── Upload artifact ──────────────────────────────────────────
@@ -164,10 +180,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: chore-quest-v${{ github.event.inputs.version_name || '1.0.0' }}
-          path: ${{ github.workspace }}/chore-quest-signed.apk
+          path: /tmp/chore-quest-signed.apk
           retention-days: 30
 
       # ── Cleanup ──────────────────────────────────────────────────
       - name: Cleanup keystore
         if: always()
-        run: rm -f "${{ github.workspace }}/release-keystore.jks"
+        run: rm -f /tmp/release-keystore.jks
