@@ -70,7 +70,7 @@ jobs:
 
       # 9️⃣ Upload signed APK
       - name: Upload APK Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: chore-quest-apk
           path: ./twa/app-release.apk
