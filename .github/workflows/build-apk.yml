@@ -1,0 +1,150 @@
+name: Build & Sign APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: 'Version name (e.g. 1.0.0)'
+        required: false
+        default: '1.0.0'
+      version_code:
+        description: 'Version code (integer, e.g. 1)'
+        required: false
+        default: '1'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── Pre-install JDK 17 & Android SDK ──────────────────────────
+      # This prevents Bubblewrap from prompting "Do you want to install JDK?"
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # ── Install Bubblewrap ────────────────────────────────────────
+      - name: Install Bubblewrap CLI
+        working-directory: twa
+        run: npm install
+
+      # ── Configure Bubblewrap to use pre-installed JDK & SDK ──────
+      # Write config so Bubblewrap knows where JDK and Android SDK are
+      # and doesn't prompt interactively
+      - name: Configure Bubblewrap paths
+        run: |
+          mkdir -p "$HOME/.llama-pack"
+          cat > "$HOME/.llama-pack/llama-pack-config.json" <<CONF
+          {
+            "jdkPath": "$JAVA_HOME",
+            "androidSdkPath": "$ANDROID_HOME"
+          }
+          CONF
+
+          # Bubblewrap also checks ~/.bubblewrap/config.json
+          mkdir -p "$HOME/.bubblewrap"
+          cat > "$HOME/.bubblewrap/config.json" <<CONF
+          {
+            "jdkPath": "$JAVA_HOME",
+            "androidSdkPath": "$ANDROID_HOME"
+          }
+          CONF
+
+          echo "✅ JDK:  $JAVA_HOME"
+          echo "✅ SDK:  $ANDROID_HOME"
+
+      # ── Decode signing keystore ──────────────────────────────────
+      - name: Decode keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > "${{ github.workspace }}/release-keystore.jks"
+
+      # ── Optionally bump version ──────────────────────────────────
+      - name: Update version in twa-manifest
+        working-directory: twa
+        run: |
+          VERSION_NAME="${{ github.event.inputs.version_name }}"
+          VERSION_CODE="${{ github.event.inputs.version_code }}"
+          if [ -n "$VERSION_NAME" ]; then
+            jq --arg v "$VERSION_NAME" '.appVersionName = $v' twa-manifest.json > tmp.json && mv tmp.json twa-manifest.json
+          fi
+          if [ -n "$VERSION_CODE" ]; then
+            jq --argjson v "$VERSION_CODE" '.appVersionCode = $v' twa-manifest.json > tmp.json && mv tmp.json twa-manifest.json
+          fi
+          echo "📋 twa-manifest.json:"
+          cat twa-manifest.json
+
+      # ── Build with Bubblewrap (non-interactive) ──────────────────
+      - name: Build TWA
+        working-directory: twa
+        run: |
+          # Pipe "n" to decline any remaining interactive prompts
+          echo "n" | npx bubblewrap build \
+            --skipPwaValidation \
+            --signingKeyPath="${{ github.workspace }}/release-keystore.jks" \
+            --signingKeyAlias="${{ secrets.KEY_ALIAS }}"
+        env:
+          BUBBLEWRAP_KEYPASSWORD: ${{ secrets.KEY_PASSWORD }}
+          BUBBLEWRAP_STOREPASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+
+      # ── Re-sign APK for safety ───────────────────────────────────
+      - name: Sign APK
+        run: |
+          APK_FILE=$(find twa -name "*-signed.apk" -o -name "*-release.apk" -o -name "*.apk" | head -1)
+
+          if [ -z "$APK_FILE" ]; then
+            echo "❌ No APK found!"
+            find twa -type f \( -name "*.apk" -o -name "*.aab" \)
+            exit 1
+          fi
+
+          echo "📦 Found: $APK_FILE"
+
+          # Locate apksigner
+          APKSIGNER=$(find "$ANDROID_HOME" -name "apksigner" -type f 2>/dev/null | sort -r | head -1)
+
+          if [ -n "$APKSIGNER" ]; then
+            echo "🔏 Signing with apksigner..."
+            "$APKSIGNER" sign \
+              --ks "${{ github.workspace }}/release-keystore.jks" \
+              --ks-key-alias "${{ secrets.KEY_ALIAS }}" \
+              --ks-pass "pass:${{ secrets.KEYSTORE_PASSWORD }}" \
+              --key-pass "pass:${{ secrets.KEY_PASSWORD }}" \
+              --out "${{ github.workspace }}/chore-quest-signed.apk" \
+              "$APK_FILE"
+          else
+            echo "⚠️ apksigner not found – copying Bubblewrap output as-is"
+            cp "$APK_FILE" "${{ github.workspace }}/chore-quest-signed.apk"
+          fi
+
+      # ── Verify ───────────────────────────────────────────────────
+      - name: Verify APK signature
+        run: |
+          APKSIGNER=$(find "$ANDROID_HOME" -name "apksigner" -type f 2>/dev/null | sort -r | head -1)
+          if [ -n "$APKSIGNER" ]; then
+            "$APKSIGNER" verify --verbose "${{ github.workspace }}/chore-quest-signed.apk"
+          fi
+
+      # ── Upload artifact ──────────────────────────────────────────
+      - name: Upload signed APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: chore-quest-v${{ github.event.inputs.version_name || '1.0.0' }}
+          path: ${{ github.workspace }}/chore-quest-signed.apk
+          retention-days: 30
+
+      # ── Cleanup ──────────────────────────────────────────────────
+      - name: Cleanup keystore
+        if: always()
+        run: rm -f "${{ github.workspace }}/release-keystore.jks"
