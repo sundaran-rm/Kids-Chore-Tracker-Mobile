@@ -3,7 +3,7 @@
   "host": "sundaran-rm.github.io",
   "name": "Chore Quest",
   "launcherName": "ChoreQuest",
-  "display": "fullscreen",
+  "display": "standalone",
   "themeColor": "#0D1424",
   "themeColorDark": "#000000",
   "navigationColor": "#000000",

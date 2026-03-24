@@ -123,6 +123,29 @@ jobs:
           name: chore-quest-v${{ github.event.inputs.version_name || '1.0.0' }}
           path: ${{ github.workspace }}/chore-quest-signed.apk
           retention-days: 30
+      - name: Generate Asset Links JSON
+        run: |
+          echo "🔍 Extracting SHA-256 fingerprint from KeyStore..."
+          SHA256=$(keytool -list -v -keystore "${{ github.workspace }}/release-keystore.jks" -alias "${{ secrets.KEY_ALIAS }}" -storepass "${{ secrets.KEYSTORE_PASSWORD }}" -keypass "${{ secrets.KEY_PASSWORD }}" | grep -i 'SHA256:' | awk '{print $2}')
+          
+          echo ""
+          echo "====================================================="
+          echo "✅ COPY THIS JSON INTO YOUR assetlinks.json FILE ✅"
+          echo "====================================================="
+          cat <<EOF
+          [{
+            "relation": ["delegate_permission/common.handle_all_urls"],
+            "target": {
+              "namespace": "android_app",
+              "package_name": "io.github.sundaran_rm.twa",
+              "sha256_cert_fingerprints": [
+                "$SHA256"
+              ]
+            }
+          }]
+          EOF
+          echo "====================================================="
+
 
       - name: Cleanup keystore
         if: always()
