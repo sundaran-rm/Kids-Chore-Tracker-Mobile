@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "io.github.sundaran_rm.twa",
+    "sha256_cert_fingerprints": [
+      "A4:60:6B:15:32:03:56:B7:39:4C:27:6A:E5:8A:AD:4F:5B:41:CC:0E:C3:5A:73:DE:CF:89:BD:06:71:F4:B1:90"
+    ]
+  }
+}]
