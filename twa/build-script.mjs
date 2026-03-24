@@ -9,6 +9,7 @@ import {
 } from '@bubblewrap/core';
 import fs from 'fs';
 import path from 'path';
+import { execSync } from 'child_process';
 
 async function build() {
   const log = new ConsoleLog();
@@ -65,8 +66,6 @@ async function build() {
   if (!isWindows) {
     fs.chmodSync(gradlew, '755');
   }
-  
-  const { execSync } = require('child_process');
   
   log.info('Running assembleRelease...');
   execSync(`${gradlew} assembleRelease`, { stdio: 'inherit' });
