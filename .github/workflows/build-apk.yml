@@ -35,9 +35,7 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Install dependencies
-        run: |
-          sudo apt-get update && sudo apt-get install -y expect
-          cd twa && npm install
+        run: cd twa && npm install
 
       - name: Decode keystore
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > "${{ github.workspace }}/release-keystore.jks"
@@ -60,141 +58,15 @@ jobs:
       # Answer Y to JDK/SDK install (avoids the JDK-path prompt that
       # caused character-echo issues). bubblewrap downloads its own
       # JDK/SDK — the PTY from expect makes this work in CI.
-      - name: Generate TWA project
-        working-directory: twa
-        run: |
-          cat > /tmp/init_twa.exp << 'EXPECT_SCRIPT'
-          #!/usr/bin/expect -f
-          set timeout 900
-          set env(TERM) dumb
-          set env(NO_COLOR) 1
-
-          spawn npx bubblewrap init --manifest https://sundaran-rm.github.io/Kids-Chore-Tracker-Mobile/pwa/manifest.json --skipPwaValidation
-
-          # ── Phase 1: JDK install (sequential) ──────────────────
-          # Wait for JDK prompt, press Enter to accept default (Y)
-          expect "install*JDK"
-          send "\r"
-
-          # ── Phase 2: Android SDK install (sequential) ──────────
-          # After JDK download, SDK prompt appears
-          expect "install*Android"
-          send "\r"
-
-          # ── Phase 3: Accept SDK terms (sequential) ─────────────
-          # The T&C prompt defaults to No (y/N), must send "y"
-          expect "Do you agree"
-          send "y\r"
-
-          # ── Phase 4: Config prompts (catch-all with Enter) ────────
-          # All config prompts accept defaults from the web manifest.
-          # When we hit a signing identity prompt (validation rejects
-          # empty input), "Minimum length" appears → we break out.
-          while {1} {
-            expect {
-              "Minimum length" {
-                break
-              }
-              "\\? " {
-                send "\r"
-              }
-              eof {
-                break
-              }
-              timeout {
-                break
-              }
-            }
-          }
-
-          # ── Phase 5: Signing identity (sequential) ─────────────
-          # The "First and Last names" prompt is currently waiting.
-          # Sequential expects avoid the echo re-trigger problem.
-          sleep 1
-          send "John Doe\r"
-
-          expect "Organizational Unit"
-          send "Development\r"
-
-          expect "Organization (eg"
-          send "ChoreQuest\r"
-
-          expect "Country"
-          send "US\r"
-
-          # Password prompts (store password + key password)
-          expect -re "assword"
-          send "ASDasd123!!\r"
-
-          expect -re "assword"
-          send "ASDasd123!!\r"
-
-          # Wait for init to complete
-          expect {
-            eof {}
-            timeout {}
-          }
-
-          catch wait result
-          set exit_code [lindex $result 3]
-          puts "\n📦 bubblewrap init exit code: $exit_code"
-          exit $exit_code
-          EXPECT_SCRIPT
-
-          expect /tmp/init_twa.exp
-
-          echo ""
-          echo "📁 Generated project files:"
-          ls -la
-
-      # ── Build TWA APK ────────────────────────────────────────────
+      # ── Build TWA APK via Node script ────────────────────────────
+      # We use a custom script that calls @bubblewrap/core directly
+      # to bypass all the fragile interactive CLI prompts.
       - name: Build TWA
         working-directory: twa
-        run: |
-          cat > /tmp/build_twa.exp << 'EXPECT_SCRIPT'
-          #!/usr/bin/expect -f
-          set timeout 600
-          set env(TERM) dumb
-          set env(NO_COLOR) 1
-
-          set keystore_path $env(KEYSTORE_PATH)
-          set key_alias $env(KEY_ALIAS)
-
-          spawn npx bubblewrap build --skipPwaValidation --signingKeyPath $keystore_path --signingKeyAlias $key_alias
-
-          while {1} {
-            expect {
-              "regenerate" {
-                send "n\r"
-              }
-              "Do you want Bubblewrap to install" {
-                send "\r"
-              }
-              "\\? " {
-                send "\r"
-              }
-              eof {
-                break
-              }
-            }
-          }
-
-          catch wait result
-          set exit_code [lindex $result 3]
-          puts "\n📦 bubblewrap build exit code: $exit_code"
-          exit $exit_code
-          EXPECT_SCRIPT
-
-          expect /tmp/build_twa.exp
-
-          echo ""
-          echo "📁 Build output:"
-          find . -name "*.apk" -o -name "*.aab" | head -10
+        run: node build-script.mjs
         env:
-          KEYSTORE_PATH: ${{ github.workspace }}/release-keystore.jks
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          BUBBLEWRAP_KEYPASSWORD: ${{ secrets.KEY_PASSWORD }}
-          BUBBLEWRAP_STOREPASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          JAVA_HOME: ${{ env.JAVA_HOME }}
+          ANDROID_HOME: ${{ env.ANDROID_HOME }}
 
       # ── Re-sign APK with our keystore ────────────────────────────
       - name: Sign APK
