@@ -66,6 +66,8 @@ jobs:
           cat > /tmp/init_twa.exp << 'EXPECT_SCRIPT'
           #!/usr/bin/expect -f
           set timeout 900
+          set env(TERM) dumb
+          set env(NO_COLOR) 1
 
           spawn npx bubblewrap init --manifest https://sundaran-rm.github.io/Kids-Chore-Tracker-Mobile/pwa/manifest.json --skipPwaValidation
 
@@ -143,6 +145,8 @@ jobs:
           cat > /tmp/build_twa.exp << 'EXPECT_SCRIPT'
           #!/usr/bin/expect -f
           set timeout 600
+          set env(TERM) dumb
+          set env(NO_COLOR) 1
 
           set keystore_path $env(KEYSTORE_PATH)
           set key_alias $env(KEY_ALIAS)
