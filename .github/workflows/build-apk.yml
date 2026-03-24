@@ -86,36 +86,14 @@ jobs:
           expect "Do you agree"
           send "y\r"
 
-          # ── Phase 4: Config & signing prompts (while loop) ─────
-          # T&C is already handled above — the catch-all is now safe
+          # ── Phase 4: Config prompts (catch-all with Enter) ────────
+          # All config prompts accept defaults from the web manifest.
+          # When we hit a signing identity prompt (validation rejects
+          # empty input), "Minimum length" appears → we break out.
           while {1} {
             expect {
-              "First and Last names" {
-                send "John Doe\r"
-              }
-              "Organizational Unit" {
-                send "Development\r"
-              }
-              "Organization:" {
-                send "ChoreQuest\r"
-              }
-              "City or Locality" {
-                send "Internet\r"
-              }
-              "State or Province" {
-                send "Web\r"
-              }
-              "Country Code" {
-                send "US\r"
-              }
-              "Key store location" {
-                send "\r"
-              }
-              "Key name" {
-                send "\r"
-              }
-              -re "assword" {
-                send "ASDasd123!!\r"
+              "Minimum length" {
+                break
               }
               "\\? " {
                 send "\r"
@@ -123,7 +101,38 @@ jobs:
               eof {
                 break
               }
+              timeout {
+                break
+              }
             }
+          }
+
+          # ── Phase 5: Signing identity (sequential) ─────────────
+          # The "First and Last names" prompt is currently waiting.
+          # Sequential expects avoid the echo re-trigger problem.
+          sleep 1
+          send "John Doe\r"
+
+          expect "Organizational Unit"
+          send "Development\r"
+
+          expect "Organization (eg"
+          send "ChoreQuest\r"
+
+          expect "Country"
+          send "US\r"
+
+          # Password prompts (store password + key password)
+          expect -re "assword"
+          send "ASDasd123!!\r"
+
+          expect -re "assword"
+          send "ASDasd123!!\r"
+
+          # Wait for init to complete
+          expect {
+            eof {}
+            timeout {}
           }
 
           catch wait result
