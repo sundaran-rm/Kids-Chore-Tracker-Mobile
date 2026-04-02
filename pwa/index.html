@@ -412,6 +412,7 @@ body.kids-mode .drag-handle,
 body.kids-mode .manual-row,
 body.kids-mode .m-hint,
 body.kids-mode .manual-label,
+body.kids-mode #btnAddChallenge,
 body.kids-mode #btnClearHist,
 body.kids-mode .sec-tip,
 body.kids-mode .day-row,
@@ -1093,6 +1094,41 @@ body.kids-mode #btnKidsHelp{display:flex!important}
 .install-banner.reinstall .install-txt{color:var(--yellow)}
 .pwa-inst-step{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;font-size:13px;color:var(--text);line-height:1.5}
 .pwa-inst-num{background:var(--blue);color:#fff;font-size:11px;font-weight:800;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+/* ── CHALLENGES ── */
+.chal-item{background:var(--navy3);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;position:relative}
+.chal-item.complete{border-color:rgba(105,240,174,0.4);background:rgba(105,240,174,0.05)}
+.chal-hdr{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px}
+.chal-icon{font-size:20px;line-height:1;flex-shrink:0;margin-top:1px}
+.chal-info{flex:1;min-width:0}
+.chal-title{font-size:13px;font-weight:800;color:var(--text);line-height:1.3;margin-bottom:2px}
+.chal-meta{font-size:10px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap}
+.chal-deadline{color:var(--orange);font-weight:700}
+.chal-deadline.urgent{color:var(--red)}
+.chal-bonus{color:var(--yellow);font-weight:700}
+.chal-track{height:8px;background:var(--navy4);border-radius:4px;overflow:hidden;margin-bottom:6px}
+.chal-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:4px;transition:width .4s ease}
+.chal-item.complete .chal-fill{background:linear-gradient(90deg,var(--green),#00c853)}
+.chal-foot{display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--muted)}
+.chal-pct{font-weight:800;font-size:11px}
+.chal-complete-badge{font-size:10px;font-weight:800;color:var(--green);display:flex;align-items:center;gap:3px}
+.chal-del-btn{background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:2px 4px;border-radius:4px;flex-shrink:0}
+.chal-del-btn:hover{color:var(--red);background:rgba(255,80,80,.1)}
+.chal-empty{color:var(--muted);font-size:12px;text-align:center;padding:16px 0;font-style:italic}
+.chal-completed-toast{position:fixed;bottom:calc(var(--safe-bot)+var(--tab-h,0px)+76px);left:50%;transform:translateX(-50%) translateY(20px);background:linear-gradient(135deg,#1b4332,#2d6a4f);border:1px solid rgba(105,240,174,0.5);border-radius:14px;padding:12px 18px;display:flex;align-items:center;gap:10px;z-index:4500;opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;pointer-events:none}
+.chal-completed-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.ct-icon{font-size:26px}
+.ct-text{display:flex;flex-direction:column}
+.ct-title{font-size:11px;font-weight:800;color:#69f0ae;letter-spacing:.4px;text-transform:uppercase}
+.ct-name{font-size:14px;font-weight:800;color:#fff}
+/* Create challenge modal */
+.chal-form-row{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.chal-form-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.chal-form-inp{background:var(--navy4);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:13px;border-radius:8px;padding:9px 11px;outline:none;width:100%;box-sizing:border-box}
+.chal-form-inp:focus{border-color:var(--blue)}
+.chal-type-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.chal-type-btn{background:var(--navy4);border:1px solid var(--border);color:var(--muted);font-family:var(--font);font-size:11px;font-weight:700;border-radius:8px;padding:8px 6px;cursor:pointer;text-align:center;transition:all .15s}
+.chal-type-btn.selected{background:rgba(79,195,247,0.15);border-color:var(--blue);color:var(--blue)}
+
 </style>
 </head>
 <body>
@@ -1252,6 +1288,13 @@ body.kids-mode #btnKidsHelp{display:flex!important}
         <div class="sec-title">&#x1F3C5; Achievements</div>
       </div>
       <div class="sec-body" style="padding:6px 6px 8px"><div id="badgesGrid" class="badges-grid"></div></div>
+    </div>
+    <div class="section" id="secChallenges">
+      <div class="sec-hdr" onclick="toggleSection('secChallenges')">
+        <div class="sec-title">&#x1F3AF; Challenges</div>
+        <button class="add-btn" onclick="event.stopPropagation();openCreateChallenge()" style="display:none" id="btnAddChallenge">+ Add</button>
+      </div>
+      <div class="sec-body" id="chalBody"></div>
     </div>
     <div class="section" id="secCalendar">
       <div class="sec-hdr" onclick="toggleSection('secCalendar')">
@@ -1752,7 +1795,7 @@ function startListener(hid){
         if(!S.levelThresholds)S.levelThresholds={};
         if(!S.customLevels)S.customLevels=[];
         if(!S.flashMessages)S.flashMessages=[];
-        S.kids.forEach(k=>{if(!k.customSections)k.customSections=[];if(!k.oneTime)k.oneTime=[];if(!k.theme)k.theme='galaxy';if(k.kidsTheme===undefined)k.kidsTheme=null;if(!k.goal)k.goal={name:'',target:100,rewardId:null,savingsLock:false};if(k.goal.savingsLock===undefined)k.goal.savingsLock=false;if(!k.badges)k.badges=[];if(!k.allowance)k.allowance={amount:0,day:1,lastPaid:null,lastWeekPaid:null};if(!k.badgeThresholds)k.badgeThresholds={};if(!k.customBadges)k.customBadges=[];if(!k.pendingApprovals)k.pendingApprovals=[];if(!k.tokenExpiry)k.tokenExpiry={enabled:false,days:30,lockedTokens:[]};k.daily.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';});k.bonus.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';});(k.customSections||[]).forEach(s=>s.chores.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';}));});
+        S.kids.forEach(k=>{if(!k.customSections)k.customSections=[];if(!k.oneTime)k.oneTime=[];if(!k.theme)k.theme='galaxy';if(k.kidsTheme===undefined)k.kidsTheme=null;if(!k.goal)k.goal={name:'',target:100,rewardId:null,savingsLock:false};if(k.goal.savingsLock===undefined)k.goal.savingsLock=false;if(!k.badges)k.badges=[];if(!k.allowance)k.allowance={amount:0,day:1,lastPaid:null,lastWeekPaid:null};if(!k.badgeThresholds)k.badgeThresholds={};if(!k.customBadges)k.customBadges=[];if(!k.pendingApprovals)k.pendingApprovals=[];if(!k.challenges)k.challenges=[];if(!k.tokenExpiry)k.tokenExpiry={enabled:false,days:30,lockedTokens:[]};k.daily.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';});k.bonus.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';});(k.customSections||[]).forEach(s=>s.chores.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';}));});
         saveLocal();renderAll();updateFlashBadge();
         if(kidsMode)checkFlashMessages();
       }
@@ -2502,7 +2545,7 @@ function renderAll(){
   const mg=document.getElementById('mainGrid');if(mg)mg.style.display=has?'':'none';
   const tb=document.querySelector('.tabbar');if(tb)tb.style.display=has?'flex':'none';
   renderTabs();
-  if(has){processTokenExpiry(k);applyTheme((kidsMode&&k.kidsTheme)||k.theme||'galaxy');renderLeft();renderRight();checkAchievements(k);renderBadges(k);renderCalendar('calBody');renderXPHeaderBar(k);}
+  if(has){processTokenExpiry(k);applyTheme((kidsMode&&k.kidsTheme)||k.theme||'galaxy');renderLeft();renderRight();checkAchievements(k);checkChallenges(k);renderBadges(k);renderCalendar('calBody');renderChallenges(k);renderXPHeaderBar(k);}
   updateApprovalBadge();
   updateFlashBadge();
 }
@@ -2523,7 +2566,7 @@ function renderXPHeaderBar(k){
 function toggleSection(id){const el=document.getElementById(id);if(el)el.classList.toggle('collapsed');}
 function getAllSectionIds(){
   const k=kid();
-  const base=['secDaily','secBonus','secRewards','secHistory','secBadges','secCalendar','secCharts','secRedemptions','secMischief'];
+  const base=['secDaily','secBonus','secRewards','secHistory','secBadges','secCalendar','secCharts','secRedemptions','secMischief','secChallenges'];
   if(document.getElementById('secOneTime'))base.push('secOneTime');
   if(k)(k.customSections||[]).forEach(s=>base.push('secCustom_'+s.id));
   return base;
@@ -3276,6 +3319,7 @@ const SETTINGS_CATS = {
       { id:'setXPLevels',     icon:'&#x26A1;',  label:'XP Levels',             desc:()=>'Edit level thresholds and custom levels' },
       { id:'setShopItems',    icon:'&#x1F6CD;', label:'Reward Shop Items',      desc:()=>'Edit default costs and add custom items' },
       { id:'setAllowance',    icon:'&#x1F4B0;', label:'Weekly Allowance',       desc:()=>'Automatic weekly token payouts per kid' },
+      { id:'setChallenges',   icon:'&#x1F3AF;', label:'Challenges',            desc:()=>'Time-limited goals with bonus token rewards' },
       { id:'setTokenExpiry',  icon:'&#x23F3;',  label:'Token Expiry',           desc:()=>document.getElementById('tokenExpiryDesc')?.textContent||'Tokens expire if not spent' },
     ]
   },
@@ -3380,6 +3424,7 @@ function _settingsRowAction(id){
   else if(id==='setXPLevels')  { closeSub(); openXPLevelManager(); }
   else if(id==='setShopItems') { closeSub(); openShopItemsManager(); }
   else if(id==='setAllowance') { closeSettingsSub(); openAllowanceSheet(); }
+  else if(id==='setChallenges') { closeSettingsSub(); openCreateChallenge(); }
   else if(id==='setTokenExpiry'){ closeSettingsSub(); openTokenExpirySheet(); }
   else if(id==='setNotifs')    { closeSub(); openNotifSettings(); }
   else if(id==='setFlashMsg')  { closeSub(); openFlashCompose(); }
@@ -5616,6 +5661,273 @@ if(kidsMode)setTimeout(checkFlashMessages,600);
 
 
 /* ── KID PICKER (PWA) ── */
+
+/* ══════════════════════════════════════════════
+   CHALLENGES
+══════════════════════════════════════════════ */
+
+const CHAL_TYPES = [
+  { id:'chores_n',  icon:'✅', label:'Complete N chores',     unit:'chores' },
+  { id:'streak_n',  icon:'🔥', label:'Reach N-day streak',    unit:'days'   },
+  { id:'tokens_n',  icon:'⭐', label:'Earn N tokens',         unit:'tokens' },
+  { id:'daily_all', icon:'🌟', label:'All dailies N days',    unit:'days'   },
+];
+
+function mkChallenge(){
+  return {
+    id: uid(),
+    title: '',
+    type: 'chores_n',
+    target: 5,
+    bonus: 10,
+    deadline: null,      // ISO date string or null
+    startDate: dateStr(new Date()),
+    progress: 0,
+    completed: false,
+    completedAt: null,
+    kidId: null,         // null = global (all kids), or specific kidId
+  };
+}
+
+function chalProgress(c, k) {
+  // Returns current progress value for a challenge given kid state
+  const today = new Date();
+  const start = c.startDate ? new Date(c.startDate + 'T00:00:00') : today;
+  if (c.type === 'chores_n') {
+    // Count completions on or after start date
+    const startDs = dateStr(start);
+    const allChores = getAllChores(k);
+    let count = 0;
+    allChores.forEach(ch => {
+      (ch.completions || []).forEach(ds => { if (ds >= startDs) count++; });
+    });
+    return count;
+  }
+  if (c.type === 'tokens_n') {
+    // Count tokens earned since start
+    const startTs = start.getTime();
+    return (k.tokens || []).filter(e =>
+      e.amount > 0 && !((e.note||'').startsWith('Undo:')) && e.timestamp >= startTs
+    ).reduce((s, e) => s + Number(e.amount), 0);
+  }
+  if (c.type === 'streak_n') {
+    return calcStreak(k);
+  }
+  if (c.type === 'daily_all') {
+    // Count consecutive days where all daily tasks were completed, going back from today
+    let count = 0;
+    const d = new Date();
+    while (true) {
+      const ds = dateStr(d);
+      if (ds < dateStr(start)) break;
+      const sched = k.daily.filter(ch => (ch.days||[]).includes(d.getDay()));
+      if (sched.length === 0) { d.setDate(d.getDate()-1); count++; continue; }
+      const allDone = sched.every(ch => (ch.completions||[]).includes(ds));
+      if (!allDone) break;
+      count++;
+      d.setDate(d.getDate()-1);
+    }
+    return count;
+  }
+  return c.progress || 0;
+}
+
+function chalDeadlineLabel(c) {
+  if (!c.deadline) return null;
+  const now = new Date();
+  const dl = new Date(c.deadline + 'T23:59:59');
+  const diffMs = dl - now;
+  const days = Math.ceil(diffMs / 86400000);
+  if (days < 0) return { text: 'Expired', urgent: true };
+  if (days === 0) return { text: 'Due today!', urgent: true };
+  if (days === 1) return { text: '1 day left', urgent: true };
+  return { text: days + ' days left', urgent: days <= 3 };
+}
+
+function renderChallenges(k) {
+  const body = document.getElementById('chalBody'); if (!body) return;
+  const addBtn = document.getElementById('btnAddChallenge');
+  body.innerHTML = '';
+
+  if (!k) { if(addBtn)addBtn.style.display='none'; return; }
+  if(addBtn)addBtn.style.display = kidsMode ? 'none' : '';
+
+  const challenges = k.challenges || [];
+  if (!challenges.length) {
+    const em = document.createElement('div'); em.className = 'chal-empty';
+    em.textContent = kidsMode ? 'No challenges yet — ask a parent!' : 'No challenges yet. Tap + Add to create one!';
+    body.appendChild(em); return;
+  }
+
+  const active = challenges.filter(c => !c.completed);
+  const done   = challenges.filter(c =>  c.completed);
+
+  [...active, ...done].forEach(c => {
+    const ct = CHAL_TYPES.find(t => t.id === c.type) || CHAL_TYPES[0];
+    const progress = chalProgress(c, k);
+    const pct = Math.min(100, Math.round(progress / c.target * 100));
+    const dl = chalDeadlineLabel(c);
+
+    const item = document.createElement('div');
+    item.className = 'chal-item' + (c.completed ? ' complete' : '');
+
+    const dlHtml = dl
+      ? `<span class="chal-deadline${dl.urgent ? ' urgent' : ''}">${dl.text}</span>` : '';
+    const bonusHtml = c.bonus ? `<span class="chal-bonus">+${c.bonus}⭐ bonus</span>` : '';
+
+    item.innerHTML = `
+      <div class="chal-hdr">
+        <div class="chal-icon">${ct.icon}</div>
+        <div class="chal-info">
+          <div class="chal-title">${escHtml(c.title||ct.label)}</div>
+          <div class="chal-meta">${dlHtml}${bonusHtml}</div>
+        </div>
+        ${!kidsMode?`<button class="chal-del-btn" title="Delete">&#x2715;</button>`:''}
+      </div>
+      <div class="chal-track"><div class="chal-fill" style="width:${pct}%"></div></div>
+      <div class="chal-foot">
+        <span style="color:var(--muted);font-size:10px">${progress} / ${c.target} ${ct.unit}</span>
+        ${c.completed
+          ? '<span class="chal-complete-badge">✅ Completed!</span>'
+          : `<span class="chal-pct">${pct}%</span>`}
+      </div>`;
+
+    if (!kidsMode) {
+      item.querySelector('.chal-del-btn').addEventListener('click', e => {
+        e.stopPropagation();
+        k.challenges = (k.challenges||[]).filter(x => x.id !== c.id);
+        save(); renderAll();
+      });
+    }
+    body.appendChild(item);
+  });
+}
+
+function checkChallenges(k) {
+  if (!k || !k.challenges) return;
+  let changed = false;
+  k.challenges.forEach(c => {
+    if (c.completed) return;
+    const progress = chalProgress(c, k);
+    // Check deadline expiry
+    if (c.deadline) {
+      const dl = new Date(c.deadline + 'T23:59:59');
+      if (dl < new Date() && progress < c.target) {
+        // Expired without completion — optionally mark expired
+        return;
+      }
+    }
+    if (progress >= c.target) {
+      c.completed = true;
+      c.completedAt = Date.now();
+      c.progress = progress;
+      // Award bonus tokens
+      if (c.bonus) {
+        k.tokens.unshift({
+          id: uid(),
+          amount: c.bonus,
+          note: '🎯 Challenge: ' + (c.title || 'Challenge complete!'),
+          timestamp: Date.now()
+        });
+      }
+      changed = true;
+      showChallengeToast(c);
+      playTick();
+    }
+  });
+  if (changed) save();
+}
+
+let _chalToastTimer = null;
+function showChallengeToast(c) {
+  let toast = document.getElementById('chalCompletedToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'chalCompletedToast';
+    toast.className = 'chal-completed-toast';
+    document.body.appendChild(toast);
+  }
+  toast.innerHTML = `<div class="ct-icon">🎯</div><div class="ct-text"><div class="ct-title">Challenge Complete!</div><div class="ct-name">${escHtml(c.title||'Challenge')} +${c.bonus}⭐</div></div>`;
+  toast.classList.add('show');
+  clearTimeout(_chalToastTimer);
+  _chalToastTimer = setTimeout(() => toast.classList.remove('show'), 3500);
+}
+
+function openCreateChallenge() {
+  const k = kid(); if (!k) return;
+  let ov = document.getElementById('chalCreateOverlay'); if (ov) ov.remove();
+  ov = document.createElement('div'); ov.id = 'chalCreateOverlay'; ov.className = 'overlay';
+  ov.style.zIndex = '3200';
+
+  let selType = 'chores_n';
+
+  ov.innerHTML = `<div class="sheet"><div class="sheet-handle"></div>
+    <div class="sheet-hdr">
+      <div class="sheet-title">🎯 New Challenge</div>
+      <button class="sheet-close" onclick="document.getElementById('chalCreateOverlay').remove()">&#x2715;</button>
+    </div>
+    <div class="sheet-body" style="padding:16px 18px 28px">
+      <div class="chal-form-row">
+        <label class="chal-form-label">Challenge name</label>
+        <input class="chal-form-inp" id="chalTitle" placeholder="e.g. Weekend Warrior" maxlength="40">
+      </div>
+      <div class="chal-form-row">
+        <label class="chal-form-label">Type</label>
+        <div class="chal-type-grid" id="chalTypeGrid">
+          ${CHAL_TYPES.map(t => `<button class="chal-type-btn${t.id==='chores_n'?' selected':''}" data-type="${t.id}">${t.icon} ${t.label}</button>`).join('')}
+        </div>
+      </div>
+      <div class="chal-form-row" style="display:flex;gap:12px">
+        <div style="flex:1">
+          <label class="chal-form-label">Target</label>
+          <input class="chal-form-inp" id="chalTarget" type="number" min="1" max="999" value="5" inputmode="numeric">
+        </div>
+        <div style="flex:1">
+          <label class="chal-form-label">Bonus tokens 🌟</label>
+          <input class="chal-form-inp" id="chalBonus" type="number" min="0" max="999" value="10" inputmode="numeric">
+        </div>
+      </div>
+      <div class="chal-form-row">
+        <label class="chal-form-label">Deadline <span style="font-weight:400;text-transform:none">(optional)</span></label>
+        <input class="chal-form-inp" id="chalDeadline" type="date">
+      </div>
+      <button id="btnSaveChallenge" style="width:100%;background:linear-gradient(135deg,var(--blue),#0288d1);color:#fff;font-family:var(--font);font-size:14px;font-weight:800;border:none;border-radius:10px;padding:13px 0;cursor:pointer;margin-top:4px">
+        🎯 Create Challenge
+      </button>
+    </div></div>`;
+
+  document.body.appendChild(ov);
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+
+  // Type selection
+  ov.querySelectorAll('.chal-type-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      ov.querySelectorAll('.chal-type-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selType = btn.dataset.type;
+    });
+  });
+
+  document.getElementById('btnSaveChallenge').addEventListener('click', () => {
+    const title   = document.getElementById('chalTitle').value.trim();
+    const target  = Math.max(1, parseInt(document.getElementById('chalTarget').value) || 5);
+    const bonus   = Math.max(0, parseInt(document.getElementById('chalBonus').value) || 0);
+    const deadline = document.getElementById('chalDeadline').value || null;
+    if (!title) { document.getElementById('chalTitle').focus(); return; }
+    if (!k.challenges) k.challenges = [];
+    const c = mkChallenge();
+    c.title = title; c.type = selType; c.target = target;
+    c.bonus = bonus; c.deadline = deadline;
+    k.challenges.push(c);
+    save(); renderAll();
+    ov.remove();
+    showInappNotif('🎯', 'Challenge created!', title);
+  });
+
+  ov.classList.add('open');
+  setTimeout(() => document.getElementById('chalTitle').focus(), 200);
+}
+
 function updateTokenExpiryDesc(){const k=kid();const el=document.getElementById('tokenExpiryDesc');if(!el)return;if(!k||!k.tokenExpiry?.enabled){el.textContent='Tokens expire if not spent — teaches kids to spend wisely';return;}const locked=(k.tokenExpiry.lockedTokens||[]).reduce((s,l)=>s+l.amount,0);el.textContent='Active · '+k.tokenExpiry.days+' days · '+(locked?locked+'⭐ locked':'no locked tokens');}
 function renderTabs(){
   const k=kid();
