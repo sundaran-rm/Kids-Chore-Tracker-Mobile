@@ -1798,8 +1798,15 @@ function startListener(hid){
         if(!S.customLevels)S.customLevels=[];
         if(!S.flashMessages)S.flashMessages=[];
         S.kids.forEach(k=>{if(!k.customSections)k.customSections=[];if(!k.oneTime)k.oneTime=[];if(!k.theme)k.theme='galaxy';if(k.kidsTheme===undefined)k.kidsTheme=null;if(!k.goal)k.goal={name:'',target:100,rewardId:null,savingsLock:false};if(k.goal.savingsLock===undefined)k.goal.savingsLock=false;if(!k.badges)k.badges=[];if(!k.allowance)k.allowance={amount:0,day:1,lastPaid:null,lastWeekPaid:null};if(!k.badgeThresholds)k.badgeThresholds={};if(!k.customBadges)k.customBadges=[];if(!k.pendingApprovals)k.pendingApprovals=[];if(!k.challenges)k.challenges=[];if(!k.tokenExpiry)k.tokenExpiry={enabled:false,days:30,lockedTokens:[]};k.daily.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';});k.bonus.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';});(k.customSections||[]).forEach(s=>s.chores.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';}));});
-        saveLocal();renderAll();updateFlashBadge();
-        if(kidsMode)checkFlashMessages();
+        saveLocal();
+        // Defer DOM rebuild to next animation frame so pending touch events
+        // are processed first. Cancels any previous pending frame to avoid stacking.
+        if(window._fbRafId)cancelAnimationFrame(window._fbRafId);
+        window._fbRafId=requestAnimationFrame(()=>{
+          window._fbRafId=null;
+          renderAll();updateFlashBadge();
+          if(kidsMode)checkFlashMessages();
+        });
       }
     }else{
       if(window._dbSwitchingHousehold){
