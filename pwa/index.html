@@ -412,7 +412,6 @@ body.kids-mode .drag-handle,
 body.kids-mode .manual-row,
 body.kids-mode .m-hint,
 body.kids-mode .manual-label,
-body.kids-mode #btnAddChallenge,
 body.kids-mode #btnClearHist,
 body.kids-mode .sec-tip,
 body.kids-mode .day-row,
@@ -1295,7 +1294,7 @@ body.kids-mode #btnKidsHelp{display:flex!important}
     <div class="section" id="secChallenges">
       <div class="sec-hdr" onclick="toggleSection('secChallenges')">
         <div class="sec-title">&#x1F3AF; Challenges</div>
-        <button class="add-btn" onclick="event.stopPropagation();openCreateChallenge()" style="display:none" id="btnAddChallenge">+ Add</button>
+        <div class="sec-hdr-acts"><button class="btn-add" id="btnAddChallenge" onclick="event.stopPropagation();openCreateChallenge()">+ Add</button></div>
       </div>
       <div class="sec-body" id="chalBody"></div>
     </div>
