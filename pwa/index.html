@@ -1601,6 +1601,12 @@ const DAY_LABELS=['S','M','T','W','T','F','S'];
 const DAY_NAMES=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const ALL_DAYS=[0,1,2,3,4,5,6];
 const CC={green:'#69f0ae',yellow:'#ffd740',blue:'#4fc3f7',orange:'#ffb74d',red:'#ff6b6b',purple:'#b388ff'};
+const CHAL_TYPES = [
+  { id:'chores_n',  icon:'✅', label:'Complete N chores',     unit:'chores' },
+  { id:'streak_n',  icon:'🔥', label:'Reach N-day streak',    unit:'days'   },
+  { id:'tokens_n',  icon:'⭐', label:'Earn N tokens',         unit:'tokens' },
+  { id:'daily_all', icon:'🌟', label:'All dailies N days',    unit:'days'   },
+];
 const GRP_ICON={daily:'\u{1F9FC}',bonus:'\u26A1',custom:'\u2728',onetime:'\u26A1\uFE0F'};
 const DIFF_STATES=['none','easy','medium','hard'];
 const DIFF_LABELS={none:'\u25A1 None',easy:'\uD83D\uDFE2 Easy',medium:'\uD83D\uDFE1 Med',hard:'\uD83D\uDD34 Hard'};
@@ -5674,13 +5680,6 @@ if(kidsMode)setTimeout(checkFlashMessages,600);
 /* ══════════════════════════════════════════════
    CHALLENGES
 ══════════════════════════════════════════════ */
-
-const CHAL_TYPES = [
-  { id:'chores_n',  icon:'✅', label:'Complete N chores',     unit:'chores' },
-  { id:'streak_n',  icon:'🔥', label:'Reach N-day streak',    unit:'days'   },
-  { id:'tokens_n',  icon:'⭐', label:'Earn N tokens',         unit:'tokens' },
-  { id:'daily_all', icon:'🌟', label:'All dailies N days',    unit:'days'   },
-];
 
 function mkChallenge(){
   return {
