@@ -1,11 +1,22 @@
-const CACHE = 'chore-quest-v13';
+const CACHE = 'chore-quest-v14';
 
-// Only cache LOCAL assets on install — CDN failures won't block PWA installation
 const LOCAL_ASSETS = [
   './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
+];
+
+// Domains that must NEVER be intercepted by the SW.
+// Firebase uses long-polling POST streams — intercepting them delays
+// Firestore keepalives and causes onSnapshot bursts that block touch on Android.
+const PASSTHROUGH_HOSTS = [
+  'firestore.googleapis.com',
+  'firebase.googleapis.com',
+  'firebaseinstallations.googleapis.com',
+  'identitytoolkit.googleapis.com',
+  'securetoken.googleapis.com',
+  'www.googleapis.com',
 ];
 
 self.addEventListener('install', e => {
@@ -26,13 +37,24 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
+
+  // ── Never intercept Firebase / Google API requests ──────────────────
+  // These use POST long-polling streams. Wrapping them in SW fetch breaks
+  // the persistent connection and causes touch-blocking onSnapshot bursts.
+  if (PASSTHROUGH_HOSTS.some(h => url.hostname === h || url.hostname.endsWith('.' + h))) {
+    return; // Let browser handle directly — no e.respondWith()
+  }
+
+  // ── Only cache GET requests — POST/PUT cannot be cached ─────────────
+  if (e.request.method !== 'GET') return;
+
   const isLocal = url.origin === self.location.origin;
-  const isHTML = e.request.destination === 'document'
-               || url.pathname.endsWith('.html')
-               || url.pathname === '/';
+  const isHTML  = e.request.destination === 'document'
+                || url.pathname.endsWith('.html')
+                || url.pathname === '/';
 
   if (isHTML) {
-    // Network-first for HTML — always get latest, fall back to cache offline
+    // Network-first: always serve freshest HTML; fall back to cache offline
     e.respondWith(
       fetch(e.request)
         .then(res => {
@@ -42,8 +64,9 @@ self.addEventListener('fetch', e => {
         })
         .catch(() => caches.match(e.request))
     );
+
   } else if (isLocal) {
-    // Local assets: cache-first
+    // Local assets (icons, manifest): cache-first
     e.respondWith(
       caches.match(e.request).then(cached => cached || fetch(e.request).then(res => {
         const clone = res.clone();
@@ -51,9 +74,9 @@ self.addEventListener('fetch', e => {
         return res;
       }))
     );
+
   } else {
-    // External CDN assets (fonts, chart.js): network-first, cache as fallback
-    // These are NOT required for install — cached lazily on first use
+    // External CDN (fonts, chart.js): network-first, cache for offline fallback
     e.respondWith(
       fetch(e.request)
         .then(res => {
