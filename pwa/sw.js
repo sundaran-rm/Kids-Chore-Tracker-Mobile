@@ -1,4 +1,4 @@
-const CACHE = 'chore-quest-v12';
+const CACHE = 'chore-quest-v13';
 
 // Only cache LOCAL assets on install — CDN failures won't block PWA installation
 const LOCAL_ASSETS = [

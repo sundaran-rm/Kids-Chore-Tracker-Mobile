@@ -2548,7 +2548,7 @@ function renderAll(){
   const mg=document.getElementById('mainGrid');if(mg)mg.style.display=has?'':'none';
   const tb=document.querySelector('.tabbar');if(tb)tb.style.display=has?'flex':'none';
   renderTabs();
-  if(has){processTokenExpiry(k);applyTheme((kidsMode&&k.kidsTheme)||k.theme||'galaxy');renderLeft();renderRight();checkAchievements(k);checkChallenges(k);renderBadges(k);renderCalendar('calBody');renderChallenges(k);renderXPHeaderBar(k);}
+  if(has){processTokenExpiry(k);applyTheme((kidsMode&&k.kidsTheme)||k.theme||'galaxy');renderLeft();renderRight();checkAchievements(k);setTimeout(()=>checkChallenges(kid()),0);renderBadges(k);renderCalendar('calBody');renderChallenges(k);renderXPHeaderBar(k);}
   updateApprovalBadge();
   updateFlashBadge();
 }
@@ -5720,7 +5720,9 @@ function chalProgress(c, k) {
     // Count consecutive days where all daily tasks were completed, going back from today
     let count = 0;
     const d = new Date();
-    while (true) {
+    const _maxDays = 365;
+    let _safetyCount = 0;
+    while (_safetyCount++ < _maxDays) {
       const ds = dateStr(d);
       if (ds < dateStr(start)) break;
       const sched = k.daily.filter(ch => (ch.days||[]).includes(d.getDay()));
@@ -5750,6 +5752,11 @@ function chalDeadlineLabel(c) {
 function renderChallenges(k) {
   const body = document.getElementById('chalBody'); if (!body) return;
   const addBtn = document.getElementById('btnAddChallenge');
+  // Only rebuild DOM if challenge data actually changed — prevents layout
+  // thrash on every Firebase onSnapshot which blocks touch events on Android.
+  const _cacheKey = JSON.stringify(k ? (k.challenges||[]) : []) + (kidsMode?'1':'0');
+  if (body._chalCache === _cacheKey) return;
+  body._chalCache = _cacheKey;
   body.innerHTML = '';
 
   if (!k) { if(addBtn)addBtn.style.display='none'; return; }
@@ -5799,6 +5806,7 @@ function renderChallenges(k) {
       item.querySelector('.chal-del-btn').addEventListener('click', e => {
         e.stopPropagation();
         k.challenges = (k.challenges||[]).filter(x => x.id !== c.id);
+        const _cb=document.getElementById('chalBody');if(_cb)_cb._chalCache=null;
         save(); renderAll();
       });
     }
