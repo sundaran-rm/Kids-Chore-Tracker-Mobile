@@ -704,6 +704,7 @@ body.kids-mode #setAchievements,
 body.kids-mode #setShopItems,
 body.kids-mode #setFlashMsg,
 body.kids-mode #setNotifs,
+body.kids-mode #btnGift,
 body.kids-mode #flashBtnWrap,
 body.kids-mode #setReset { display:none!important }
 /* Dim the settings gear so it's clear it's restricted */
@@ -1131,6 +1132,44 @@ body.kids-mode #btnKidsHelp{display:flex!important}
 .chal-type-btn{background:var(--navy4);border:1px solid var(--border);color:var(--muted);font-family:var(--font);font-size:11px;font-weight:700;border-radius:8px;padding:8px 6px;cursor:pointer;text-align:center;transition:all .15s}
 .chal-type-btn.selected{background:rgba(79,195,247,0.15);border-color:var(--blue);color:var(--blue)}
 
+/* ── TOKEN GIFTING ── */
+.gift-kid-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:14px}
+.gift-kid-btn{background:var(--navy4);border:1.5px solid var(--border);border-radius:11px;padding:10px 8px;
+  cursor:pointer;text-align:center;transition:all .18s;touch-action:manipulation}
+.gift-kid-btn.selected{border-color:var(--yellow);background:rgba(255,215,64,0.1)}
+.gift-kid-dot{width:10px;height:10px;border-radius:50%;margin:0 auto 5px}
+.gift-kid-name{font-size:12px;font-weight:800;color:var(--text)}
+.gift-kid-bal{font-size:10px;color:var(--muted);margin-top:2px}
+.gift-amount-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.gift-amount-presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.gift-preset{background:var(--navy4);border:1px solid var(--border);color:var(--muted);
+  font-family:var(--font);font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;
+  cursor:pointer;transition:all .15s;touch-action:manipulation}
+.gift-preset:hover,.gift-preset.sel{background:rgba(255,215,64,0.15);border-color:var(--yellow);color:var(--yellow)}
+.gift-note-presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.gift-note-preset{background:var(--navy4);border:1px solid var(--border);color:var(--muted);
+  font-family:var(--font);font-size:11px;padding:4px 10px;border-radius:16px;cursor:pointer;
+  transition:all .15s;touch-action:manipulation;white-space:nowrap}
+.gift-note-preset:hover{border-color:var(--blue);color:var(--blue)}
+.gift-send-btn{width:100%;background:linear-gradient(135deg,var(--yellow),#f9a825);color:#1a1a00;
+  font-family:var(--font);font-size:14px;font-weight:800;border:none;border-radius:11px;
+  padding:14px 0;cursor:pointer;margin-top:4px;touch-action:manipulation;
+  transition:transform .1s,filter .1s}
+.gift-send-btn:active{transform:scale(0.97)}
+.gift-send-btn:disabled{opacity:.5;cursor:not-allowed}
+.gift-toast{position:fixed;bottom:calc(var(--safe-bot)+var(--tab-h,0px)+76px);left:50%;
+  transform:translateX(-50%) translateY(20px);
+  background:linear-gradient(135deg,#3d2c00,#5c4200);
+  border:1px solid rgba(255,215,64,0.5);border-radius:14px;
+  padding:12px 18px;display:flex;align-items:center;gap:10px;
+  z-index:4500;opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);
+  white-space:nowrap;pointer-events:none}
+.gift-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.gift-toast-icon{font-size:26px}
+.gift-toast-text{display:flex;flex-direction:column}
+.gift-toast-title{font-size:10px;font-weight:800;color:var(--yellow);letter-spacing:.5px;text-transform:uppercase}
+.gift-toast-body{font-size:13px;font-weight:800;color:#fff}
+
 </style>
 </head>
 <body>
@@ -1152,6 +1191,7 @@ body.kids-mode #btnKidsHelp{display:flex!important}
         <button class="icon-btn" id="btnApprovals" style="color:var(--orange)">&#x23F3;</button>
         <div class="approval-badge-count" id="approvalCount">0</div>
       </div>
+      <button class="icon-btn" id="btnGift" title="Gift Tokens" style="color:var(--yellow)">&#x1F381;</button>
       <div class="flash-btn-wrap" id="flashBtnWrap">
         <button class="icon-btn" id="btnFlash" title="Flash Message">&#x1F4E3;</button>
         <div class="flash-badge" id="flashBadge" style="display:none">0</div>
@@ -3540,6 +3580,7 @@ function setupCommonEvents(){
   const setShop=document.getElementById('setShopItems');if(setShop)setShop.addEventListener('click',()=>{const so=document.getElementById('settingsOverlay');if(so)so.classList.remove('open');openShopItemsManager();});
   const setAllow=document.getElementById('setAllowance');if(setAllow)setAllow.addEventListener('click',openAllowanceSheet);
   // Flash message + notifications event wiring
+  const btnGift=document.getElementById('btnGift');if(btnGift)btnGift.addEventListener('click',openGiftTokens);
   const btnFlash=document.getElementById('btnFlash');
   if(btnFlash)btnFlash.addEventListener('click',openFlashCompose);
   const setFlash=document.getElementById('setFlashMsg');
@@ -5942,6 +5983,145 @@ function openCreateChallenge() {
 
   ov.classList.add('open');
   setTimeout(() => document.getElementById('chalTitle').focus(), 200);
+}
+
+
+/* ══════════════════════════════════════════════
+   TOKEN GIFTING
+══════════════════════════════════════════════ */
+
+function openGiftTokens() {
+  let ov = document.getElementById('giftOverlay'); if (ov) ov.remove();
+  ov = document.createElement('div'); ov.id = 'giftOverlay'; ov.className = 'overlay';
+  ov.style.zIndex = '3200';
+
+  const kids = S.kids || [];
+  if (!kids.length) { showInappNotif('🎁','No kids yet','Add a kid first!'); return; }
+
+  let selKidId = S.activeId || kids[0]?.id;
+  let selAmount = 5;
+
+  function kidCard(k) {
+    const t = THEMES[(k.kidsTheme||k.theme)||'galaxy'] || THEMES.galaxy;
+    const bal = tokenSum(k);
+    const sel = k.id === selKidId;
+    return `<button class="gift-kid-btn${sel?' selected':''}" data-kid="${k.id}">
+      <div class="gift-kid-dot" style="background:${t.accent};box-shadow:0 0 5px ${t.accent}"></div>
+      <div class="gift-kid-name">${escHtml(k.name||'Kid')}</div>
+      <div class="gift-kid-bal">${bal} ⭐</div>
+    </button>`;
+  }
+
+  function render() {
+    ov.innerHTML = `<div class="sheet"><div class="sheet-handle"></div>
+      <div class="sheet-hdr">
+        <div class="sheet-title">🎁 Gift Tokens</div>
+        <button class="sheet-close" onclick="document.getElementById('giftOverlay').remove()">&#x2715;</button>
+      </div>
+      <div class="sheet-body" style="padding:16px 18px 32px">
+        ${kids.length > 1 ? `
+        <div class="chal-form-label" style="margin-bottom:8px">To</div>
+        <div class="gift-kid-grid" id="giftKidGrid">${kids.map(kidCard).join('')}</div>` : ''}
+        <div class="chal-form-label" style="margin-bottom:8px">Amount</div>
+        <div class="gift-amount-presets" id="giftPresets">
+          ${[1,2,5,10,15,20,25,50].map(n=>`<button class="gift-preset${n===selAmount?' sel':''}" data-amt="${n}">${n} ⭐</button>`).join('')}
+        </div>
+        <div class="gift-amount-row">
+          <input class="chal-form-inp" id="giftAmtInp" type="number" min="1" max="9999"
+            value="${selAmount}" inputmode="numeric" style="width:100px;flex-shrink:0"/>
+          <span style="color:var(--muted);font-size:12px">tokens</span>
+        </div>
+        <div class="chal-form-label" style="margin-bottom:8px">Personal note <span style="font-weight:400;text-transform:none;font-size:10px">(optional)</span></div>
+        <div class="gift-note-presets">
+          ${['Great job! 🌟','You earned it! 💪','Keep it up! 🔥','Just because! 💛','Weekend bonus! 🎉'].map(n=>`<button class="gift-note-preset" data-note="${n}">${n}</button>`).join('')}
+        </div>
+        <input class="chal-form-inp" id="giftNoteInp" type="text" placeholder="Write a message…" maxlength="80" style="margin-bottom:14px"/>
+        <button class="gift-send-btn" id="giftSendBtn">🎁 Send Gift</button>
+      </div>
+    </div>`;
+    ov.classList.add('open');
+  }
+
+  render();
+  document.body.appendChild(ov);
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+
+  // Kid selection
+  ov.addEventListener('click', e => {
+    const kb = e.target.closest('.gift-kid-btn');
+    if (kb) { selKidId = kb.dataset.kid; render(); return; }
+    const pb = e.target.closest('.gift-preset');
+    if (pb) {
+      selAmount = Number(pb.dataset.amt);
+      ov.querySelectorAll('.gift-preset').forEach(b => b.classList.toggle('sel', b === pb));
+      const inp = document.getElementById('giftAmtInp');
+      if (inp) inp.value = selAmount;
+      return;
+    }
+    const np = e.target.closest('.gift-note-preset');
+    if (np) {
+      const ni = document.getElementById('giftNoteInp');
+      if (ni) ni.value = np.dataset.note;
+      return;
+    }
+  });
+
+  // Amount input sync
+  ov.addEventListener('input', e => {
+    if (e.target.id === 'giftAmtInp') {
+      selAmount = Math.max(1, parseInt(e.target.value) || 1);
+      ov.querySelectorAll('.gift-preset').forEach(b =>
+        b.classList.toggle('sel', Number(b.dataset.amt) === selAmount));
+    }
+  });
+
+  // Send
+  ov.addEventListener('click', e => {
+    if (e.target.id !== 'giftSendBtn') return;
+    const amt   = Math.max(1, parseInt(document.getElementById('giftAmtInp')?.value) || 1);
+    const note  = (document.getElementById('giftNoteInp')?.value || '').trim();
+    const recip = S.kids.find(k => k.id === selKidId);
+    if (!recip) return;
+
+    if (!recip.tokens) recip.tokens = [];
+    const senderNote = '🎁 Gift' + (note ? ': ' + note : '!');
+    recip.tokens.unshift({
+      id: uid(),
+      amount: amt,
+      note: senderNote,
+      timestamp: Date.now(),
+      isGift: true,
+    });
+    // Fire a flash message to the recipient kid
+    if (!S.flashMessages) S.flashMessages = [];
+    const flashText = '🎁 You got ' + amt + ' bonus tokens!' + (note ? ' ' + note : '');
+    S.flashMessages.push({id:uid(), text:flashText, mood:'love',
+      targetKidId:recip.id, sentAt:Date.now(), readBy:[]});
+    if (S.flashMessages.length > 50) S.flashMessages = S.flashMessages.slice(-50);
+    save();
+    ov.remove();
+    showGiftToast(recip.name || 'Kid', amt, note);
+    updateFlashBadge();
+    renderAll();
+  });
+}
+
+let _giftToastTimer = null;
+function showGiftToast(kidName, amount, note) {
+  let toast = document.getElementById('giftToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'giftToast'; toast.className = 'gift-toast';
+    document.body.appendChild(toast);
+  }
+  toast.innerHTML = `<div class="gift-toast-icon">🎁</div>
+    <div class="gift-toast-text">
+      <div class="gift-toast-title">Gift Sent!</div>
+      <div class="gift-toast-body">${escHtml(kidName)} got ${amount} ⭐${note ? ' · ' + escHtml(note) : ''}</div>
+    </div>`;
+  toast.classList.add('show');
+  clearTimeout(_giftToastTimer);
+  _giftToastTimer = setTimeout(() => toast.classList.remove('show'), 3500);
 }
 
 function updateTokenExpiryDesc(){const k=kid();const el=document.getElementById('tokenExpiryDesc');if(!el)return;if(!k||!k.tokenExpiry?.enabled){el.textContent='Tokens expire if not spent — teaches kids to spend wisely';return;}const locked=(k.tokenExpiry.lockedTokens||[]).reduce((s,l)=>s+l.amount,0);el.textContent='Active · '+k.tokenExpiry.days+' days · '+(locked?locked+'⭐ locked':'no locked tokens');}
