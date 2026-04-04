@@ -704,6 +704,7 @@ body.kids-mode #setAchievements,
 body.kids-mode #setShopItems,
 body.kids-mode #setFlashMsg,
 body.kids-mode #setNotifs,
+body.kids-mode #tabDash,
 body.kids-mode #btnGift,
 body.kids-mode #flashBtnWrap,
 body.kids-mode #setReset { display:none!important }
@@ -1170,6 +1171,40 @@ body.kids-mode #btnKidsHelp{display:flex!important}
 .gift-toast-title{font-size:10px;font-weight:800;color:var(--yellow);letter-spacing:.5px;text-transform:uppercase}
 .gift-toast-body{font-size:13px;font-weight:800;color:#fff}
 
+/* ── PARENT DASHBOARD ── */
+.dash-greeting{font-size:13px;color:var(--muted);font-weight:700;padding:4px 2px 12px;letter-spacing:.3px}
+.dash-grid{display:flex;flex-direction:column;gap:10px}
+.dash-card{background:var(--navy2);border:1px solid var(--border);border-radius:16px;
+  padding:14px 16px;cursor:pointer;transition:all .2s;touch-action:manipulation;
+  position:relative;overflow:hidden}
+.dash-card:active{transform:scale(.98);filter:brightness(.95)}
+.dash-card-accent{position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:16px 0 0 16px}
+.dash-card-hdr{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.dash-kid-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.dash-kid-name{font-size:15px;font-weight:800;color:var(--text);flex:1;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dash-level-badge{font-size:10px;font-weight:700;color:var(--muted);white-space:nowrap;
+  background:var(--navy4);border-radius:8px;padding:2px 7px}
+.dash-stats-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.dash-stat{display:flex;flex-direction:column;align-items:center;background:var(--navy4);
+  border-radius:10px;padding:7px 10px;flex:1;min-width:60px}
+.dash-stat-val{font-size:16px;font-weight:800;color:var(--text);line-height:1}
+.dash-stat-lbl{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.4px;margin-top:2px}
+.dash-progress-row{display:flex;align-items:center;gap:8px}
+.dash-progress-track{flex:1;height:7px;background:var(--navy4);border-radius:4px;overflow:hidden}
+.dash-progress-fill{height:100%;border-radius:4px;transition:width .4s ease}
+.dash-progress-lbl{font-size:10px;font-weight:800;color:var(--muted);white-space:nowrap;min-width:36px;text-align:right}
+.dash-alerts{display:flex;flex-direction:column;gap:5px;margin-top:9px}
+.dash-alert{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;
+  padding:5px 8px;border-radius:8px}
+.dash-alert.approval{background:rgba(255,183,77,0.12);color:var(--orange)}
+.dash-alert.challenge{background:rgba(79,195,247,0.1);color:var(--blue)}
+.dash-alert.streak{background:rgba(255,183,77,0.1);color:var(--yellow)}
+.dash-alert.gift-pending{background:rgba(105,240,174,0.1);color:var(--green)}
+.dash-empty{text-align:center;color:var(--muted);font-size:13px;padding:32px 0;font-style:italic}
+.dash-switch-hint{font-size:10px;color:var(--muted);text-align:right;margin-top:6px;opacity:.7}
+
 </style>
 </head>
 <body>
@@ -1228,6 +1263,10 @@ body.kids-mode #btnKidsHelp{display:flex!important}
 
   <div id="mainGrid" style="display:none">
   <!-- CHORES TAB -->
+  <div class="tab-pane" id="paneDash">
+    <div class="dash-greeting" id="dashGreeting"></div>
+    <div class="dash-grid" id="dashGrid"></div>
+  </div>
   <div class="tab-pane active" id="paneChores">
     <!-- XP HEADER BAR -->
     <div class="xp-header-bar" id="xpHeaderBar" style="display:none">
@@ -1388,6 +1427,7 @@ body.kids-mode #btnKidsHelp{display:flex!important}
 
 <!-- BOTTOM TAB BAR -->
 <div class="tabbar" id="tabbar" style="display:none">
+  <button class="tab" data-pane="paneDash" id="tabDash"><span class="tab-icon">&#x1F3E0;</span><span>Overview</span></button>
   <button class="tab active" data-pane="paneChores"><span class="tab-icon">&#x2705;</span><span>Chores</span></button>
   <button class="tab" data-pane="paneRewards"><span class="tab-icon">&#x1F381;</span><span>Rewards</span></button>
   <button class="tab" data-pane="paneWallet"><span class="tab-icon">&#x1FA99;</span><span>Wallet</span></button>
@@ -2601,6 +2641,7 @@ function renderAll(){
   const tb=document.querySelector('.tabbar');if(tb)tb.style.display=has?'flex':'none';
   renderTabs();
   if(has){processTokenExpiry(k);applyTheme((kidsMode&&k.kidsTheme)||k.theme||'galaxy');renderLeft();renderRight();checkAchievements(k);setTimeout(()=>checkChallenges(kid()),0);renderBadges(k);renderCalendar('calBody');renderChallenges(k);renderXPHeaderBar(k);}
+  renderDashboard();
   updateApprovalBadge();
   updateFlashBadge();
 }
@@ -5793,6 +5834,134 @@ function chalDeadlineLabel(c) {
   if (days === 0) return { text: 'Due today!', urgent: true };
   if (days === 1) return { text: '1 day left', urgent: true };
   return { text: days + ' days left', urgent: days <= 3 };
+}
+
+
+/* ══════════════════════════════════════════════
+   PARENT DASHBOARD
+══════════════════════════════════════════════ */
+
+function renderDashboard() {
+  const grid   = document.getElementById('dashGrid');
+  const greet  = document.getElementById('dashGreeting');
+  const tabBtn = document.getElementById('tabDash');
+  if (!grid) return;
+
+  const kids = S.kids || [];
+  const multiKid = kids.length >= 2;
+
+  // Show/hide the tab itself
+  if (tabBtn) tabBtn.style.display = multiKid ? '' : 'none';
+
+  // If not multi-kid and currently on dash pane, redirect to chores
+  if (!multiKid) {
+    const dashPane = document.getElementById('paneDash');
+    if (dashPane && dashPane.classList.contains('active')) {
+      dashPane.classList.remove('active');
+      const chores = document.getElementById('paneChores');
+      if (chores) chores.classList.add('active');
+      document.querySelectorAll('.tab').forEach(t =>
+        t.classList.toggle('active', t.dataset.pane === 'paneChores'));
+    }
+    return;
+  }
+
+  // Greeting
+  const hr = new Date().getHours();
+  const tod = hr < 12 ? 'Morning' : hr < 17 ? 'Afternoon' : 'Evening';
+  if (greet) greet.textContent = `Good ${tod} · ${kids.length} kids`;
+
+  grid.innerHTML = '';
+  const today = todayStr();
+
+  kids.forEach(k => {
+    const theme = THEMES[(kidsMode && k.kidsTheme) || k.theme || 'galaxy'] || THEMES.galaxy;
+    const bal   = tokenSum(k);
+    const streak= calcStreak(k);
+    const xp    = getXP(k);
+    const lv    = getLevel(xp);
+
+    // Today's chore progress
+    const todayChores = (k.daily || []).filter(c => (c.days || []).includes(new Date().getDay()));
+    const doneTodayCount = todayChores.filter(c => (c.completions || []).includes(today)).length;
+    const totalToday     = todayChores.length;
+    const pct = totalToday > 0 ? Math.round(doneTodayCount / totalToday * 100) : 100;
+    const allDone = totalToday === 0 || doneTodayCount >= totalToday;
+
+    // Pending approvals for this kid
+    const pendingCount = (k.pendingApprovals || []).length;
+
+    // Active challenges
+    const activeChallenges = (k.challenges || []).filter(c => !c.completed);
+    const nearDone = activeChallenges.filter(c => {
+      const p = chalProgress(c, k);
+      return p / c.target >= 0.75;
+    });
+
+    const card = document.createElement('div');
+    card.className = 'dash-card';
+
+    const streakAlert = streak >= 3
+      ? `<div class="dash-alert streak">🔥 ${streak}-day streak — keep it going!</div>` : '';
+    const approvalAlert = pendingCount
+      ? `<div class="dash-alert approval">⏳ ${pendingCount} approval${pendingCount>1?'s':''} waiting</div>` : '';
+    const chalAlert = nearDone.length
+      ? `<div class="dash-alert challenge">🎯 ${nearDone.length} challenge${nearDone.length>1?'s':''} nearly done!</div>` : '';
+
+    card.innerHTML = `
+      <div class="dash-card-accent" style="background:${theme.accent}"></div>
+      <div class="dash-card-hdr">
+        <div class="dash-kid-dot" style="background:${theme.accent};box-shadow:0 0 6px ${theme.accent}40"></div>
+        <div class="dash-kid-name">${escHtml(k.name || 'Kid')}</div>
+        <div class="dash-level-badge">${lv.emoji} ${lv.name}</div>
+      </div>
+      <div class="dash-stats-row">
+        <div class="dash-stat">
+          <div class="dash-stat-val" style="color:var(--yellow)">${bal}⭐</div>
+          <div class="dash-stat-lbl">Tokens</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat-val" style="color:${streak>0?'var(--orange)':'var(--muted)'}">${streak>0?streak+'🔥':'—'}</div>
+          <div class="dash-stat-lbl">Streak</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat-val" style="color:${allDone?'var(--green)':'var(--blue)'}">${totalToday>0?doneTodayCount+'/'+totalToday:'✓'}</div>
+          <div class="dash-stat-lbl">Today</div>
+        </div>
+        ${activeChallenges.length ? `<div class="dash-stat">
+          <div class="dash-stat-val" style="color:var(--blue)">${activeChallenges.length}🎯</div>
+          <div class="dash-stat-lbl">Challenges</div>
+        </div>` : ''}
+      </div>
+      ${totalToday > 0 ? `
+      <div class="dash-progress-row">
+        <div class="dash-progress-track">
+          <div class="dash-progress-fill" style="width:${pct}%;background:${allDone?'var(--green)':theme.accent}"></div>
+        </div>
+        <div class="dash-progress-lbl" style="color:${allDone?'var(--green)':'var(--muted)'}">${allDone?'Done! ✓':pct+'%'}</div>
+      </div>` : ''}
+      <div class="dash-alerts">${approvalAlert}${chalAlert}${streakAlert}</div>
+      <div class="dash-switch-hint">Tap to switch →</div>`;
+
+    card.addEventListener('click', () => {
+      S.activeId = k.id;
+      save();
+      // Switch to Chores pane for this kid
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      const choresTab = document.querySelector('.tab[data-pane="paneChores"]');
+      const choresPane = document.getElementById('paneChores');
+      if (choresTab) choresTab.classList.add('active');
+      if (choresPane) choresPane.classList.add('active');
+      renderAll();
+    });
+
+    grid.appendChild(card);
+  });
+
+  if (!kids.length) {
+    grid.innerHTML = '<div class="dash-empty">No kids yet — add one to get started!</div>';
+  }
 }
 
 function renderChallenges(k) {
