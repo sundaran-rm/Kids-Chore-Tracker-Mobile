@@ -1205,6 +1205,51 @@ body.kids-mode #btnKidsHelp{display:flex!important}
 .dash-empty{text-align:center;color:var(--muted);font-size:13px;padding:32px 0;font-style:italic}
 .dash-switch-hint{font-size:10px;color:var(--muted);text-align:right;margin-top:6px;opacity:.7}
 
+/* ── BULK DAY TOGGLE ── */
+.bulk-day-bar{display:flex;align-items:center;gap:6px;padding:6px 11px 2px;flex-wrap:nowrap}
+.bulk-day-lbl{font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.4px;white-space:nowrap;flex-shrink:0}
+.bulk-day-btns{display:flex;gap:4px;flex:1}
+.bulk-day-btn{flex:1;height:26px;border-radius:5px;border:1px solid var(--border);
+  background:transparent;cursor:pointer;font-size:9px;font-weight:800;font-family:var(--font);
+  color:var(--muted);transition:all .15s;touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;position:relative}
+.bulk-day-btn.all-on{background:rgba(79,195,247,0.14);border-color:var(--blue);color:var(--blue)}
+.bulk-day-btn.some-on{background:rgba(79,195,247,0.06);border-color:rgba(79,195,247,0.4);color:var(--blue)}
+.bulk-day-btn.today{box-shadow:0 0 0 2px var(--yellow)}
+.bulk-day-btn-hint{font-size:9px;color:var(--muted);padding:0 11px 5px;opacity:.7}
+body.kids-mode .bulk-day-bar,body.kids-mode .bulk-day-btn-hint{display:none!important}
+
+/* ── VACATION / BULK DAY MODAL ── */
+.vac-day-row{display:flex;gap:8px;justify-content:space-between;margin-bottom:14px}
+.vac-day-btn{flex:1;height:48px;border-radius:10px;border:1.5px solid var(--border);
+  background:var(--navy4);cursor:pointer;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;font-family:var(--font);
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:all .15s}
+.vac-day-btn .vd-name{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.3px}
+.vac-day-btn .vd-cnt{font-size:11px;font-weight:800;color:var(--muted);margin-top:2px}
+.vac-day-btn.all-on{background:rgba(79,195,247,0.14);border-color:var(--blue)}
+.vac-day-btn.all-on .vd-name,.vac-day-btn.all-on .vd-cnt{color:var(--blue)}
+.vac-day-btn.some-on{background:rgba(79,195,247,0.06);border-color:rgba(79,195,247,0.4)}
+.vac-day-btn.some-on .vd-name,.vac-day-btn.some-on .vd-cnt{color:var(--blue)}
+.vac-day-btn.today-ring{box-shadow:0 0 0 2px var(--yellow)}
+.vac-preset-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.vac-preset{background:var(--navy4);border:1px solid var(--border);color:var(--muted);
+  font-family:var(--font);font-size:11px;font-weight:700;padding:6px 12px;border-radius:20px;
+  cursor:pointer;transition:all .15s;touch-action:manipulation}
+.vac-preset:hover{border-color:var(--orange);color:var(--orange)}
+.vac-info{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:14px;
+  padding:9px 11px;background:rgba(79,195,247,0.06);border-radius:8px;border-left:3px solid rgba(79,195,247,0.3)}
+/* ── DISABLED CHORE ── */
+.ced-disabled-row{display:flex;align-items:center;justify-content:space-between;
+  padding:10px 0;border-top:1px solid var(--border);margin-top:2px}
+.ced-disabled-lbl{font-size:12px;color:var(--muted);font-weight:700}
+.ced-disabled-sub{font-size:10px;color:var(--muted);opacity:.7;margin-top:2px}
+.chore-card.disabled-chore{opacity:.45;filter:grayscale(.4)}
+.chore-card.disabled-chore .chore-name::after{content:' · Disabled';font-size:9px;
+  color:var(--muted);font-weight:700;margin-left:4px}
+body.kids-mode .chore-card.disabled-chore{display:none!important}
+
 </style>
 </head>
 <body>
@@ -1283,7 +1328,7 @@ body.kids-mode #btnKidsHelp{display:flex!important}
     <div class="section" id="secDaily">
       <div class="sec-hdr" onclick="toggleSection('secDaily')">
         <div class="sec-title"><div class="dot" style="background:var(--blue);box-shadow:0 0 6px var(--blue)"></div>&#x2600;&#xFE0F; Daily Tasks</div>
-        <div class="sec-hdr-acts"><button class="btn-save-tpl" onclick="event.stopPropagation();openSaveTemplateModal('daily')" title="Save daily as template">&#x1F4BE;</button><button class="btn-add" id="btnTemplates" onclick="event.stopPropagation();openTemplates()" style="border-color:rgba(79,195,247,0.4);color:var(--blue)">&#x1F4CB;</button><button class="btn-add" id="btnAddDaily" onclick="event.stopPropagation()">+ Add</button></div>
+        <div class="sec-hdr-acts"><button class="btn-save-tpl" onclick="event.stopPropagation();openSaveTemplateModal('daily')" title="Save daily as template">&#x1F4BE;</button><button class="btn-save-tpl" onclick="event.stopPropagation();openVacationModal()" title="Bulk day toggle / Vacation mode" style="color:var(--orange)">&#x1F3D6;&#xFE0F;</button><button class="btn-add" id="btnTemplates" onclick="event.stopPropagation();openTemplates()" style="border-color:rgba(79,195,247,0.4);color:var(--blue)">&#x1F4CB;</button><button class="btn-add" id="btnAddDaily" onclick="event.stopPropagation()">+ Add</button></div>
       </div>
       <div class="sec-body" id="listDaily"></div>
       <div class="sec-tip">Tap days to set schedule. Grey = not today.</div>
@@ -1883,7 +1928,7 @@ function startListener(hid){
         if(!S.levelThresholds)S.levelThresholds={};
         if(!S.customLevels)S.customLevels=[];
         if(!S.flashMessages)S.flashMessages=[];
-        S.kids.forEach(k=>{if(!k.customSections)k.customSections=[];if(!k.oneTime)k.oneTime=[];if(!k.theme)k.theme='galaxy';if(k.kidsTheme===undefined)k.kidsTheme=null;if(!k.goal)k.goal={name:'',target:100,rewardId:null,savingsLock:false};if(k.goal.savingsLock===undefined)k.goal.savingsLock=false;if(!k.badges)k.badges=[];if(!k.allowance)k.allowance={amount:0,day:1,lastPaid:null,lastWeekPaid:null};if(!k.badgeThresholds)k.badgeThresholds={};if(!k.customBadges)k.customBadges=[];if(!k.pendingApprovals)k.pendingApprovals=[];if(!k.challenges)k.challenges=[];if(!k.tokenExpiry)k.tokenExpiry={enabled:false,days:30,lockedTokens:[]};k.daily.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';});k.bonus.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';});(k.customSections||[]).forEach(s=>s.chores.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';}));});
+        S.kids.forEach(k=>{if(!k.customSections)k.customSections=[];if(!k.oneTime)k.oneTime=[];if(!k.theme)k.theme='galaxy';if(k.kidsTheme===undefined)k.kidsTheme=null;if(!k.goal)k.goal={name:'',target:100,rewardId:null,savingsLock:false};if(k.goal.savingsLock===undefined)k.goal.savingsLock=false;if(!k.badges)k.badges=[];if(!k.allowance)k.allowance={amount:0,day:1,lastPaid:null,lastWeekPaid:null};if(!k.badgeThresholds)k.badgeThresholds={};if(!k.customBadges)k.customBadges=[];if(!k.pendingApprovals)k.pendingApprovals=[];if(!k.challenges)k.challenges=[];if(!k.tokenExpiry)k.tokenExpiry={enabled:false,days:30,lockedTokens:[]};k.daily.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';if(c.disabled===undefined)c.disabled=false;});k.bonus.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';if(c.disabled===undefined)c.disabled=false;});(k.customSections||[]).forEach(s=>s.chores.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';}));});
         saveLocal();
         // Defer DOM rebuild to next animation frame so pending touch events
         // are processed first. Cancels any previous pending frame to avoid stacking.
@@ -1973,17 +2018,34 @@ function getExpiryWarningIds(k){
 }
 function timeAgo(ts){const ms=Date.now()-ts,h=ms/3600000,d=ms/86400000;if(ms<60000)return'Just now';if(h<1)return Math.floor(ms/60000)+'m ago';if(h<24)return Math.floor(h)+'h ago';if(d<7)return Math.floor(d)+'d ago';return new Date(ts).toLocaleDateString(undefined,{month:'short',day:'numeric'});}
 function scheduledToday(c){return(c.days||ALL_DAYS).includes(todayDow());}
+/* ── STREAK: freeze when no chores scheduled ── */
 function calcStreak(k){
-  const set=new Set(k.streakDates||[]);if(!set.size)return 0;
-  let cur=new Date(),streak=0;
-  if(!set.has(todayStr()))cur.setDate(cur.getDate()-1);
-  while(true){const ds=dateStr(cur);if(set.has(ds)){streak++;cur.setDate(cur.getDate()-1);}else break;}
+  const set=new Set(k.streakDates||[]); if(!set.size)return 0;
+  let cur=new Date(), streak=0;
+  // If today not in set, start from yesterday
+  if(!set.has(todayStr())) cur.setDate(cur.getDate()-1);
+  // Safety: if ALL chores are paused (days=[]) on every day of the week,
+  // there is no active schedule so streak stays frozen at its current value.
+  const anyDayActive=(k.daily||[]).some(c=>(c.days||[]).length>0&&!c.disabled);
+  if(!anyDayActive)return streak; // fully paused — freeze streak
+  let _safetyLimit=730; // max 2 years back
+  while(_safetyLimit-->0){
+    const ds=dateStr(cur);
+    if(set.has(ds)){
+      streak++; cur.setDate(cur.getDate()-1); continue;
+    }
+    // Streak freeze: skip days with no chores scheduled
+    const dow=cur.getDay();
+    const hasChores=(k.daily||[]).some(c=>(c.days||[]).includes(dow)&&!c.disabled);
+    if(!hasChores){ cur.setDate(cur.getDate()-1); continue; }
+    break;
+  }
   return streak;
 }
 function refreshStreak(k){
   // Only Daily Tasks section (k.daily) counts toward the streak — bonus and custom sections are excluded
   const today=todayStr();
-  const sched=k.daily.filter(c=>scheduledToday(c));
+  const sched=k.daily.filter(c=>scheduledToday(c)&&!c.disabled);
   const allDone=sched.length>0&&sched.every(c=>c.lastDone===today);
   if(!k.streakDates)k.streakDates=[];
   if(allDone){if(!k.streakDates.includes(today))k.streakDates.push(today);}
@@ -2031,7 +2093,7 @@ function pruneOneTime(k){
 /* ── CHORE CARD ── */
 function buildChoreCard(grp,secId,idx,item,k){
   const today=todayStr(),dow=todayDow();
-  const done=item.lastDone===today,sched=scheduledToday(item);
+  const done=item.lastDone===today,sched=scheduledToday(item)&&!item.disabled;
   const isOneTime=grp==='onetime';
   const effectiveSched=isOneTime?true:sched;
   const card=document.createElement('div');
@@ -2164,6 +2226,7 @@ function buildChoreCard(grp,secId,idx,item,k){
     name.title='Tap to show instructions';
   }
   if(isCOTWchore)card.classList.add('cotw');
+  if(item.disabled)card.classList.add('disabled-chore');
   return card;
 }
 
@@ -2275,7 +2338,7 @@ function renderCustomSections(k){
     hdr.appendChild(titleWrap);hdr.appendChild(acts);
     const body=document.createElement('div');body.className='sec-body';body.id='listCustom_'+sec.id;
     makeBodyDropZone(body,k,'custom',sec.id);
-    sec.chores.forEach((ch,i)=>body.appendChild(buildChoreCard('custom',sec.id,i,ch,k)));
+    sec.chores.filter(ch=>!(kidsMode&&ch.disabled)).forEach((ch,i)=>body.appendChild(buildChoreCard('custom',sec.id,i,ch,k)));
     if(sec.chores.length===0){const h=document.createElement('div');h.className='drop-hint';h.textContent='Drag chores here or tap + Add';body.appendChild(h);}
     section.appendChild(hdr);section.appendChild(body);container.appendChild(section);
   });
@@ -2291,7 +2354,7 @@ function renderLeft(){
   [['daily',null,'listDaily'],['bonus',null,'listBonus']].forEach(([g,sid,id])=>{
     const ct=document.getElementById(id);if(!ct)return;ct.innerHTML='';
     if(k){
-      k[g].forEach((item,i)=>ct.appendChild(buildChoreCard(g,sid,i,item,k)));
+      k[g].filter(item=>!(kidsMode&&item.disabled)).forEach((item,i)=>ct.appendChild(buildChoreCard(g,sid,i,item,k)));
       makeBodyDropZone(ct,k,g,sid);
       if(k[g].length===0){const h=document.createElement('div');h.className='drop-hint';h.textContent='Drag chores here or tap + Add';ct.appendChild(h);}
     }
@@ -2967,6 +3030,95 @@ function getBadgeDynamicDesc(badge,k){
     default: return badge.desc;
   }
 }
+
+
+/* ══════════════════════════════════════════════
+   VACATION / BULK DAY TOGGLE MODAL
+══════════════════════════════════════════════ */
+function openVacationModal() {
+  const k = kid(); if (!k) return;
+  let ov = document.getElementById('vacOverlay'); if (ov) ov.remove();
+  ov = document.createElement('div'); ov.id = 'vacOverlay'; ov.className = 'overlay';
+  ov.style.zIndex = '3200';
+
+  function build() {
+    const chores = k.daily || [];
+    const dow = new Date().getDay();
+    ov.innerHTML = `<div class="sheet"><div class="sheet-handle"></div>
+      <div class="sheet-hdr">
+        <div class="sheet-title">🏖️ Vacation / Day Toggle</div>
+        <button class="sheet-close" onclick="document.getElementById('vacOverlay').remove()">&#x2715;</button>
+      </div>
+      <div class="sheet-body" style="padding:14px 16px 28px">
+        <div class="vac-info">
+          Tap a day to add or remove <strong>all</strong> daily chores on that day.
+          Streaks freeze when a day has no chores and resume automatically on the next active day.
+        </div>
+        <div class="vac-preset-row">
+          <button class="vac-preset" id="vpWeekdays">Weekdays only</button>
+          <button class="vac-preset" id="vpWeekends">Weekends only</button>
+          <button class="vac-preset" id="vpAll">All days</button>
+          <button class="vac-preset" id="vpNone">Pause all</button>
+        </div>
+        <div class="vac-day-row" id="vacDayRow"></div>
+      </div>
+    </div>`;
+    ov.classList.add('open');
+    document.body.appendChild(ov);
+    ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+
+    // Render day buttons
+    function renderDays() {
+      const row = document.getElementById('vacDayRow'); if (!row) return;
+      row.innerHTML = '';
+      DAY_LABELS.forEach((lbl, d) => {
+        const onCount = chores.filter(c => (c.days || []).includes(d)).length;
+        const allOn   = chores.length > 0 && onCount === chores.length;
+        const someOn  = onCount > 0 && !allOn;
+        const btn = document.createElement('button');
+        btn.className = 'vac-day-btn' +
+          (allOn ? ' all-on' : someOn ? ' some-on' : '') +
+          (d === dow ? ' today-ring' : '');
+        btn.innerHTML = `<span class="vd-name">${DAY_NAMES[d].slice(0,3).toUpperCase()}</span>
+          <span class="vd-cnt">${onCount}/${chores.length}</span>`;
+        btn.title = DAY_NAMES[d];
+        btn.addEventListener('click', () => {
+          if (allOn) {
+            // Remove day from all chores — allow 0 days (vacation/pause)
+            chores.forEach(c => { c.days = (c.days || []).filter(x => x !== d); });
+          } else {
+            // Add day to all chores
+            chores.forEach(c => {
+              if (!(c.days || []).includes(d))
+                c.days = [...(c.days || []), d].sort((a, b) => a - b);
+            });
+          }
+          save(); renderAll(); renderDays();
+        });
+        row.appendChild(btn);
+      });
+    }
+    renderDays();
+
+    // Presets
+    function applyPreset(dayArr) {
+      chores.forEach(c => { c.days = [...dayArr]; });
+      save(); renderAll(); renderDays();
+    }
+    const vp = ov.querySelector('#vpWeekdays');
+    if (vp) vp.addEventListener('click', () => applyPreset([1,2,3,4,5]));
+    const ve = ov.querySelector('#vpWeekends');
+    if (ve) ve.addEventListener('click', () => applyPreset([0,6]));
+    const va = ov.querySelector('#vpAll');
+    if (va) va.addEventListener('click', () => applyPreset([0,1,2,3,4,5,6]));
+    const vn = ov.querySelector('#vpNone');
+    if (vn) vn.addEventListener('click', () => applyPreset([]));
+  }
+
+  build();
+}
+
+
 
 function renderBadges(k){
   const ct=document.getElementById('badgesGrid');if(!ct)return;
@@ -5046,6 +5198,10 @@ function openChoreEditModal(item,k,grp,secId,onCancel){
       </div>
       <div class="ced-label">\uD83D\uDCDD Instructions</div>
       <textarea class="ced-notes" id="cedNotes" placeholder="Optional instructions\u2026"></textarea>
+      <div class="ced-disabled-row">
+        <div><div class="ced-disabled-lbl">&#x1F6AB; Disable chore</div><div class="ced-disabled-sub">Hides from kids. Streak days skip disabled chores.</div></div>
+        <label class="tog-wrap"><input type="checkbox" id="cedDisabled"${item.disabled?" checked":""}><span class="tog-sl"></span></label>
+      </div>
       <div class="ced-actions">
         <button class="ced-save-btn" id="cedSave">\u2713 Save</button>
         <button class="ced-del-btn" id="cedDel">\uD83D\uDDD1 Delete</button>
@@ -5095,9 +5251,22 @@ function openChoreEditModal(item,k,grp,secId,onCancel){
     b.className='day-btn'+((item.days||[]).includes(d)?' on':'')+(d===dow?' today-ring':'');
     b.textContent=lbl;b.title=DAY_NAMES[d];
     b.addEventListener('click',()=>{
-      if((item.days||[]).includes(d)){if(item.days.length>1)item.days=item.days.filter(x=>x!==d);}
-      else item.days=[...(item.days||[]),d].sort((a,b)=>a-b);
-      b.className='day-btn'+(item.days.includes(d)?' on':'')+(d===dow?' today-ring':'');
+      if((item.days||[]).includes(d)){
+        item.days=item.days.filter(x=>x!==d);
+        // Auto-disable when all days unchecked
+        if(item.days.length===0){
+          item.disabled=true;
+          const cb=document.getElementById('cedDisabled');if(cb)cb.checked=true;
+        }
+      } else {
+        item.days=[...(item.days||[]),d].sort((a,b)=>a-b);
+        // Auto-enable when a day is added back
+        if(item.disabled){
+          item.disabled=false;
+          const cb=document.getElementById('cedDisabled');if(cb)cb.checked=false;
+        }
+      }
+      b.className='day-btn'+((item.days||[]).includes(d)?' on':'')+(d===dow?' today-ring':'');
     });
     daysRow.appendChild(b);
   });
@@ -5108,7 +5277,7 @@ function openChoreEditModal(item,k,grp,secId,onCancel){
     if(ov._onCancel)ov._onCancel=null; // committed — don't discard on close
     item.title=nameInp.value.trim()||item.title||'(unnamed)';
     item.tokens=Math.max(0,Number(tokInp.value||0));
-    item.notes=notesTA.value;
+    item.notes=notesTA.value;item.disabled=!!document.getElementById('cedDisabled')?.checked;
     // Handle type change: move between arrays
     if(selectedOneTime&&grp!=='onetime'){
       // Recurring → One-Time: remove from current arr, add to k.oneTime
@@ -5119,7 +5288,7 @@ function openChoreEditModal(item,k,grp,secId,onCancel){
     } else if(!selectedOneTime&&grp==='onetime'){
       // One-Time → Recurring: remove from oneTime, add to daily
       k.oneTime=(k.oneTime||[]).filter(c=>c.id!==item.id);
-      item.oneTime=false;if(!item.days||!item.days.length)item.days=[...ALL_DAYS];
+      item.oneTime=false;
       k.daily.push(item);
     }
     save();renderAll();closeChoreEditModal();
