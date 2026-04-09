@@ -1286,9 +1286,42 @@ body.kids-mode .bulk-day-bar,body.kids-mode .bulk-day-btn-hint{display:none!impo
 body.kids-mode .chore-card.disabled-chore{display:none!important}
 
 /* ── HIDE SCROLLBARS (keep scrollable) ── */
-.m-body,.sheet-body,.setup-body,.hist-feed,.flash-compose-body,.flash-history,.cal-pop-scroll,.content{
+.m-body,.sheet-body,.setup-body,.hist-feed,.flash-compose-body,.flash-history,.cal-pop-scroll,.content,.rc-kid-tabs,.lb-toggle{
   scrollbar-width:none;-ms-overflow-style:none}
-.m-body::-webkit-scrollbar,.sheet-body::-webkit-scrollbar,.setup-body::-webkit-scrollbar,.hist-feed::-webkit-scrollbar,.flash-compose-body::-webkit-scrollbar,.flash-history::-webkit-scrollbar,.cal-pop-scroll::-webkit-scrollbar,.content::-webkit-scrollbar{display:none}
+.m-body::-webkit-scrollbar,.sheet-body::-webkit-scrollbar,.setup-body::-webkit-scrollbar,.hist-feed::-webkit-scrollbar,.flash-compose-body::-webkit-scrollbar,.flash-history::-webkit-scrollbar,.cal-pop-scroll::-webkit-scrollbar,.content::-webkit-scrollbar,.rc-kid-tabs::-webkit-scrollbar,.lb-toggle::-webkit-scrollbar{display:none}
+/* Prevent horizontal scrollbar from appearing inside modals */
+.modal,.sheet{overflow-x:hidden}
+.m-body,.sheet-body{overflow-x:hidden}
+
+/* ── SIBLING LEADERBOARD ── */
+.lb-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.lb-title{font-size:13px;font-weight:800;color:var(--text)}
+.lb-toggle{display:flex;gap:4px;background:var(--navy4);border-radius:20px;padding:3px}
+.lb-toggle-btn{background:transparent;border:none;font-family:var(--font);font-size:10px;
+  font-weight:700;color:var(--muted);padding:4px 9px;border-radius:17px;cursor:pointer;
+  transition:all .15s;touch-action:manipulation;white-space:nowrap}
+.lb-toggle-btn.active{background:var(--navy2);color:var(--text);
+  box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.lb-row{display:flex;align-items:center;gap:10px;padding:9px 0;
+  border-bottom:1px solid rgba(42,56,84,.4);position:relative}
+.lb-row:last-child{border-bottom:none}
+.lb-rank{font-size:18px;width:28px;text-align:center;flex-shrink:0;line-height:1}
+.lb-kid-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.lb-kid-info{flex:1;min-width:0}
+.lb-kid-name{font-size:13px;font-weight:800;color:var(--text);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-kid-sub{font-size:10px;color:var(--muted);margin-top:1px}
+.lb-value{font-size:16px;font-weight:800;flex-shrink:0;text-align:right}
+.lb-bar-wrap{position:absolute;bottom:0;left:38px;right:0;height:2px;
+  background:var(--navy4);border-radius:1px;overflow:hidden}
+.lb-bar-fill{height:100%;border-radius:1px;transition:width .4s ease}
+.lb-winner-crown{position:absolute;top:-4px;left:24px;font-size:11px;
+  animation:crownBob 2s ease-in-out infinite}
+@keyframes crownBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+.lb-empty{text-align:center;color:var(--muted);font-size:12px;padding:18px 0;font-style:italic}
+.lb-reset-note{font-size:9px;color:var(--muted);text-align:center;margin-top:8px;opacity:.7}
+.lb-section{background:var(--navy2);border:1px solid var(--border);border-radius:14px;
+  padding:12px 14px;margin-top:14px}
 
 </style>
 </head>
@@ -1351,6 +1384,7 @@ body.kids-mode .chore-card.disabled-chore{display:none!important}
   <div class="tab-pane" id="paneDash">
     <div class="dash-greeting" id="dashGreeting"></div>
     <div class="dash-grid" id="dashGrid"></div>
+    <div class="lb-section" id="lbContainer" style="display:none"></div>
   </div>
   <div class="tab-pane active" id="paneChores">
     <!-- XP HEADER BAR -->
@@ -1745,6 +1779,7 @@ const DAY_LABELS=['S','M','T','W','T','F','S'];
 const DAY_NAMES=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const ALL_DAYS=[0,1,2,3,4,5,6];
 const CC={green:'#69f0ae',yellow:'#ffd740',blue:'#4fc3f7',orange:'#ffb74d',red:'#ff6b6b',purple:'#b388ff'};
+let _lbMode = 'tokens'; // 'tokens' | 'chores' | 'streak'
 const CHAL_TYPES = [
   { id:'chores_n',  icon:'✅', label:'Complete N chores',     unit:'chores' },
   { id:'streak_n',  icon:'🔥', label:'Reach N-day streak',    unit:'days'   },
@@ -6238,6 +6273,96 @@ function chalDeadlineLabel(c) {
    PARENT DASHBOARD
 ══════════════════════════════════════════════ */
 
+/* ══════════════════════════════════════════════
+   SIBLING LEADERBOARD
+══════════════════════════════════════════════ */
+
+
+function getLeaderboardData(mode) {
+  const kids = S.kids || [];
+  if (kids.length < 2) return [];
+
+  return kids.map(k => {
+    let value = 0, sub = '';
+    if (mode === 'tokens') {
+      const data = buildReportData(k, 0);
+      value = data.earned;
+      sub = `${data.earned} tokens this week`;
+    } else if (mode === 'chores') {
+      const data = buildReportData(k, 0);
+      value = data.totalDone;
+      sub = `${data.totalDone} of ${data.totalPossible} chores`;
+    } else { // streak
+      value = calcStreak(k);
+      sub = `${value} day streak`;
+    }
+    const theme = THEMES[(k.kidsTheme || k.theme) || 'galaxy'] || THEMES.galaxy;
+    return { id: k.id, name: k.name || 'Kid', value, sub, accent: theme.accent };
+  }).sort((a, b) => b.value - a.value);
+}
+
+function renderLeaderboard(containerId) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+
+  const kids = S.kids || [];
+  if (kids.length < 2) { el.innerHTML = ''; return; }
+
+  const rows = getLeaderboardData(_lbMode);
+  const maxVal = rows[0]?.value || 1;
+
+  const rankEmoji = ['🥇','🥈','🥉'];
+  const modeLabel = { tokens:'⭐ Tokens', chores:'✅ Chores', streak:'🔥 Streak' };
+  const valueColor = { tokens:'var(--yellow)', chores:'var(--green)', streak:'var(--orange)' };
+  const valueSuffix = { tokens:'⭐', chores:'', streak:'🔥' };
+
+  const toggleHtml = Object.keys(modeLabel).map(m =>
+    `<button class="lb-toggle-btn${m===_lbMode?' active':''}" data-mode="${m}">${modeLabel[m]}</button>`
+  ).join('');
+
+  const rowsHtml = rows.length ? rows.map((r, i) => {
+    const pct = maxVal > 0 ? Math.round(r.value / maxVal * 100) : 0;
+    const rankIcon = i < 3 ? rankEmoji[i] : `${i+1}.`;
+    const crownHtml = i === 0 && r.value > 0 ? `<div class="lb-winner-crown">👑</div>` : '';
+    const valDisplay = r.value + (valueSuffix[_lbMode] ? ' ' + valueSuffix[_lbMode] : '');
+    return `<div class="lb-row">
+      ${crownHtml}
+      <div class="lb-rank">${rankIcon}</div>
+      <div class="lb-kid-dot" style="background:${r.accent};box-shadow:0 0 5px ${r.accent}60"></div>
+      <div class="lb-kid-info">
+        <div class="lb-kid-name">${escHtml(r.name)}</div>
+        <div class="lb-kid-sub">${escHtml(r.sub)}</div>
+      </div>
+      <div class="lb-value" style="color:${valueColor[_lbMode]}">${valDisplay}</div>
+      <div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:${pct}%;background:${r.accent}"></div></div>
+    </div>`;
+  }).join('') : `<div class="lb-empty">No activity yet this week</div>`;
+
+  // Get Monday of current week for reset note
+  const now = new Date();
+  const mon = new Date(now);
+  mon.setDate(now.getDate() - (now.getDay() + 6) % 7);
+  const nextMon = new Date(mon); nextMon.setDate(mon.getDate() + 7);
+  const resetDate = nextMon.toLocaleDateString(undefined, { weekday:'short', month:'short', day:'numeric' });
+
+  el.innerHTML = `
+    <div class="lb-header">
+      <div class="lb-title">🏆 This Week</div>
+      <div class="lb-toggle" id="lbToggle">${toggleHtml}</div>
+    </div>
+    ${rowsHtml}
+    <div class="lb-reset-note">Resets ${resetDate}</div>`;
+
+  // Wire toggle buttons
+  el.querySelectorAll('.lb-toggle-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      _lbMode = btn.dataset.mode;
+      renderLeaderboard(containerId);
+    });
+  });
+}
+
 function renderDashboard() {
   const grid   = document.getElementById('dashGrid');
   const greet  = document.getElementById('dashGreeting');
@@ -6249,6 +6374,10 @@ function renderDashboard() {
 
   // Show/hide the tab itself
   if (tabBtn) tabBtn.style.display = multiKid ? '' : 'none';
+
+  // Leaderboard: show below kid cards in Overview tab
+  const lbEl = document.getElementById('lbContainer');
+  if (lbEl) { lbEl.style.display = multiKid ? '' : 'none'; if (multiKid) renderLeaderboard('lbContainer'); }
 
   // If not multi-kid and currently on dash pane, redirect to chores
   if (!multiKid) {
