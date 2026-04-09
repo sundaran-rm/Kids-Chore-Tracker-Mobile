@@ -924,21 +924,56 @@ body.kids-mode .settings-km-hint { display:block!important }
 .shop-item-add.added{background:var(--green-dark)!important;color:#0a2a1a}
 .btn-reward-shop{background:transparent;border:1.5px solid rgba(var(--purple-rgb),0.4);color:var(--purple);font-family:var(--font);font-size:11px;font-weight:700;padding:4px 9px;border-radius:7px;cursor:pointer;white-space:nowrap;transition:all .15s;}
 .btn-reward-shop:hover{border-color:var(--purple);background:rgba(var(--purple-rgb),0.07)}
-.report-week{font-size:11px;color:var(--muted);text-align:center;margin-bottom:12px}
-.report-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px;}
-.report-card{background:var(--navy3);border:1px solid var(--border);border-radius:10px;padding:10px;display:flex;flex-direction:column;align-items:center;gap:2px;}
-.report-val{font-family:var(--display);font-size:20px;line-height:1.1}
-.report-key{font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
-.report-sec-title{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;padding:8px 0 4px}
-.report-chore-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(42,56,84,0.4)}
-.report-chore-row:last-child{border-bottom:none}
-.report-chore-name{flex:1;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.report-mini-hm{display:flex;gap:2px;flex-shrink:0}
-.report-mini-cell{width:11px;height:11px;border-radius:2px}
-.report-pct{font-size:10px;font-weight:800;width:28px;text-align:right;flex-shrink:0}
-.report-actions{display:flex;gap:8px;margin-top:10px;}
-.report-actions button{flex:1;padding:9px;border-radius:10px;font-family:var(--font);font-size:12px;font-weight:800;cursor:pointer;border:none;}
-.report-close-btn{background:var(--navy3);color:var(--muted);border:1px solid var(--border)!important;}
+/* ── WEEKLY REPORT CARD ── */
+.rc-hero{text-align:center;padding:16px 0 10px;position:relative}
+.rc-grade-ring{width:80px;height:80px;border-radius:50%;margin:0 auto 8px;
+  display:flex;align-items:center;justify-content:center;font-size:36px;
+  border:3px solid var(--border);background:var(--navy3);position:relative}
+.rc-grade-ring.grade-s{border-color:#ffd700;box-shadow:0 0 18px rgba(255,215,0,0.4);background:rgba(255,215,0,0.08)}
+.rc-grade-ring.grade-a{border-color:var(--green);box-shadow:0 0 14px rgba(105,240,174,0.3)}
+.rc-grade-ring.grade-b{border-color:var(--blue);box-shadow:0 0 12px rgba(79,195,247,0.25)}
+.rc-grade-ring.grade-c{border-color:var(--yellow);box-shadow:0 0 10px rgba(255,215,64,0.2)}
+.rc-grade-ring.grade-d{border-color:var(--orange)}
+.rc-headline{font-size:15px;font-weight:800;color:var(--text);margin-bottom:3px}
+.rc-subline{font-size:11px;color:var(--muted)}
+.rc-period{font-size:10px;color:var(--muted);margin-top:5px;font-weight:700;letter-spacing:.3px}
+.rc-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.rc-stat{background:var(--navy3);border:1px solid var(--border);border-radius:10px;
+  padding:8px 4px;text-align:center}
+.rc-stat-val{font-family:var(--display);font-size:18px;line-height:1.1;margin-bottom:1px}
+.rc-stat-lbl{font-size:8px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.rc-trend{font-size:9px;font-weight:700;margin-top:1px}
+.rc-trend.up{color:var(--green)}
+.rc-trend.dn{color:var(--red)}
+.rc-trend.eq{color:var(--muted)}
+.rc-section-title{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.5px;padding:8px 0 5px}
+.rc-chore-row{display:flex;align-items:center;gap:8px;padding:5px 0;
+  border-bottom:1px solid rgba(42,56,84,0.4)}
+.rc-chore-name{flex:1;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rc-mini-hm{display:flex;gap:2px;flex-shrink:0}
+.rc-mini-cell{width:12px;height:12px;border-radius:2px}
+.rc-pct{font-size:10px;font-weight:800;width:28px;text-align:right;flex-shrink:0}
+.rc-badge-row{display:flex;flex-wrap:wrap;gap:6px;padding:4px 0 8px}
+.rc-badge-chip{background:rgba(255,215,64,0.12);border:1px solid rgba(255,215,64,0.3);
+  border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--yellow)}
+.rc-chal-chip{background:rgba(79,195,247,0.1);border:1px solid rgba(79,195,247,0.3);
+  border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--blue)}
+.rc-perfect-banner{background:linear-gradient(135deg,rgba(255,215,0,0.12),rgba(255,183,77,0.08));
+  border:1px solid rgba(255,215,0,0.3);border-radius:11px;padding:10px 14px;
+  text-align:center;margin-bottom:10px;font-size:12px;font-weight:800;color:var(--yellow)}
+.rc-actions{display:flex;gap:8px;margin-top:14px}
+.rc-send-btn{flex:1;background:linear-gradient(135deg,var(--blue),#0288d1);color:#fff;
+  font-family:var(--font);font-size:12px;font-weight:800;border:none;border-radius:9px;
+  padding:10px 0;cursor:pointer;touch-action:manipulation}
+.rc-close-btn{background:var(--navy3);color:var(--muted);border:1px solid var(--border);
+  font-family:var(--font);font-size:12px;font-weight:700;border-radius:9px;
+  padding:10px 16px;cursor:pointer;touch-action:manipulation}
+.rc-kid-tabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px}
+.rc-kid-tab{background:var(--navy4);border:1.5px solid var(--border);border-radius:20px;
+  padding:5px 12px;font-size:11px;font-weight:800;color:var(--muted);cursor:pointer;
+  white-space:nowrap;touch-action:manipulation;flex-shrink:0}
+.rc-kid-tab.active{border-color:var(--blue);color:var(--blue);background:rgba(79,195,247,0.1)}
 .chart-sub-title{font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-top:14px;margin-bottom:2px;padding-left:2px;}
 .streak-hist-wrap{height:80px;margin-top:4px;position:relative;}
 
@@ -1249,6 +1284,11 @@ body.kids-mode .bulk-day-bar,body.kids-mode .bulk-day-btn-hint{display:none!impo
 .chore-card.disabled-chore .chore-name::after{content:' · Disabled';font-size:9px;
   color:var(--muted);font-weight:700;margin-left:4px}
 body.kids-mode .chore-card.disabled-chore{display:none!important}
+
+/* ── HIDE SCROLLBARS (keep scrollable) ── */
+.m-body,.sheet-body,.setup-body,.hist-feed,.flash-compose-body,.flash-history,.cal-pop-scroll,.content{
+  scrollbar-width:none;-ms-overflow-style:none}
+.m-body::-webkit-scrollbar,.sheet-body::-webkit-scrollbar,.setup-body::-webkit-scrollbar,.hist-feed::-webkit-scrollbar,.flash-compose-body::-webkit-scrollbar,.flash-history::-webkit-scrollbar,.cal-pop-scroll::-webkit-scrollbar,.content::-webkit-scrollbar{display:none}
 
 </style>
 </head>
@@ -5416,66 +5456,6 @@ function renderAllowanceBox(k){
 }
 
 /* ══ WEEKLY REPORT CARD ══ */
-function buildWeeklyReport(k){
-  if(!k)return'';
-  const today=new Date();const dow=today.getDay();const dfm=(dow+6)%7;
-  const wS=new Date(today);wS.setDate(today.getDate()-dfm);wS.setHours(0,0,0,0);
-  const wE=new Date(today);wE.setHours(23,59,59,999);
-  let earned=0,redeemed=0;
-  (k.tokens||[]).forEach(ev=>{const d=new Date(ev.timestamp);if(d<wS||d>wE)return;const v=Number(ev.amount||0);if(v>0)earned+=v;else if((ev.note||'').startsWith('\uD83C\uDF81'))redeemed+=Math.abs(v);});
-  const allChores=getAllChores(k);
-  const choreRows=[];
-  allChores.forEach(c=>{
-    let possible=0,done=0;
-    for(let i=0;i<=dfm;i++){const d=new Date(wS);d.setDate(wS.getDate()+i);if((c.days||ALL_DAYS).includes(d.getDay())){possible++;if((c.completions||[]).includes(dateStr(d)))done++;}}
-    if(possible>0)choreRows.push({name:c.title||'(unnamed)',done,possible,pct:Math.round(done/possible*100),completions:c.completions||[],days:c.days||ALL_DAYS});
-  });
-  choreRows.sort((a,b)=>b.pct-a.pct);
-  const doneCount=choreRows.reduce((s,r)=>s+r.done,0);
-  const streak=calcStreak(k);
-  const dateRange=wS.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' \u2013 '+today.toLocaleDateString(undefined,{month:'short',day:'numeric'});
-  const monOffset=(dow+6)%7;
-  let chorHtml='';
-  choreRows.slice(0,8).forEach(r=>{
-    const col=r.pct>=80?'var(--green)':r.pct>=50?'var(--yellow)':'var(--red)';
-    let cells='';
-    for(let i=0;i<7;i++){
-      const d2=new Date(wS);d2.setDate(wS.getDate()+i);
-      if(d2>wE){cells+='<div class="report-mini-cell" style="background:var(--navy4)"></div>';continue;}
-      const ds=dateStr(d2);const sched=r.days.includes(d2.getDay());const done2=r.completions.includes(ds);
-      const bg=done2?'var(--green)':sched?'rgba(255,107,107,0.5)':'var(--navy4)';
-      cells+='<div class="report-mini-cell" style="background:'+bg+'"></div>';
-    }
-    chorHtml+='<div class="report-chore-row"><div class="report-chore-name">'+r.name+'</div><div class="report-mini-hm">'+cells+'</div><div class="report-pct" style="color:'+col+'">'+r.pct+'%</div></div>';
-  });
-  return '<div class="report-week">'+k.name+' \u00B7 '+dateRange+'</div>'
-    +'<div class="report-grid">'
-    +'<div class="report-card"><div class="report-val" style="color:var(--green)">+'+earned+'</div><div class="report-key">Earned</div></div>'
-    +'<div class="report-card"><div class="report-val" style="color:var(--purple)">'+redeemed+'</div><div class="report-key">Redeemed</div></div>'
-    +'<div class="report-card"><div class="report-val" style="color:var(--yellow)">'+doneCount+'</div><div class="report-key">Done</div></div>'
-    +'<div class="report-card"><div class="report-val" style="color:var(--orange)">'+streak+'\uD83D\uDD25</div><div class="report-key">Streak</div></div>'
-    +'</div>'
-    +(choreRows.length?'<div class="report-sec-title">This Week\'s Chores</div>'+chorHtml:'')
-    +'<div class="report-actions"><button class="report-close-btn" onclick="closeReportCard()">Close</button></div>';
-}
-function openReportCard(){
-  const k=kid();if(!k){alert('Add a kid first!');return;}
-  let ov=document.getElementById('reportOverlay');
-  if(!ov){ov=document.createElement('div');ov.id='reportOverlay';ov.className='overlay';ov.innerHTML='<div class="modal" style="max-width:460px"><div class="m-hdr"><div class="m-title">\uD83D\uDCCA Weekly Report</div><button class="m-close" onclick="closeReportCard()">\u2715</button></div><div class="m-body" id="reportBody" style="padding:14px 16px 18px;overflow-y:auto;max-height:76vh"></div></div>';document.body.appendChild(ov);ov.addEventListener('click',e=>{if(e.target===ov)closeReportCard();});}
-  document.getElementById('reportBody').innerHTML=buildWeeklyReport(k);
-  ov.classList.add('open');
-}
-function closeReportCard(){const ov=document.getElementById('reportOverlay');if(ov)ov.classList.remove('open');}
-function maybeShowWeeklyReport(){
-  const k=kid();if(!k)return;
-  if(new Date().getDay()!==1)return;
-  const thisMonday=getWeekStr();
-  if(localStorage.getItem('cq_report_seen')===thisMonday)return;
-  localStorage.setItem('cq_report_seen',thisMonday);
-  const lastWeekStart=new Date();lastWeekStart.setDate(lastWeekStart.getDate()-7);lastWeekStart.setHours(0,0,0,0);
-  const hasData=(k.tokens||[]).some(ev=>{const d=new Date(ev.timestamp);return d>=lastWeekStart&&d<new Date()&&Number(ev.amount||0)>0;});
-  if(hasData)setTimeout(openReportCard,1500);
-}
 
 /* ══ REWARD SHOP ══ */
 const REWARD_SHOP=[
@@ -5894,6 +5874,275 @@ S.kids.forEach(k=>{
 S.kids.forEach(k=>{if(!k.customSections)k.customSections=[];if(!k.oneTime)k.oneTime=[];if(!k.theme)k.theme='galaxy';if(k.kidsTheme===undefined)k.kidsTheme=null;if(!k.goal)k.goal={name:'',target:100,rewardId:null,savingsLock:false};if(k.goal.savingsLock===undefined)k.goal.savingsLock=false;if(!k.badges)k.badges=[];if(!k.allowance)k.allowance={amount:0,day:1,lastPaid:null,lastWeekPaid:null};if(!k.badgeThresholds)k.badgeThresholds={};if(!k.customBadges)k.customBadges=[];if(!k.pendingApprovals)k.pendingApprovals=[];k.daily.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';});k.bonus.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';});(k.customSections||[]).forEach(s=>s.chores.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';}));pruneOneTime(k);});
 // Migrate PIN from localStorage into S if present
 (()=>{const lp=localStorage.getItem('cq_parent_pin');if(lp&&!S.parentPin){S.parentPin=lp;localStorage.removeItem('cq_parent_pin');save();}})();
+/* ══════════════════════════════════════════════
+   WEEKLY REPORT CARD (rebuilt)
+══════════════════════════════════════════════ */
+
+function buildReportData(k, weekOffset) {
+  // weekOffset: 0 = current week, -1 = last week
+  const today = new Date();
+  const dow = today.getDay();
+  const daysFromMon = (dow + 6) % 7;
+
+  // Week start = last Monday (or this Monday)
+  const wS = new Date(today);
+  wS.setDate(today.getDate() - daysFromMon + (weekOffset * 7));
+  wS.setHours(0,0,0,0);
+  const wE = new Date(wS);
+  wE.setDate(wS.getDate() + 6);
+  wE.setHours(23,59,59,999);
+
+  // For current week, end is today not Sunday
+  const effectiveEnd = weekOffset === 0 ? new Date(today) : wE;
+  effectiveEnd.setHours(23,59,59,999);
+
+  let earned = 0, redeemed = 0, mischief = 0;
+  (k.tokens || []).forEach(ev => {
+    const d = new Date(ev.timestamp);
+    if (d < wS || d > effectiveEnd) return;
+    const v = Number(ev.amount || 0);
+    const note = ev.note || '';
+    if (v > 0 && !note.startsWith('Undo:')) earned += v;
+    else if (note.startsWith('\uD83C\uDF81')) redeemed += Math.abs(v);
+    else if (v < 0 && ev.manual) mischief += Math.abs(v);
+  });
+
+  // Chore completion per day
+  const allChores = getAllChores(k).filter(c => !c.disabled);
+  const choreRows = [];
+  allChores.forEach(c => {
+    let possible = 0, done = 0;
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(wS); d.setDate(wS.getDate() + i);
+      if (d > effectiveEnd) break;
+      if ((c.days || ALL_DAYS).includes(d.getDay())) {
+        possible++;
+        if ((c.completions || []).includes(dateStr(d))) done++;
+      }
+    }
+    if (possible > 0) choreRows.push({
+      name: c.title || '(unnamed)',
+      done, possible,
+      pct: Math.round(done / possible * 100),
+      completions: c.completions || [],
+      days: c.days || ALL_DAYS,
+    });
+  });
+  choreRows.sort((a, b) => b.pct - a.pct);
+  const totalDone = choreRows.reduce((s, r) => s + r.done, 0);
+  const totalPossible = choreRows.reduce((s, r) => s + r.possible, 0);
+  const overallPct = totalPossible > 0 ? Math.round(totalDone / totalPossible * 100) : 0;
+
+  // Badges earned this week
+  const badgesThisWeek = (k.badges || []).filter(b => {
+    const ea = b.earnedAt || 0;
+    return ea >= wS.getTime() && ea <= effectiveEnd.getTime();
+  });
+
+  // Challenges completed this week
+  const challsThisWeek = (k.challenges || []).filter(c => {
+    return c.completed && c.completedAt >= wS.getTime() && c.completedAt <= effectiveEnd.getTime();
+  });
+
+  // Streak
+  const streak = calcStreak(k);
+
+  // Best day
+  const dayTotals = {};
+  (k.tokens || []).forEach(ev => {
+    const d = new Date(ev.timestamp);
+    if (d < wS || d > effectiveEnd) return;
+    const v = Number(ev.amount || 0);
+    if (v > 0 && !(ev.note || '').startsWith('Undo:')) {
+      const ds = dateStr(d);
+      dayTotals[ds] = (dayTotals[ds] || 0) + v;
+    }
+  });
+  let bestDay = '', bestVal = 0;
+  Object.entries(dayTotals).forEach(([ds, val]) => {
+    if (val > bestVal) { bestVal = val; bestDay = ds; }
+  });
+
+  return {
+    earned, redeemed, mischief, totalDone, totalPossible, overallPct,
+    choreRows, streak, badgesThisWeek, challsThisWeek,
+    bestDay, bestVal, wS, effectiveEnd,
+  };
+}
+
+function getReportGrade(pct) {
+  if (pct === 100) return { letter: 'S', emoji: '🏆', label: 'Perfect week!', cls: 'grade-s' };
+  if (pct >= 85)  return { letter: 'A', emoji: '🌟', label: 'Excellent week!', cls: 'grade-a' };
+  if (pct >= 70)  return { letter: 'B', emoji: '👍', label: 'Great effort!', cls: 'grade-b' };
+  if (pct >= 50)  return { letter: 'C', emoji: '💪', label: 'Getting there!', cls: 'grade-c' };
+  return           { letter: 'D', emoji: '🌱', label: 'Room to grow!', cls: 'grade-d' };
+}
+
+function getReportHeadline(data, kidName) {
+  const { overallPct, earned, streak, badgesThisWeek, challsThisWeek } = data;
+  if (overallPct === 100) return `${kidName} nailed every chore this week! 🎉`;
+  if (badgesThisWeek.length)
+    return `${kidName} unlocked ${badgesThisWeek.length} badge${badgesThisWeek.length>1?'s':''}! ⭐`;
+  if (challsThisWeek.length)
+    return `${kidName} completed a challenge! 🎯`;
+  if (streak >= 7) return `${streak}-day streak and counting! 🔥`;
+  if (earned >= 30) return `${kidName} earned ${earned} tokens this week! 💰`;
+  if (overallPct >= 80) return `Strong week for ${kidName}! 💪`;
+  return `Here's ${kidName}'s week in review.`;
+}
+
+function buildWeeklyReport(k) {
+  const curr = buildReportData(k, 0);
+  const prev = buildReportData(k, -1);
+  const grade = getReportGrade(curr.overallPct);
+  const headline = getReportHeadline(curr, k.name || 'Kid');
+
+  const dateRange = curr.wS.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+    + ' \u2013 ' + curr.effectiveEnd.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+
+  function trend(cur, prv) {
+    if (!prv && !cur) return '';
+    const d = cur - prv;
+    if (d > 0) return `<div class="rc-trend up">+${d} vs last wk</div>`;
+    if (d < 0) return `<div class="rc-trend dn">${d} vs last wk</div>`;
+    return `<div class="rc-trend eq">same as last wk</div>`;
+  }
+
+  // Stats row
+  const statsHtml =
+    `<div class="rc-stat"><div class="rc-stat-val" style="color:var(--green)">+${curr.earned}</div><div class="rc-stat-lbl">Earned</div>${trend(curr.earned,prev.earned)}</div>` +
+    `<div class="rc-stat"><div class="rc-stat-val" style="color:var(--yellow)">${curr.totalDone}</div><div class="rc-stat-lbl">Done</div>${trend(curr.totalDone,prev.totalDone)}</div>` +
+    `<div class="rc-stat"><div class="rc-stat-val" style="color:var(--orange)">${curr.streak}\uD83D\uDD25</div><div class="rc-stat-lbl">Streak</div></div>` +
+    `<div class="rc-stat"><div class="rc-stat-val" style="color:var(--blue)">${curr.overallPct}%</div><div class="rc-stat-lbl">Complete</div></div>`;
+
+  // Perfect week banner
+  const perfectBanner = curr.overallPct === 100 && curr.totalPossible > 0
+    ? `<div class="rc-perfect-banner">🏆 Perfect Week — every chore completed!</div>` : '';
+
+  // Chore rows (top 8)
+  let choreHtml = '';
+  curr.choreRows.slice(0, 8).forEach(r => {
+    const col = r.pct >= 80 ? 'var(--green)' : r.pct >= 50 ? 'var(--yellow)' : 'var(--red)';
+    let cells = '';
+    for (let i = 0; i < 7; i++) {
+      const d2 = new Date(curr.wS); d2.setDate(curr.wS.getDate() + i);
+      if (d2 > curr.effectiveEnd) { cells += `<div class="rc-mini-cell" style="background:var(--navy4)"></div>`; continue; }
+      const ds = dateStr(d2);
+      const sched = r.days.includes(d2.getDay());
+      const done2 = r.completions.includes(ds);
+      const bg = done2 ? 'var(--green)' : sched ? 'rgba(255,107,107,0.5)' : 'var(--navy4)';
+      cells += `<div class="rc-mini-cell" style="background:${bg}"></div>`;
+    }
+    choreHtml += `<div class="rc-chore-row"><div class="rc-chore-name">${escHtml(r.name)}</div><div class="rc-mini-hm">${cells}</div><div class="rc-pct" style="color:${col}">${r.pct}%</div></div>`;
+  });
+
+  // Badges this week
+  const badgeHtml = curr.badgesThisWeek.length
+    ? `<div class="rc-section-title">🏅 Badges Earned</div><div class="rc-badge-row">${curr.badgesThisWeek.map(b=>{const def=[...BADGES,...(k.customBadges||[])].find(x=>x.id===b.id)||{emoji:'🏅',name:b.id};return `<div class="rc-badge-chip">${def.emoji} ${escHtml(def.name)}</div>`;}).join('')}</div>` : '';
+
+  // Challenges completed
+  const chalHtml = curr.challsThisWeek.length
+    ? `<div class="rc-section-title">🎯 Challenges Completed</div><div class="rc-badge-row">${curr.challsThisWeek.map(c=>`<div class="rc-chal-chip">🎯 ${escHtml(c.title||'Challenge')} +${c.bonus}⭐</div>`).join('')}</div>` : '';
+
+  // Best day
+  const bestDayHtml = curr.bestDay
+    ? `<div style="font-size:10px;color:var(--muted);text-align:center;margin-bottom:8px">Best day: <strong style="color:var(--yellow)">${new Date(curr.bestDay+'T12:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})}</strong> &mdash; ${curr.bestVal}⭐</div>` : '';
+
+  return `<div class="rc-hero">
+      <div class="rc-grade-ring ${grade.cls}">${grade.emoji}</div>
+      <div class="rc-headline">${escHtml(headline)}</div>
+      <div class="rc-subline">${grade.label}</div>
+      <div class="rc-period">${escHtml(k.name||'Kid')} · ${dateRange}</div>
+    </div>
+    ${perfectBanner}
+    <div class="rc-stats">${statsHtml}</div>
+    ${bestDayHtml}
+    ${badgeHtml}${chalHtml}
+    ${curr.choreRows.length ? `<div class="rc-section-title">Chore Breakdown</div>${choreHtml}` : ''}
+    <div class="rc-actions">
+      <button class="rc-send-btn" onclick="sendReportToKid()">📣 Send to ${escHtml(k.name||'Kid')}</button>
+      <button class="rc-close-btn" onclick="closeReportCard()">Close</button>
+    </div>`;
+}
+
+function sendReportToKid() {
+  const k = kid(); if (!k) return;
+  const data = buildReportData(k, 0);
+  const grade = getReportGrade(data.overallPct);
+  const text = `${grade.emoji} Weekly Report: ${data.totalDone} chores done, +${data.earned} tokens earned, ${data.overallPct}% complete. ${grade.label}`;
+  if (!S.flashMessages) S.flashMessages = [];
+  S.flashMessages.push({
+    id: uid(), text, mood: data.overallPct >= 80 ? 'praise' : 'heads-up',
+    targetKidId: k.id, sentAt: Date.now(), readBy: []
+  });
+  if (S.flashMessages.length > 50) S.flashMessages = S.flashMessages.slice(-50);
+  save(); updateFlashBadge();
+  showInappNotif('📣', 'Report sent!', `${k.name||'Kid'} will see it in Kids Mode`);
+}
+
+function openReportCard() {
+  const kids = S.kids || [];
+  if (!kids.length) { showInappNotif('❌','No kids','Add a kid first!'); return; }
+
+  let ov = document.getElementById('reportOverlay');
+  if (!ov) {
+    ov = document.createElement('div'); ov.id = 'reportOverlay'; ov.className = 'overlay';
+    ov.innerHTML = `<div class="modal" style="max-width:480px">
+      <div class="m-hdr">
+        <div class="m-title">📊 Weekly Report</div>
+        <button class="m-close" onclick="closeReportCard()">&#x2715;</button>
+      </div>
+      <div class="m-body" id="reportBody" style="padding:14px 16px 18px;overflow-y:auto;max-height:80vh"></div>
+    </div>`;
+    document.body.appendChild(ov);
+    ov.addEventListener('click', e => { if (e.target === ov) closeReportCard(); });
+  }
+
+  const body = document.getElementById('reportBody');
+
+  // Kid tabs if multiple kids
+  function render() {
+    const k = kid();
+    let tabsHtml = '';
+    if (kids.length > 1) {
+      tabsHtml = `<div class="rc-kid-tabs">${kids.map(kk => {
+        const t = THEMES[(kk.kidsTheme||kk.theme)||'galaxy']||THEMES.galaxy;
+        const isActive = kk.id === S.activeId;
+        return `<button class="rc-kid-tab${isActive?' active':''}" data-kid="${kk.id}"
+          style="${isActive?'border-color:'+t.accent+';color:'+t.accent+';background:rgba(79,195,247,0.1)':''}">
+          ${escHtml(kk.name||'Kid')}</button>`;
+      }).join('')}</div>`;
+    }
+    body.innerHTML = tabsHtml + buildWeeklyReport(k);
+    // Wire kid tabs
+    body.querySelectorAll('.rc-kid-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        S.activeId = btn.dataset.kid;
+        renderAll();
+        render();
+      });
+    });
+  }
+
+  render();
+  ov.classList.add('open');
+}
+
+function maybeShowWeeklyReport() {
+  if (new Date().getDay() !== 1) return; // only on Monday
+  const thisMonday = getWeekStr();
+  if (localStorage.getItem('cq_report_seen') === thisMonday) return;
+  localStorage.setItem('cq_report_seen', thisMonday);
+  const kids = S.kids || [];
+  // Check if any kid had activity last week
+  const lastWeekStart = new Date(); lastWeekStart.setDate(lastWeekStart.getDate() - 7); lastWeekStart.setHours(0,0,0,0);
+  const hasData = kids.some(k => (k.tokens||[]).some(ev => {
+    const d = new Date(ev.timestamp);
+    return d >= lastWeekStart && Number(ev.amount||0) > 0;
+  }));
+  if (hasData) setTimeout(openReportCard, 1800);
+}
+
 setupCommonEvents();
 applyKidsMode();
 renderAll();
@@ -7054,7 +7303,8 @@ function dismissInappNotif(){
 /* ── SERVICE WORKER ── */
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
 
-</script>
+
+function closeReportCard(){const ov=document.getElementById('reportOverlay');if(ov)ov.classList.remove('open');}</script>
 <!-- KIDS HELP OVERLAY -->
 <div class="overlay" id="kidsHelpOverlay" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="sheet kids-help-sheet"><div class="sheet-handle"></div>
