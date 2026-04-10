@@ -1323,6 +1323,34 @@ body.kids-mode .chore-card.disabled-chore{display:none!important}
 .lb-section{background:var(--navy2);border:1px solid var(--border);border-radius:14px;
   padding:12px 14px;margin-top:14px}
 
+/* ── LEVEL-UP CELEBRATION ── */
+.levelup-overlay{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;
+  justify-content:center;background:rgba(0,0,0,0);pointer-events:none;
+  transition:background .3s}
+.levelup-overlay.show{background:rgba(0,0,0,.65);pointer-events:all}
+.levelup-card{background:var(--navy2);border:2px solid var(--yellow);border-radius:24px;
+  padding:36px 32px 28px;text-align:center;max-width:300px;width:90%;
+  transform:scale(.6) translateY(40px);opacity:0;
+  transition:transform .45s cubic-bezier(.34,1.56,.64,1),opacity .3s;
+  box-shadow:0 0 60px rgba(255,215,0,.25),0 20px 60px rgba(0,0,0,.6)}
+.levelup-overlay.show .levelup-card{transform:scale(1) translateY(0);opacity:1}
+.levelup-emoji{font-size:72px;line-height:1;margin-bottom:10px;
+  animation:lvlPop .6s cubic-bezier(.34,1.56,.64,1) .2s both}
+@keyframes lvlPop{from{transform:scale(0) rotate(-15deg)}to{transform:scale(1) rotate(0)}}
+.levelup-label{font-size:11px;font-weight:800;color:var(--yellow);letter-spacing:1px;
+  text-transform:uppercase;margin-bottom:4px}
+.levelup-name{font-family:var(--display);font-size:32px;color:var(--text);margin-bottom:6px}
+.levelup-kid{font-size:13px;color:var(--muted);margin-bottom:20px}
+.levelup-stars{display:flex;justify-content:center;gap:6px;margin-bottom:24px;
+  font-size:20px;animation:lvlStars .5s .4s both}
+@keyframes lvlStars{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.levelup-close{background:linear-gradient(135deg,var(--yellow),#f9a825);color:#1a1000;
+  font-family:var(--font);font-size:14px;font-weight:800;border:none;border-radius:12px;
+  padding:13px 36px;cursor:pointer;touch-action:manipulation;width:100%;
+  transition:filter .15s}
+.levelup-close:active{filter:brightness(.9)}
+.levelup-confetti-burst{position:fixed;pointer-events:none;z-index:9001}
+
 </style>
 </head>
 <body>
@@ -1982,7 +2010,7 @@ function startListener(hid){
         if(!S.levelThresholds)S.levelThresholds={};
         if(!S.customLevels)S.customLevels=[];
         if(!S.flashMessages)S.flashMessages=[];
-        S.kids.forEach(k=>{if(!k.customSections)k.customSections=[];if(!k.oneTime)k.oneTime=[];if(!k.theme)k.theme='galaxy';if(k.kidsTheme===undefined)k.kidsTheme=null;if(!k.goal)k.goal={name:'',target:100,rewardId:null,savingsLock:false};if(k.goal.savingsLock===undefined)k.goal.savingsLock=false;if(!k.badges)k.badges=[];if(!k.allowance)k.allowance={amount:0,day:1,lastPaid:null,lastWeekPaid:null};if(!k.badgeThresholds)k.badgeThresholds={};if(!k.customBadges)k.customBadges=[];if(!k.pendingApprovals)k.pendingApprovals=[];if(!k.challenges)k.challenges=[];if(!k.tokenExpiry)k.tokenExpiry={enabled:false,days:30,lockedTokens:[]};k.daily.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';if(c.disabled===undefined)c.disabled=false;});k.bonus.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';if(c.disabled===undefined)c.disabled=false;});(k.customSections||[]).forEach(s=>s.chores.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';}));});
+        S.kids.forEach(k=>{if(!k.customSections)k.customSections=[];if(!k.oneTime)k.oneTime=[];if(!k.theme)k.theme='galaxy';if(k.kidsTheme===undefined)k.kidsTheme=null;if(!k.goal)k.goal={name:'',target:100,rewardId:null,savingsLock:false};if(k.goal.savingsLock===undefined)k.goal.savingsLock=false;if(!k.badges)k.badges=[];if(!k.allowance)k.allowance={amount:0,day:1,lastPaid:null,lastWeekPaid:null};if(!k.badgeThresholds)k.badgeThresholds={};if(!k.customBadges)k.customBadges=[];if(!k.pendingApprovals)k.pendingApprovals=[];if(!k.lastLevelCls){const _lv=getLevel(getXP(k));k.lastLevelCls=_lv.cls;}if(!k.challenges)k.challenges=[];if(!k.tokenExpiry)k.tokenExpiry={enabled:false,days:30,lockedTokens:[]};k.daily.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';if(c.disabled===undefined)c.disabled=false;});k.bonus.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';if(c.disabled===undefined)c.disabled=false;});(k.customSections||[]).forEach(s=>s.chores.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';}));});
         saveLocal();
         // Defer DOM rebuild to next animation frame so pending touch events
         // are processed first. Cancels any previous pending frame to avoid stacking.
@@ -2757,7 +2785,7 @@ function renderAll(){
   const mg=document.getElementById('mainGrid');if(mg)mg.style.display=has?'':'none';
   const tb=document.querySelector('.tabbar');if(tb)tb.style.display=has?'flex':'none';
   renderTabs();
-  if(has){processTokenExpiry(k);applyTheme((kidsMode&&k.kidsTheme)||k.theme||'galaxy');renderLeft();renderRight();checkAchievements(k);setTimeout(()=>checkChallenges(kid()),0);renderBadges(k);renderCalendar('calBody');renderChallenges(k);renderXPHeaderBar(k);}
+  if(has){processTokenExpiry(k);applyTheme((kidsMode&&k.kidsTheme)||k.theme||'galaxy');renderLeft();renderRight();checkAchievements(k);checkLevelUp(k);setTimeout(()=>checkChallenges(kid()),0);renderBadges(k);renderCalendar('calBody');renderChallenges(k);renderXPHeaderBar(k);}
   renderDashboard();
   updateApprovalBadge();
   updateFlashBadge();
@@ -6553,6 +6581,66 @@ function renderChallenges(k) {
     }
     body.appendChild(item);
   });
+}
+
+/* ══════════════════════════════════════════════
+   LEVEL-UP CELEBRATION
+══════════════════════════════════════════════ */
+
+function checkLevelUp(k) {
+  if (!k) return;
+  const xp = getXP(k);
+  const lv = getLevel(xp);
+  const prev = k.lastLevelCls;
+  // Init on first run — don't celebrate on first load
+  if (!prev) { k.lastLevelCls = lv.cls; return; }
+  if (lv.cls !== prev) {
+    k.lastLevelCls = lv.cls;
+    // Save the new level silently (no re-trigger)
+    setTimeout(() => showLevelUpCelebration(k, lv), 400);
+  }
+}
+
+function showLevelUpCelebration(k, lv) {
+  // Remove any existing overlay
+  const existing = document.getElementById('levelupOverlay');
+  if (existing) existing.remove();
+
+  const ov = document.createElement('div');
+  ov.id = 'levelupOverlay';
+  ov.className = 'levelup-overlay';
+  ov.innerHTML = `
+    <div class="levelup-card" id="levelupCard">
+      <div class="levelup-emoji">${lv.emoji}</div>
+      <div class="levelup-label">Level Up!</div>
+      <div class="levelup-name">${escHtml(lv.name)}</div>
+      <div class="levelup-kid">${escHtml(k.name || 'Kid')} reached a new level</div>
+      <div class="levelup-stars">⭐ ⭐ ⭐</div>
+      <button class="levelup-close" onclick="closeLevelUpCelebration()">🎉 Awesome!</button>
+    </div>`;
+  document.body.appendChild(ov);
+
+  // Trigger animation
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => ov.classList.add('show'));
+  });
+
+  // Full-screen confetti burst
+  playBadge();
+  for (let i = 0; i < 5; i++) {
+    setTimeout(() => {
+      const x = Math.random() * window.innerWidth;
+      const y = Math.random() * window.innerHeight * 0.5;
+      confetti(x, y);
+    }, i * 180);
+  }
+}
+
+function closeLevelUpCelebration() {
+  const ov = document.getElementById('levelupOverlay');
+  if (!ov) return;
+  ov.classList.remove('show');
+  setTimeout(() => ov.remove(), 350);
 }
 
 function checkChallenges(k) {
