@@ -1351,6 +1351,35 @@ body.kids-mode .chore-card.disabled-chore{display:none!important}
 .levelup-close:active{filter:brightness(.9)}
 .levelup-confetti-burst{position:fixed;pointer-events:none;z-index:9001}
 
+/* ── SPENDING HISTORY ── */
+.spend-item{display:flex;align-items:center;gap:10px;padding:9px 0;
+  border-bottom:1px solid rgba(42,56,84,.4)}
+.spend-item:last-child{border-bottom:none}
+.spend-icon{font-size:20px;flex-shrink:0;width:28px;text-align:center}
+.spend-info{flex:1;min-width:0}
+.spend-name{font-size:13px;font-weight:700;color:var(--text);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.spend-date{font-size:10px;color:var(--muted);margin-top:1px}
+.spend-amt{font-size:14px;font-weight:800;color:var(--purple);flex-shrink:0}
+.spend-empty{text-align:center;color:var(--muted);font-size:12px;
+  padding:18px 0;font-style:italic}
+/* ── STREAK RISK BANNER ── */
+.streak-risk-banner{position:fixed;top:calc(var(--safe-top) + var(--hdr-h) + 8px);
+  left:12px;right:12px;z-index:3500;
+  background:linear-gradient(135deg,rgba(255,107,107,.18),rgba(255,183,77,.12));
+  border:1.5px solid rgba(255,107,107,.5);border-radius:14px;
+  padding:11px 14px;display:flex;align-items:center;gap:10px;
+  transform:translateY(-120%);opacity:0;
+  transition:transform .4s cubic-bezier(.34,1.56,.64,1),opacity .3s;
+  pointer-events:none}
+.streak-risk-banner.show{transform:translateY(0);opacity:1;pointer-events:all}
+.srb-icon{font-size:24px;flex-shrink:0}
+.srb-text{flex:1;min-width:0}
+.srb-title{font-size:13px;font-weight:800;color:var(--orange)}
+.srb-sub{font-size:10px;color:var(--muted);margin-top:1px}
+.srb-close{background:none;border:none;color:var(--muted);font-size:16px;
+  cursor:pointer;flex-shrink:0;touch-action:manipulation;padding:2px 4px}
+
 </style>
 </head>
 <body>
@@ -1506,6 +1535,12 @@ body.kids-mode .chore-card.disabled-chore{display:none!important}
         <button class="clear-btn" id="btnClearHist" onclick="event.stopPropagation()">Clear</button>
       </div>
       <div class="hist-feed sec-body" id="histFeed"></div>
+    </div>
+    <div class="section" id="secSpending">
+      <div class="sec-hdr" onclick="toggleSection('secSpending')">
+        <div class="sec-title">&#x1F4B8; Spending History</div>
+      </div>
+      <div class="sec-body" id="spendFeed"></div>
     </div>
   </div>
 
@@ -2537,6 +2572,7 @@ function renderRight(){
   // otherwise the tab-click handler will call renderCharts when the user navigates there
   const _statPane=document.getElementById('paneStats');
   if(_statPane&&_statPane.classList.contains('active'))renderCharts(k);
+  renderSpendingHistory(k);
 }
 
 /* ── CHARTS ── */
@@ -2807,7 +2843,7 @@ function renderXPHeaderBar(k){
 function toggleSection(id){const el=document.getElementById(id);if(el)el.classList.toggle('collapsed');}
 function getAllSectionIds(){
   const k=kid();
-  const base=['secDaily','secBonus','secRewards','secHistory','secBadges','secCalendar','secCharts','secRedemptions','secMischief','secChallenges'];
+  const base=['secDaily','secBonus','secRewards','secHistory','secBadges','secCalendar','secCharts','secRedemptions','secMischief','secChallenges','secSpending'];
   if(document.getElementById('secOneTime'))base.push('secOneTime');
   if(k)(k.customSections||[]).forEach(s=>base.push('secCustom_'+s.id));
   return base;
@@ -6587,6 +6623,110 @@ function renderChallenges(k) {
    LEVEL-UP CELEBRATION
 ══════════════════════════════════════════════ */
 
+/* ══════════════════════════════════════════════
+   SPENDING HISTORY
+══════════════════════════════════════════════ */
+
+function renderSpendingHistory(k) {
+  const el = document.getElementById('spendFeed'); if (!el) return;
+  el.innerHTML = '';
+  if (!k) return;
+
+  const spends = (k.tokens || []).filter(ev =>
+    (ev.note || '').startsWith('\uD83C\uDF81') && ev.amount < 0
+  );
+
+  if (!spends.length) {
+    el.innerHTML = '<div class="spend-empty">No redemptions yet — spend some tokens! 🎁</div>';
+    return;
+  }
+
+  spends.slice(0, 50).forEach(ev => {
+    const name = (ev.note || '').replace('\uD83C\uDF81', '').trim() || 'Reward';
+    const amt  = Math.abs(ev.amount);
+    const date = new Date(ev.timestamp).toLocaleDateString(undefined,
+      { weekday:'short', month:'short', day:'numeric', year:'numeric' });
+
+    const item = document.createElement('div'); item.className = 'spend-item';
+    item.innerHTML = `
+      <div class="spend-icon">\uD83C\uDF81</div>
+      <div class="spend-info">
+        <div class="spend-name">${escHtml(name)}</div>
+        <div class="spend-date">${date}</div>
+      </div>
+      <div class="spend-amt">-${amt}\u2B50</div>`;
+    el.appendChild(item);
+  });
+}
+
+/* ══════════════════════════════════════════════
+   STREAK AT RISK ALERT
+══════════════════════════════════════════════ */
+
+let _streakRiskTimer = null;
+
+function checkStreakRisk() {
+  if (kidsMode) return;
+  const k = kid(); if (!k) return;
+
+  const streak = calcStreak(k);
+  if (streak < 3) return; // only care if streak is meaningful
+
+  const today = todayStr();
+  const sched = (k.daily || []).filter(c =>
+    scheduledToday(c) && !c.disabled
+  );
+  if (!sched.length) return; // no chores today — streak safe
+
+  const anyDone = sched.some(c =>
+    (c.completions || []).includes(today) || c.lastDone === today
+  );
+  if (anyDone) return; // already done something — safe
+
+  // Check time: only alert after 7pm
+  const hr = new Date().getHours();
+  if (hr < 19) return;
+
+  // Only alert once per day
+  const seenKey = 'cq_streak_risk_' + today;
+  if (localStorage.getItem(seenKey)) return;
+  localStorage.setItem(seenKey, '1');
+
+  showStreakRiskBanner(streak, k.name || 'Kid');
+}
+
+function showStreakRiskBanner(streak, kidName) {
+  let banner = document.getElementById('streakRiskBanner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'streakRiskBanner';
+    banner.className = 'streak-risk-banner';
+    banner.innerHTML = `
+      <div class="srb-icon">\uD83D\uDD25</div>
+      <div class="srb-text">
+        <div class="srb-title" id="srbTitle"></div>
+        <div class="srb-sub" id="srbSub"></div>
+      </div>
+      <button class="srb-close" onclick="dismissStreakRiskBanner()" title="Dismiss">&#x2715;</button>`;
+    document.body.appendChild(banner);
+  }
+  document.getElementById('srbTitle').textContent =
+    `${kidName}'s ${streak}-day streak is at risk!`;
+  document.getElementById('srbSub').textContent =
+    'No chores done today — complete one before midnight to keep the streak!';
+
+  requestAnimationFrame(() => requestAnimationFrame(() =>
+    banner.classList.add('show')));
+
+  clearTimeout(_streakRiskTimer);
+  _streakRiskTimer = setTimeout(dismissStreakRiskBanner, 12000);
+}
+
+function dismissStreakRiskBanner() {
+  const banner = document.getElementById('streakRiskBanner');
+  if (banner) banner.classList.remove('show');
+}
+
 function checkLevelUp(k) {
   if (!k) return;
   const xp = getXP(k);
@@ -7401,6 +7541,9 @@ function checkAndFireNotifs(){
       else showInappNotif('⏰','Chore Time!','Time to check your chores and earn tokens!');
     }
   }
+  // Streak at risk check (7pm+, streak≥3, no chores done today)
+  checkStreakRisk();
+
   if(ns.parentEnabled&&!kidsMode){
     const pending=totalPending();
     if(pending>0){
