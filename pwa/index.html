@@ -705,6 +705,7 @@ body.kids-mode #setShopItems,
 body.kids-mode #setFlashMsg,
 body.kids-mode #setNotifs,
 body.kids-mode #tabDash,
+body.kids-mode #btnSwapRequests,
 body.kids-mode #btnGift,
 body.kids-mode #flashBtnWrap,
 body.kids-mode #setReset { display:none!important }
@@ -1380,6 +1381,59 @@ body.kids-mode .chore-card.disabled-chore{display:none!important}
 .srb-close{background:none;border:none;color:var(--muted);font-size:16px;
   cursor:pointer;flex-shrink:0;touch-action:manipulation;padding:2px 4px}
 
+/* ══ CHORE SWAP REQUESTS ══ */
+.swap-btn{background:rgba(179,136,255,0.12);border:1px solid rgba(179,136,255,0.35);
+  color:var(--purple);font-family:var(--font);font-size:9px;font-weight:800;
+  padding:3px 8px;border-radius:12px;cursor:pointer;touch-action:manipulation;
+  letter-spacing:.3px;text-transform:uppercase;flex-shrink:0}
+.swap-panel-kid{display:flex;align-items:center;gap:8px;padding:10px 0;
+  border-bottom:1px solid rgba(42,56,84,.4);cursor:pointer}
+.swap-panel-kid:last-child{border-bottom:none}
+.swap-panel-kid:hover{background:rgba(79,195,247,.05)}
+.swap-panel-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.swap-panel-name{flex:1;font-size:13px;font-weight:700;color:var(--text)}
+.swap-req-item{background:var(--navy3);border:1px solid var(--border);border-radius:10px;
+  padding:10px 12px;margin-bottom:8px}
+.swap-req-hdr{font-size:12px;font-weight:800;color:var(--text);margin-bottom:4px}
+.swap-req-meta{font-size:10px;color:var(--muted);margin-bottom:8px}
+.swap-req-acts{display:flex;gap:6px}
+.swap-approve-btn{flex:1;background:rgba(105,240,174,.15);border:1px solid rgba(105,240,174,.4);
+  color:var(--green);font-family:var(--font);font-size:11px;font-weight:800;border-radius:8px;
+  padding:7px 0;cursor:pointer;touch-action:manipulation}
+.swap-reject-btn{flex:1;background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.35);
+  color:var(--red);font-family:var(--font);font-size:11px;font-weight:800;border-radius:8px;
+  padding:7px 0;cursor:pointer;touch-action:manipulation}
+.swap-empty{text-align:center;color:var(--muted);font-size:12px;padding:16px 0;font-style:italic}
+/* ══ FAMILY GOAL ══ */
+.fg-wrap{background:linear-gradient(135deg,rgba(105,240,174,.08),rgba(79,195,247,.06));
+  border:1px solid rgba(105,240,174,.25);border-radius:14px;padding:14px 16px;margin-bottom:10px}
+.fg-title{font-size:15px;font-weight:800;color:var(--text);margin-bottom:2px}
+.fg-desc{font-size:11px;color:var(--muted);margin-bottom:10px}
+.fg-progress-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.fg-track{flex:1;height:10px;background:var(--navy4);border-radius:5px;overflow:hidden}
+.fg-fill{height:100%;background:linear-gradient(90deg,var(--green),#00c853);
+  border-radius:5px;transition:width .4s ease}
+.fg-pct{font-size:11px;font-weight:800;color:var(--green);white-space:nowrap}
+.fg-kids-row{display:flex;flex-wrap:wrap;gap:6px}
+.fg-kid-chip{background:var(--navy4);border-radius:20px;padding:4px 10px;
+  font-size:10px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:4px}
+.fg-kid-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.fg-achieved-banner{text-align:center;padding:12px;background:rgba(255,215,0,.1);
+  border:1px solid rgba(255,215,0,.3);border-radius:12px;margin-bottom:10px;
+  font-size:14px;font-weight:800;color:var(--yellow)}
+.fg-setup-btn{background:transparent;border:1.5px dashed var(--border);color:var(--muted);
+  font-family:var(--font);font-size:12px;font-weight:700;border-radius:10px;
+  padding:12px;width:100%;cursor:pointer;touch-action:manipulation;transition:all .15s}
+.fg-setup-btn:hover{border-color:var(--green);color:var(--green)}
+/* ══ PARENT NOTE ON APPROVAL ══ */
+.ap-parent-note-row{margin-top:8px;display:flex;gap:6px;align-items:center}
+.ap-parent-note-inp{flex:1;background:var(--navy4);border:1px solid var(--border);
+  color:var(--text);font-family:var(--font);font-size:11px;border-radius:7px;
+  padding:6px 9px;outline:none}
+.ap-parent-note-inp:focus{border-color:var(--blue)}
+.ap-parent-note{font-size:10px;color:var(--blue);margin-top:4px;padding:4px 8px;
+  background:rgba(79,195,247,.08);border-radius:6px;border-left:2px solid var(--blue)}
+
 </style>
 </head>
 <body>
@@ -1401,6 +1455,7 @@ body.kids-mode .chore-card.disabled-chore{display:none!important}
         <button class="icon-btn" id="btnApprovals" style="color:var(--orange)">&#x23F3;</button>
         <div class="approval-badge-count" id="approvalCount">0</div>
       </div>
+      <button class="icon-btn" id="btnSwapRequests" style="display:none;color:var(--purple)" title="Swap Requests">&#x1F504;</button>
       <button class="icon-btn" id="btnGift" title="Gift Tokens" style="color:var(--yellow)">&#x1F381;</button>
       <div class="flash-btn-wrap" id="flashBtnWrap">
         <button class="icon-btn" id="btnFlash" title="Flash Message">&#x1F4E3;</button>
@@ -1529,6 +1584,7 @@ body.kids-mode .chore-card.disabled-chore{display:none!important}
         <button class="m-undo" id="btnMUndo">&#x21A9; Undo</button>
       </div>
     </div>
+    <div id="familyGoalSection" style="display:none;padding:4px 0 2px"></div>
     <div class="section" id="secHistory">
       <div class="sec-hdr" onclick="toggleSection('secHistory')">
         <div class="sec-title">&#x1F4DC; History</div>
@@ -2044,7 +2100,7 @@ function startListener(hid){
         if(!S.customBadges)S.customBadges=[];
         if(!S.levelThresholds)S.levelThresholds={};
         if(!S.customLevels)S.customLevels=[];
-        if(!S.flashMessages)S.flashMessages=[];
+        if(!S.flashMessages)S.flashMessages=[];if(!S.swapRequests)S.swapRequests=[];if(S.familyGoal===undefined)S.familyGoal=null;
         S.kids.forEach(k=>{if(!k.customSections)k.customSections=[];if(!k.oneTime)k.oneTime=[];if(!k.theme)k.theme='galaxy';if(k.kidsTheme===undefined)k.kidsTheme=null;if(!k.goal)k.goal={name:'',target:100,rewardId:null,savingsLock:false};if(k.goal.savingsLock===undefined)k.goal.savingsLock=false;if(!k.badges)k.badges=[];if(!k.allowance)k.allowance={amount:0,day:1,lastPaid:null,lastWeekPaid:null};if(!k.badgeThresholds)k.badgeThresholds={};if(!k.customBadges)k.customBadges=[];if(!k.pendingApprovals)k.pendingApprovals=[];if(!k.lastLevelCls){const _lv=getLevel(getXP(k));k.lastLevelCls=_lv.cls;}if(!k.challenges)k.challenges=[];if(!k.tokenExpiry)k.tokenExpiry={enabled:false,days:30,lockedTokens:[]};k.daily.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';if(c.disabled===undefined)c.disabled=false;});k.bonus.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';if(c.disabled===undefined)c.disabled=false;});(k.customSections||[]).forEach(s=>s.chores.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';}));});
         saveLocal();
         // Defer DOM rebuild to next animation frame so pending touch events
@@ -2311,7 +2367,7 @@ function buildChoreCard(grp,secId,idx,item,k){
     const baseT=Number(item.tokens||0);const multi=isCOTW(item.id)?2:1;const awarded=baseT*multi;
     const note=(item.title||'Task')+' ('+grp+')'+(multi>1?' \u2B502\u00D7':'');
     k.tokens.unshift({amount:awarded,note,timestamp:Date.now()});
-    if(grp==='daily')refreshStreak(k);save();playTick();
+    if(grp==='daily')refreshStreak(k);updateFamilyGoalContrib(k);save();playTick();
     const r=chk.getBoundingClientRect();confetti(r.left+r.width/2,r.top+r.height/2);
     renderAll();
   });
@@ -2330,7 +2386,15 @@ function buildChoreCard(grp,secId,idx,item,k){
   const editBtn=document.createElement('button');editBtn.className='ic-btn edit chore-edit-btn';editBtn.title='Edit chore';editBtn.innerHTML='\u270F\uFE0F';
   editBtn.addEventListener('click',e=>{e.stopPropagation();openChoreEditModal(item,k,grp,secId);});
 
-  row.appendChild(handle);row.appendChild(icon);row.appendChild(name);row.appendChild(diff);row.appendChild(tb);row.appendChild(cotwBtn);
+  row.appendChild(handle);row.appendChild(icon);row.appendChild(name);if(kidsMode&&S.kids.length>1&&grp==='daily'){
+    const swapBtn=document.createElement('button');swapBtn.className='swap-btn';
+    swapBtn.textContent='🔄 Swap';
+    swapBtn.addEventListener('click',e=>{e.stopPropagation();openChoreSwapSheet(kid(),item);});
+    row.appendChild(diff);row.appendChild(swapBtn);row.appendChild(tb);
+  } else {
+    row.appendChild(diff);row.appendChild(tb);
+  }
+  row.appendChild(cotwBtn);
   row.appendChild(chk);row.appendChild(undo);row.appendChild(editBtn);
   card.appendChild(row);
   // Notes tap-expand (PWA)
@@ -2573,6 +2637,7 @@ function renderRight(){
   const _statPane=document.getElementById('paneStats');
   if(_statPane&&_statPane.classList.contains('active'))renderCharts(k);
   renderSpendingHistory(k);
+  renderFamilyGoal();
 }
 
 /* ── CHARTS ── */
@@ -2726,7 +2791,8 @@ function renderApprovalPanel(){
         const note=p.choreTitle+' ('+p.grp+')'+(p.multi>1?' ⭐2×':'');
         k.tokens.unshift({amount:awarded,note,timestamp:p.requestedAt});
         k.pendingApprovals=k.pendingApprovals.filter(x=>x.id!==p.id);
-        refreshStreak(k);save();playTick();renderAll();
+        if(p.parentNote){if(!S.flashMessages)S.flashMessages=[];S.flashMessages.push({id:uid(),text:'💬 '+p.parentNote,mood:'praise',targetKidId:k.id,sentAt:Date.now(),readBy:[]});}
+        refreshStreak(k);updateFamilyGoalContrib(k);save();playTick();renderAll();
         const r=approveBtn.getBoundingClientRect();confetti(r.left+r.width/2,r.top+r.height/2);
         renderApprovalPanel();updateApprovalBadge();
         if(totalPending()===0){setTimeout(()=>{const o=document.getElementById('approvalOverlay');if(o)o.remove();},600);}
@@ -2737,6 +2803,16 @@ function renderApprovalPanel(){
         save();renderAll();renderApprovalPanel();updateApprovalBadge();
         if(totalPending()===0){setTimeout(()=>{const o=document.getElementById('approvalOverlay');if(o)o.remove();},600);}
       });
+      // Parent note input
+      const noteRow=document.createElement('div');noteRow.className='ap-parent-note-row';
+      const noteInp=document.createElement('input');noteInp.className='ap-parent-note-inp';
+      noteInp.placeholder='Add a note back to '+k.name+' (optional)';
+      noteInp.maxLength=100;
+      if(p.parentNote){const pn=document.createElement('div');pn.className='ap-parent-note';pn.textContent='💬 '+p.parentNote;item.appendChild(pn);}
+      noteRow.appendChild(noteInp);
+      item.appendChild(noteRow);
+      // Store note on approve
+      approveBtn.addEventListener('click',()=>{p.parentNote=noteInp.value.trim();},true);
       acts.appendChild(approveBtn);acts.appendChild(rejectBtn);
       row1.appendChild(dot);row1.appendChild(info);row1.appendChild(tok);row1.appendChild(acts);
       item.appendChild(row1);
@@ -2825,6 +2901,7 @@ function renderAll(){
   renderDashboard();
   updateApprovalBadge();
   updateFlashBadge();
+  updateSwapBadge();
 }
 
 function renderXPHeaderBar(k){
@@ -3891,6 +3968,7 @@ function setupCommonEvents(){
   const setShop=document.getElementById('setShopItems');if(setShop)setShop.addEventListener('click',()=>{const so=document.getElementById('settingsOverlay');if(so)so.classList.remove('open');openShopItemsManager();});
   const setAllow=document.getElementById('setAllowance');if(setAllow)setAllow.addEventListener('click',openAllowanceSheet);
   // Flash message + notifications event wiring
+  const btnSwap=document.getElementById('btnSwapRequests');if(btnSwap)btnSwap.addEventListener('click',openSwapRequestsPanel);
   const btnGift=document.getElementById('btnGift');if(btnGift)btnGift.addEventListener('click',openGiftTokens);
   const btnFlash=document.getElementById('btnFlash');
   if(btnFlash)btnFlash.addEventListener('click',openFlashCompose);
@@ -6726,6 +6804,230 @@ function dismissStreakRiskBanner() {
   const banner = document.getElementById('streakRiskBanner');
   if (banner) banner.classList.remove('show');
 }
+
+/* ══════════════════════════════════════════════
+   CHORE SWAP REQUESTS
+══════════════════════════════════════════════ */
+
+function openChoreSwapSheet(fromKid, chore) {
+  const otherKids = S.kids.filter(k => k.id !== fromKid.id);
+  if (!otherKids.length) return;
+  let ov = document.getElementById('swapSheetOverlay'); if (ov) ov.remove();
+  ov = document.createElement('div'); ov.id = 'swapSheetOverlay'; ov.className = 'overlay';
+  ov.style.zIndex = '3400';
+  ov.innerHTML = `<div class="sheet"><div class="sheet-handle"></div>
+    <div class="sheet-hdr">
+      <div class="sheet-title">🔄 Swap: ${escHtml(chore.title||'Chore')}</div>
+      <button class="sheet-close" onclick="document.getElementById('swapSheetOverlay').remove()">&#x2715;</button>
+    </div>
+    <div class="sheet-body" style="padding:12px 16px 28px">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Offer to swap <strong>${escHtml(chore.title||'Chore')}</strong> with a sibling. They keep their chore, you take theirs for the day — parent must approve.</p>
+      <div id="swapKidList">${otherKids.map(k=>{
+        const t=THEMES[(k.kidsTheme||k.theme)||'galaxy']||THEMES.galaxy;
+        return `<div class="swap-panel-kid" data-kid="${k.id}">
+          <div class="swap-panel-dot" style="background:${t.accent}"></div>
+          <div class="swap-panel-name">${escHtml(k.name||'Kid')}</div>
+          <span style="font-size:10px;color:var(--muted)">Swap with →</span>
+        </div>`;
+      }).join('')}</div>
+    </div></div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+  ov.classList.add('open');
+  ov.querySelectorAll('.swap-panel-kid').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const toKid = S.kids.find(k => k.id === btn.dataset.kid);
+      if (!toKid) return;
+      if (!S.swapRequests) S.swapRequests = [];
+      // Don't duplicate
+      const dup = S.swapRequests.find(r =>
+        r.fromKidId === fromKid.id && r.choreId === chore.id && r.status === 'pending');
+      if (!dup) {
+        S.swapRequests.push({
+          id: uid(), fromKidId: fromKid.id, fromKidName: fromKid.name||'Kid',
+          toKidId: toKid.id, toKidName: toKid.name||'Kid',
+          choreId: chore.id, choreTitle: chore.title||'Chore',
+          requestedAt: Date.now(), status: 'pending'
+        });
+        save();
+      }
+      ov.remove();
+      showInappNotif('🔄','Swap requested!',`Waiting for parent to approve`);
+    });
+  });
+}
+
+function openSwapRequestsPanel() {
+  let ov = document.getElementById('swapPanelOverlay'); if (ov) ov.remove();
+  ov = document.createElement('div'); ov.id = 'swapPanelOverlay'; ov.className = 'overlay';
+  ov.style.zIndex = '3300';
+  ov.innerHTML = `<div class="sheet"><div class="sheet-handle"></div>
+    <div class="sheet-hdr">
+      <div class="sheet-title">🔄 Swap Requests</div>
+      <button class="sheet-close" onclick="document.getElementById('swapPanelOverlay').remove()">&#x2715;</button>
+    </div>
+    <div class="sheet-body" style="padding:12px 16px 28px" id="swapPanelBody"></div>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+  ov.classList.add('open');
+  renderSwapPanel();
+}
+
+function renderSwapPanel() {
+  const body = document.getElementById('swapPanelBody'); if (!body) return;
+  const reqs = (S.swapRequests || []).filter(r => r.status === 'pending');
+  if (!reqs.length) { body.innerHTML = '<div class="swap-empty">No pending swap requests 🔄</div>'; return; }
+  body.innerHTML = reqs.map(r => `
+    <div class="swap-req-item" data-req="${r.id}">
+      <div class="swap-req-hdr">🔄 ${escHtml(r.choreTitle)}</div>
+      <div class="swap-req-meta">${escHtml(r.fromKidName)} wants to swap with ${escHtml(r.toKidName)} · ${timeAgo(r.requestedAt)}</div>
+      <div class="swap-req-acts">
+        <button class="swap-approve-btn" data-req="${r.id}">✓ Approve Swap</button>
+        <button class="swap-reject-btn" data-req="${r.id}">✕ Decline</button>
+      </div>
+    </div>`).join('');
+  body.querySelectorAll('.swap-approve-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const req = (S.swapRequests||[]).find(r => r.id === btn.dataset.req);
+      if (!req) return;
+      req.status = 'approved';
+      // Move chore: fromKid loses it, toKid gains it for today
+      const fromKid = S.kids.find(k => k.id === req.fromKidId);
+      const toKid   = S.kids.find(k => k.id === req.toKidId);
+      const chore   = fromKid && findChoreInKid(fromKid, req.choreId);
+      if (chore && fromKid && toKid) {
+        // Clone chore to toKid's daily for today only
+        const swapChore = {...chore, id: uid(), days: [new Date().getDay()],
+          title: chore.title + ' (swap)', completions: [], lastDone: null};
+        if (!toKid.daily) toKid.daily = [];
+        toKid.daily.push(swapChore);
+        // Remove chore from fromKid's schedule for today
+        chore.disabled = true;
+        showInappNotif('✅','Swap approved!',`${req.choreTitle} moved to ${req.toKidName}`);
+      }
+      save(); renderAll(); renderSwapPanel(); updateSwapBadge();
+    });
+  });
+  body.querySelectorAll('.swap-reject-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const req = (S.swapRequests||[]).find(r => r.id === btn.dataset.req);
+      if (req) req.status = 'rejected';
+      save(); renderAll(); renderSwapPanel(); updateSwapBadge();
+    });
+  });
+}
+
+function updateSwapBadge() {
+  const pending = (S.swapRequests||[]).filter(r=>r.status==='pending').length;
+  const btn = document.getElementById('btnSwapRequests');
+  if (btn) btn.style.display = pending > 0 && !kidsMode ? '' : 'none';
+}
+
+/* ══════════════════════════════════════════════
+   FAMILY GOAL
+══════════════════════════════════════════════ */
+
+function renderFamilyGoal() {
+  const el = document.getElementById('familyGoalSection'); if (!el) return;
+  const kids = S.kids || [];
+  if (kids.length < 2) { el.style.display = 'none'; return; }
+  el.style.display = '';
+  const fg = S.familyGoal;
+  if (!fg || !fg.name) {
+    if (!kidsMode) el.innerHTML = `<button class="fg-setup-btn" onclick="openFamilyGoalSetup()">➕ Set a Family Goal</button>`;
+    else el.innerHTML = '';
+    return;
+  }
+  // Sum contributions
+  const total = Object.values(fg.contributions || {}).reduce((s,v)=>s+v,0);
+  const pct   = fg.target > 0 ? Math.min(100, Math.round(total / fg.target * 100)) : 0;
+  const done  = pct >= 100;
+  if (done && !fg.achieved) {
+    fg.achieved = true; fg.achievedAt = Date.now();
+    save();
+    setTimeout(() => showInappNotif('🎉','Family Goal reached!', fg.name), 300);
+  }
+  const kidsHtml = kids.map(k => {
+    const t = THEMES[(k.kidsTheme||k.theme)||'galaxy']||THEMES.galaxy;
+    const contrib = (fg.contributions||{})[k.id] || 0;
+    return `<div class="fg-kid-chip">
+      <div class="fg-kid-dot" style="background:${t.accent}"></div>
+      ${escHtml(k.name||'Kid')}: ${contrib}⭐
+    </div>`;
+  }).join('');
+  el.innerHTML = `
+    ${done ? `<div class="fg-achieved-banner">🏆 Family Goal Achieved: ${escHtml(fg.name)}!</div>` : ''}
+    <div class="fg-wrap">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <div class="fg-title">${escHtml(fg.name)}</div>
+        ${!kidsMode?`<button onclick="openFamilyGoalSetup()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px">✏️</button>`:''}
+      </div>
+      ${fg.desc?`<div class="fg-desc">${escHtml(fg.desc)}</div>`:''}
+      <div class="fg-progress-row">
+        <div class="fg-track"><div class="fg-fill" style="width:${pct}%"></div></div>
+        <div class="fg-pct">${total}/${fg.target}⭐ (${pct}%)</div>
+      </div>
+      <div class="fg-kids-row">${kidsHtml}</div>
+    </div>`;
+}
+
+function openFamilyGoalSetup() {
+  const fg = S.familyGoal || {};
+  let ov = document.getElementById('fgSetupOverlay'); if (ov) ov.remove();
+  ov = document.createElement('div'); ov.id = 'fgSetupOverlay'; ov.className = 'overlay';
+  ov.style.zIndex = '3200';
+  ov.innerHTML = `<div class="sheet"><div class="sheet-handle"></div>
+    <div class="sheet-hdr">
+      <div class="sheet-title">🎯 Family Goal</div>
+      <button class="sheet-close" onclick="document.getElementById('fgSetupOverlay').remove()">&#x2715;</button>
+    </div>
+    <div class="sheet-body" style="padding:14px 16px 28px">
+      <div class="chal-form-row">
+        <label class="chal-form-label">Goal name</label>
+        <input class="chal-form-inp" id="fgName" placeholder="e.g. Family Movie Night" maxlength="50" value="${escHtml(fg.name||'')}">
+      </div>
+      <div class="chal-form-row">
+        <label class="chal-form-label">Description <span style="font-weight:400;text-transform:none">(optional)</span></label>
+        <input class="chal-form-inp" id="fgDesc" placeholder="What are we saving for?" maxlength="80" value="${escHtml(fg.desc||'')}">
+      </div>
+      <div class="chal-form-row">
+        <label class="chal-form-label">Token target (combined)</label>
+        <input class="chal-form-inp" id="fgTarget" type="number" min="1" max="9999" value="${fg.target||100}" inputmode="numeric">
+      </div>
+      <button id="fgSaveBtn" style="width:100%;background:linear-gradient(135deg,var(--green),#00c853);color:#0a1a0a;font-family:var(--font);font-size:14px;font-weight:800;border:none;border-radius:10px;padding:13px 0;cursor:pointer;margin-top:4px">🎯 Save Goal</button>
+      ${fg.name?`<button id="fgClearBtn" style="width:100%;background:transparent;border:1px solid var(--border);color:var(--muted);font-family:var(--font);font-size:12px;font-weight:700;border-radius:10px;padding:10px 0;cursor:pointer;margin-top:8px">Remove goal</button>`:''}
+    </div></div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+  ov.classList.add('open');
+  document.getElementById('fgSaveBtn').addEventListener('click', () => {
+    const name = document.getElementById('fgName').value.trim();
+    if (!name) { document.getElementById('fgName').focus(); return; }
+    const target = Math.max(1, parseInt(document.getElementById('fgTarget').value)||100);
+    const desc   = document.getElementById('fgDesc').value.trim();
+    const prevContrib = (S.familyGoal||{}).contributions || {};
+    S.familyGoal = { name, desc, target, contributions: prevContrib, achieved: false, achievedAt: null };
+    save(); renderAll(); ov.remove();
+  });
+  const clrBtn = document.getElementById('fgClearBtn');
+  if (clrBtn) clrBtn.addEventListener('click', () => {
+    S.familyGoal = null; save(); renderAll(); ov.remove();
+  });
+}
+
+function updateFamilyGoalContrib(k) {
+  // Called after each chore tick — add earned tokens to kid's contribution
+  if (!S.familyGoal || !S.familyGoal.name) return;
+  const xp = getXP(k);
+  if (!S.familyGoal.contributions) S.familyGoal.contributions = {};
+  S.familyGoal.contributions[k.id] = xp;
+}
+
+/* ══════════════════════════════════════════════
+   PARENT NOTE ON APPROVAL
+══════════════════════════════════════════════ */
+// Injected into renderApprovalPanel — see patch below
 
 function checkLevelUp(k) {
   if (!k) return;
