@@ -1284,7 +1284,8 @@ body.kids-mode .bulk-day-bar,body.kids-mode .bulk-day-btn-hint{display:none!impo
 .chore-card.disabled-chore{opacity:.45;filter:grayscale(.4)}
 .chore-card.disabled-chore .chore-name::after{content:' · Disabled';font-size:9px;
   color:var(--muted);font-weight:700;margin-left:4px}
-body.kids-mode .chore-card.disabled-chore{display:none!important}
+body.kids-mode .chore-card.disabled-chore,
+body.kids-mode .chore-card.off-day{display:none!important}
 
 /* ── HIDE SCROLLBARS (keep scrollable) ── */
 .m-body,.sheet-body,.setup-body,.hist-feed,.flash-compose-body,.flash-history,.cal-pop-scroll,.content,.rc-kid-tabs,.lb-toggle{
@@ -1434,6 +1435,82 @@ body.kids-mode .chore-card.disabled-chore{display:none!important}
 .ap-parent-note{font-size:10px;color:var(--blue);margin-top:4px;padding:4px 8px;
   background:rgba(79,195,247,.08);border-radius:6px;border-left:2px solid var(--blue)}
 
+/* ── ARCHIVE / DUPLICATE ── */
+.ced-archive-btn{background:rgba(255,183,77,.12);border:1px solid rgba(255,183,77,.4)!important;
+  color:var(--orange)!important;font-size:11px!important}
+.ced-dup-btn{background:rgba(79,195,247,.1);border:1px solid rgba(79,195,247,.35)!important;
+  color:var(--blue)!important;font-size:11px!important}
+.arc-sheet-title{font-size:15px;font-weight:800;color:var(--text);margin-bottom:4px;text-align:center}
+.arc-sheet-sub{font-size:12px;color:var(--muted);text-align:center;margin-bottom:18px}
+.arc-option{display:flex;align-items:center;gap:12px;padding:14px;border-radius:12px;
+  border:1.5px solid var(--border);background:var(--navy3);cursor:pointer;margin-bottom:10px;
+  touch-action:manipulation;transition:border-color .15s}
+.arc-option:hover{border-color:var(--blue)}
+.arc-option.danger:hover{border-color:var(--red)}
+.arc-option-icon{font-size:24px;flex-shrink:0;width:36px;text-align:center}
+.arc-option-text .arc-opt-title{font-size:13px;font-weight:800;color:var(--text)}
+.arc-option.danger .arc-opt-title{color:var(--red)}
+.arc-option-text .arc-opt-desc{font-size:11px;color:var(--muted);margin-top:2px}
+.arc-item{display:flex;align-items:center;gap:10px;padding:9px 0;
+  border-bottom:1px solid rgba(42,56,84,.4)}
+.arc-item:last-child{border-bottom:none}
+.arc-item-icon{font-size:18px;flex-shrink:0;opacity:.6}
+.arc-item-info{flex:1;min-width:0}
+.arc-item-name{font-size:13px;font-weight:700;color:var(--muted);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.arc-item-meta{font-size:10px;color:var(--muted);opacity:.7;margin-top:1px}
+.arc-item-acts{display:flex;gap:6px;flex-shrink:0}
+.arc-restore-btn{background:rgba(105,240,174,.12);border:1px solid rgba(105,240,174,.35);
+  color:var(--green);font-family:var(--font);font-size:10px;font-weight:800;
+  border-radius:7px;padding:5px 9px;cursor:pointer;touch-action:manipulation}
+.arc-permdelete-btn{background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3);
+  color:var(--red);font-family:var(--font);font-size:10px;font-weight:800;
+  border-radius:7px;padding:5px 9px;cursor:pointer;touch-action:manipulation}
+.arc-empty{text-align:center;color:var(--muted);font-size:12px;padding:18px 0;font-style:italic}
+body.kids-mode #secArchive{display:none!important}
+
+/* ── ARCHIVE KIDS ── */
+.kd-archive-btn{background:none;border:none;color:var(--orange);font-size:14px;
+  cursor:pointer;padding:2px 3px;touch-action:manipulation;opacity:.8;flex-shrink:0}
+.kd-archive-btn:hover{opacity:1}
+.kd-archived-row{display:flex;align-items:center;gap:8px;padding:9px 12px;
+  cursor:pointer;border-top:1px solid var(--border);color:var(--muted);font-size:12px;
+  font-weight:700;transition:background .12s}
+.kd-archived-row:hover{background:var(--navy3)}
+.kd-archived-row span:first-child{font-size:16px}
+.arc-kid-item{display:flex;align-items:center;gap:10px;padding:11px 0;
+  border-bottom:1px solid rgba(42,56,84,.4)}
+.arc-kid-item:last-child{border-bottom:none}
+.arc-kid-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.arc-kid-info{flex:1;min-width:0}
+.arc-kid-name{font-size:14px;font-weight:800;color:var(--text)}
+.arc-kid-meta{font-size:10px;color:var(--muted);margin-top:2px}
+.arc-kid-acts{display:flex;gap:6px;flex-shrink:0}
+
+/* ── SCHEDULED CHALLENGES ── */
+.chal-sched-badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;
+  font-weight:800;color:var(--purple);background:rgba(179,136,255,.12);
+  border:1px solid rgba(179,136,255,.3);border-radius:10px;padding:2px 7px;
+  margin-left:4px;letter-spacing:.2px;text-transform:uppercase}
+.chal-sched-row{display:flex;flex-direction:column;gap:8px}
+.chal-sched-opts{display:flex;gap:6px;flex-wrap:wrap}
+.chal-sched-btn{background:var(--navy4);border:1.5px solid var(--border);
+  color:var(--muted);font-family:var(--font);font-size:11px;font-weight:700;
+  border-radius:20px;padding:5px 12px;cursor:pointer;touch-action:manipulation;
+  transition:all .14s;white-space:nowrap}
+.chal-sched-btn.selected{background:rgba(179,136,255,.14);
+  border-color:var(--purple);color:var(--purple)}
+.chal-sched-day-row{display:none;gap:4px;flex-wrap:wrap}
+.chal-sched-day-row.show{display:flex}
+.chal-sched-day-btn{background:var(--navy4);border:1.5px solid var(--border);
+  color:var(--muted);font-family:var(--font);font-size:11px;font-weight:700;
+  border-radius:20px;padding:4px 10px;cursor:pointer;touch-action:manipulation;
+  transition:all .14s}
+.chal-sched-day-btn.selected{background:rgba(179,136,255,.14);
+  border-color:var(--purple);color:var(--purple)}
+.chal-reset-flash{animation:chalReset .6s ease}
+@keyframes chalReset{0%{opacity:.3;transform:scale(.97)}100%{opacity:1;transform:none}}
+
 </style>
 </head>
 <body>
@@ -1531,6 +1608,12 @@ body.kids-mode .chore-card.disabled-chore{display:none!important}
 
   <!-- REWARDS TAB -->
   <div class="tab-pane" id="paneRewards">
+  <div class="section" id="secArchive" style="display:none">
+    <div class="sec-hdr" onclick="toggleSection('secArchive')">
+      <div class="sec-title">&#x1F4E6; Archived Chores</div>
+    </div>
+    <div class="sec-body" id="arcList"></div>
+  </div>
     <div class="section" id="secRewards">
       <div class="sec-hdr" onclick="toggleSection('secRewards')">
         <div class="sec-title"><div class="dot" style="background:var(--purple);box-shadow:0 0 6px var(--purple)"></div>&#x1F381; Rewards</div>
@@ -2035,7 +2118,14 @@ function mkReward(){return{id:uid(),title:'',cost:5};}
 let S;
 try{const r=localStorage.getItem(SK);S=r?JSON.parse(r):{kids:[],activeId:null};}catch(e){S={kids:[],activeId:null};}
 if(!S.kids)S.kids=[];
-function kid(){return S.kids.find(k=>k.id===S.activeId)||S.kids[0]||null;}
+function kid(){
+  const active=S.kids.find(k=>k.id===S.activeId&&!k.archived);
+  if(active)return active;
+  // Fall back to first non-archived kid
+  const fallback=S.kids.find(k=>!k.archived);
+  if(fallback){S.activeId=fallback.id;return fallback;}
+  return null;
+}
 
 /* ── FIREBASE + SYNC ── */
 let db=null,fbUnsub=null,saveTimer=null,pendingWriteToken=null;
@@ -2101,7 +2191,8 @@ function startListener(hid){
         if(!S.levelThresholds)S.levelThresholds={};
         if(!S.customLevels)S.customLevels=[];
         if(!S.flashMessages)S.flashMessages=[];if(!S.swapRequests)S.swapRequests=[];if(S.familyGoal===undefined)S.familyGoal=null;
-        S.kids.forEach(k=>{if(!k.customSections)k.customSections=[];if(!k.oneTime)k.oneTime=[];if(!k.theme)k.theme='galaxy';if(k.kidsTheme===undefined)k.kidsTheme=null;if(!k.goal)k.goal={name:'',target:100,rewardId:null,savingsLock:false};if(k.goal.savingsLock===undefined)k.goal.savingsLock=false;if(!k.badges)k.badges=[];if(!k.allowance)k.allowance={amount:0,day:1,lastPaid:null,lastWeekPaid:null};if(!k.badgeThresholds)k.badgeThresholds={};if(!k.customBadges)k.customBadges=[];if(!k.pendingApprovals)k.pendingApprovals=[];if(!k.lastLevelCls){const _lv=getLevel(getXP(k));k.lastLevelCls=_lv.cls;}if(!k.challenges)k.challenges=[];if(!k.tokenExpiry)k.tokenExpiry={enabled:false,days:30,lockedTokens:[]};k.daily.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';if(c.disabled===undefined)c.disabled=false;});k.bonus.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';if(c.disabled===undefined)c.disabled=false;});(k.customSections||[]).forEach(s=>s.chores.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';}));});
+        S.kids.forEach(k=>{if(!k.customSections)k.customSections=[];if(!k.oneTime)k.oneTime=[];if(!k.theme)k.theme='galaxy';if(k.kidsTheme===undefined)k.kidsTheme=null;if(!k.goal)k.goal={name:'',target:100,rewardId:null,savingsLock:false};if(k.goal.savingsLock===undefined)k.goal.savingsLock=false;if(!k.badges)k.badges=[];if(!k.allowance)k.allowance={amount:0,day:1,lastPaid:null,lastWeekPaid:null};if(!k.badgeThresholds)k.badgeThresholds={};if(!k.customBadges)k.customBadges=[];if(!k.pendingApprovals)k.pendingApprovals=[];if(k.archived===undefined)k.archived=false;if(!k.archive)k.archive=[];if(!k.lastLevelCls){const _lv=getLevel(getXP(k));k.lastLevelCls=_lv.cls;}if(!k.challenges)k.challenges=[];
+k.challenges.forEach(c=>{if(!c.schedule)c.schedule={type:'none',dayOfWeek:1,dayOfMonth:1};if(c.lastScheduledRun===undefined)c.lastScheduledRun=null;});if(!k.tokenExpiry)k.tokenExpiry={enabled:false,days:30,lockedTokens:[]};k.daily.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';if(c.disabled===undefined)c.disabled=false;});k.bonus.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';if(c.disabled===undefined)c.disabled=false;});(k.customSections||[]).forEach(s=>s.chores.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';}));});
         saveLocal();
         // Defer DOM rebuild to next animation frame so pending touch events
         // are processed first. Cancels any previous pending frame to avoid stacking.
@@ -2519,7 +2610,11 @@ function renderCustomSections(k){
     hdr.appendChild(titleWrap);hdr.appendChild(acts);
     const body=document.createElement('div');body.className='sec-body';body.id='listCustom_'+sec.id;
     makeBodyDropZone(body,k,'custom',sec.id);
-    sec.chores.filter(ch=>!(kidsMode&&ch.disabled)).forEach((ch,i)=>body.appendChild(buildChoreCard('custom',sec.id,i,ch,k)));
+    sec.chores.filter(ch=>{
+        if(kidsMode&&ch.disabled)return false;
+        if(kidsMode&&!scheduledToday(ch))return false;
+        return true;
+      }).forEach((ch,i)=>body.appendChild(buildChoreCard('custom',sec.id,i,ch,k)));
     if(sec.chores.length===0){const h=document.createElement('div');h.className='drop-hint';h.textContent='Drag chores here or tap + Add';body.appendChild(h);}
     section.appendChild(hdr);section.appendChild(body);container.appendChild(section);
   });
@@ -2535,12 +2630,17 @@ function renderLeft(){
   [['daily',null,'listDaily'],['bonus',null,'listBonus']].forEach(([g,sid,id])=>{
     const ct=document.getElementById(id);if(!ct)return;ct.innerHTML='';
     if(k){
-      k[g].filter(item=>!(kidsMode&&item.disabled)).forEach((item,i)=>ct.appendChild(buildChoreCard(g,sid,i,item,k)));
+      k[g].filter(item=>{
+          if(kidsMode&&item.disabled)return false;
+          if(kidsMode&&!scheduledToday(item))return false;
+          return true;
+        }).forEach((item,i)=>ct.appendChild(buildChoreCard(g,sid,i,item,k)));
       makeBodyDropZone(ct,k,g,sid);
       if(k[g].length===0){const h=document.createElement('div');h.className='drop-hint';h.textContent='Drag chores here or tap + Add';ct.appendChild(h);}
     }
   });
   renderCustomSections(k);
+  renderArchiveSection(k);
   renderPointsBanner(k);
   const rct=document.getElementById('listRewards');if(!rct)return;rct.innerHTML='';
   if(k)k.rewards.forEach((r,i)=>rct.appendChild(buildRewardRow(i,r,k)));
@@ -2585,7 +2685,7 @@ function renderOneTimeSection(k){
     const today=todayStr();
     const pending=new Set((k.pendingApprovals||[]).map(p=>p.choreId));
     const isVisible=!item.lastDone||item.lastDone===today||pending.has(item.id);
-    if(isVisible)body.appendChild(buildChoreCard('onetime',null,i,item,k));
+    if(isVisible&&!(kidsMode&&item.disabled))body.appendChild(buildChoreCard('onetime',null,i,item,k));
   });
   if(body.children.length===0){const h=document.createElement('div');h.className='drop-hint';h.textContent='Tap + Add to create a one-time task';body.appendChild(h);}
   section.appendChild(hdr);section.appendChild(body);
@@ -2728,7 +2828,7 @@ function renderCharts(k){
 /* ══════════════════════════════════════════════
    PARENT APPROVAL
 ══════════════════════════════════════════════ */
-function totalPending(){return(S.kids||[]).reduce((s,k)=>s+(k.pendingApprovals||[]).length,0);}
+function totalPending(){return(S.kids||[]).filter(k=>!k.archived).reduce((s,k)=>s+(k.pendingApprovals||[]).length,0);}
 
 function updateApprovalBadge(){
   const n=totalPending();
@@ -2759,7 +2859,7 @@ function renderApprovalPanel(){
   body.innerHTML='';
   const today=todayStr();
   let hasAny=false;
-  S.kids.forEach(k=>{
+  (S.kids||[]).filter(k=>!k.archived).forEach(k=>{
     if(!k.pendingApprovals||!k.pendingApprovals.length)return;
     hasAny=true;
     const t=THEMES[(kidsMode&&k.kidsTheme)||k.theme||'galaxy']||THEMES.galaxy;
@@ -2884,7 +2984,7 @@ async function doResetEverything(){
 
 function addKid(){const k=mkKid('Kid '+(S.kids.length+1));S.kids.push(k);S.activeId=k.id;save();renderAll();}
 function removeKid(id){
-  if(S.kids.length<=1){alert("Can't remove the last kid!");return;}
+  if(S.kids.filter(k=>!k.archived).length<=1){alert("Can't remove the last active kid!");return;}
   if(!confirm('Remove '+(S.kids.find(k=>k.id===id)?.name||'this kid')+'?'))return;
   S.kids=S.kids.filter(k=>k.id!==id);if(S.activeId===id)S.activeId=S.kids[0]?.id||null;
   save();renderAll();
@@ -2897,7 +2997,8 @@ function renderAll(){
   const mg=document.getElementById('mainGrid');if(mg)mg.style.display=has?'':'none';
   const tb=document.querySelector('.tabbar');if(tb)tb.style.display=has?'flex':'none';
   renderTabs();
-  if(has){processTokenExpiry(k);applyTheme((kidsMode&&k.kidsTheme)||k.theme||'galaxy');renderLeft();renderRight();checkAchievements(k);checkLevelUp(k);setTimeout(()=>checkChallenges(kid()),0);renderBadges(k);renderCalendar('calBody');renderChallenges(k);renderXPHeaderBar(k);}
+  if(has){processTokenExpiry(k);applyTheme((kidsMode&&k.kidsTheme)||k.theme||'galaxy');renderLeft();renderRight();checkAchievements(k);checkLevelUp(k);
+  setTimeout(()=>{ checkChallenges(kid()); checkScheduledChallenges(kid()); }, 0);renderBadges(k);renderCalendar('calBody');renderChallenges(k);renderXPHeaderBar(k);}
   renderDashboard();
   updateApprovalBadge();
   updateFlashBadge();
@@ -2920,7 +3021,7 @@ function renderXPHeaderBar(k){
 function toggleSection(id){const el=document.getElementById(id);if(el)el.classList.toggle('collapsed');}
 function getAllSectionIds(){
   const k=kid();
-  const base=['secDaily','secBonus','secRewards','secHistory','secBadges','secCalendar','secCharts','secRedemptions','secMischief','secChallenges','secSpending'];
+  const base=['secDaily','secBonus','secRewards','secHistory','secBadges','secCalendar','secCharts','secRedemptions','secMischief','secChallenges','secSpending','secArchive'];
   if(document.getElementById('secOneTime'))base.push('secOneTime');
   if(k)(k.customSections||[]).forEach(s=>base.push('secCustom_'+s.id));
   return base;
@@ -3621,12 +3722,13 @@ function openTokenExpirySheet(){
 function renderTokenExpirySheet(){
   const body=document.getElementById('tokenExpirySheetBody');if(!body)return;
   body.innerHTML='';
-  if(!S.kids||!S.kids.length){body.innerHTML='<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0">No kids added yet.</div>';return;}
+  const _activeKids=(S.kids||[]).filter(k=>!k.archived);
+  if(!_activeKids.length){body.innerHTML='<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0">No kids added yet.</div>';return;}
   const desc=document.createElement('p');
   desc.style.cssText='font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6';
   desc.innerHTML='When enabled, tokens not spent within the set number of days get <strong>locked</strong>. They won\'t be spendable but are never deleted \u2014 you can restore them as a reward for good behaviour.';
   body.appendChild(desc);
-  S.kids.forEach(k=>{
+  _activeKids.forEach(k=>{
     if(!k.tokenExpiry)k.tokenExpiry={enabled:false,days:30,lockedTokens:[]};
     const te=k.tokenExpiry;
     const locked=te.lockedTokens||[];
@@ -5400,7 +5502,8 @@ function openChoreEditModal(item,k,grp,secId,onCancel){
       </div>
       <div class="ced-actions">
         <button class="ced-save-btn" id="cedSave">\u2713 Save</button>
-        <button class="ced-del-btn" id="cedDel">\uD83D\uDDD1 Delete</button>
+        <button class="ced-del-btn" id="cedDel">&#x1F4E6; Archive / Delete</button>
+        <button class="ced-del-btn ced-dup-btn" id="cedDup">&#x1F4CB; Duplicate</button>
       </div>
     </div>
   </div>`;
@@ -5490,10 +5593,11 @@ function openChoreEditModal(item,k,grp,secId,onCancel){
     save();renderAll();closeChoreEditModal();
   });
   document.getElementById('cedDel').addEventListener('click',()=>{
-    if(!confirm('Delete "'+(item.title||'this chore')+'"?'))return;
-    const arr=getChoreArr(k,grp,secId);
-    if(arr){const i=arr.findIndex(c=>c.id===item.id);if(i!==-1)arr.splice(i,1);}
-    save();renderAll();closeChoreEditModal();
+    openArchiveOrDelete(k,item,grp,secId);
+  });
+  const cedDupBtn=document.getElementById('cedDup');
+  if(cedDupBtn)cedDupBtn.addEventListener('click',()=>{
+    duplicateChore(k,item,grp,secId);closeChoreEditModal();
   });
 
   ov.classList.add('open');
@@ -5591,8 +5695,9 @@ function renderAllowanceSheet(){
   const body=document.getElementById('allowanceSheetBody');if(!body)return;
   body.innerHTML='';
   const DN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  if(!S.kids||!S.kids.length){body.innerHTML='<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0">No kids added yet.</div>';return;}
-  S.kids.forEach(k=>{
+  const _activeKids2=(S.kids||[]).filter(k=>!k.archived);
+  if(!_activeKids2.length){body.innerHTML='<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0">No kids added yet.</div>';return;}
+  _activeKids2.forEach(k=>{
     if(!k.allowance)k.allowance={amount:0,day:1,lastPaid:null,lastWeekPaid:null};
     const a=k.allowance;
     const t=THEMES[(kidsMode&&k.kidsTheme)||k.theme||'galaxy']||THEMES.galaxy;
@@ -6258,7 +6363,7 @@ function sendReportToKid() {
 }
 
 function openReportCard() {
-  const kids = S.kids || [];
+  const kids = (S.kids || []).filter(k=>!k.archived);
   if (!kids.length) { showInappNotif('❌','No kids','Add a kid first!'); return; }
 
   let ov = document.getElementById('reportOverlay');
@@ -6310,7 +6415,7 @@ function maybeShowWeeklyReport() {
   const thisMonday = getWeekStr();
   if (localStorage.getItem('cq_report_seen') === thisMonday) return;
   localStorage.setItem('cq_report_seen', thisMonday);
-  const kids = S.kids || [];
+  const kids = (S.kids || []).filter(k=>!k.archived);
   // Check if any kid had activity last week
   const lastWeekStart = new Date(); lastWeekStart.setDate(lastWeekStart.getDate() - 7); lastWeekStart.setHours(0,0,0,0);
   const hasData = kids.some(k => (k.tokens||[]).some(ev => {
@@ -6350,6 +6455,8 @@ function mkChallenge(){
     completed: false,
     completedAt: null,
     kidId: null,         // null = global (all kids), or specific kidId
+    schedule: { type: 'none', dayOfWeek: 1, dayOfMonth: 1 },
+    lastScheduledRun: null,
   };
 }
 
@@ -6421,7 +6528,7 @@ function chalDeadlineLabel(c) {
 
 
 function getLeaderboardData(mode) {
-  const kids = S.kids || [];
+  const kids = (S.kids || []).filter(k=>!k.archived);
   if (kids.length < 2) return [];
 
   return kids.map(k => {
@@ -6447,7 +6554,7 @@ function renderLeaderboard(containerId) {
   const el = document.getElementById(containerId);
   if (!el) return;
 
-  const kids = S.kids || [];
+  const kids = (S.kids || []).filter(k=>!k.archived);
   if (kids.length < 2) { el.innerHTML = ''; return; }
 
   const rows = getLeaderboardData(_lbMode);
@@ -6511,7 +6618,7 @@ function renderDashboard() {
   const tabBtn = document.getElementById('tabDash');
   if (!grid) return;
 
-  const kids = S.kids || [];
+  const kids = (S.kids || []).filter(k=>!k.archived);
   const multiKid = kids.length >= 2;
 
   // Show/hide the tab itself
@@ -6667,13 +6774,15 @@ function renderChallenges(k) {
     const dlHtml = dl
       ? `<span class="chal-deadline${dl.urgent ? ' urgent' : ''}">${dl.text}</span>` : '';
     const bonusHtml = c.bonus ? `<span class="chal-bonus">+${c.bonus}⭐ bonus</span>` : '';
+    const schedLabel = getChalScheduleLabel(c);
+    const schedHtml = schedLabel ? `<span class="chal-sched-badge">${schedLabel}</span>` : '';
 
     item.innerHTML = `
       <div class="chal-hdr">
         <div class="chal-icon">${ct.icon}</div>
         <div class="chal-info">
           <div class="chal-title">${escHtml(c.title||ct.label)}</div>
-          <div class="chal-meta">${dlHtml}${bonusHtml}</div>
+          <div class="chal-meta">${dlHtml}${bonusHtml}${schedHtml}</div>
         </div>
         ${!kidsMode?`<button class="chal-del-btn" title="Delete">&#x2715;</button>`:''}
       </div>
@@ -6810,7 +6919,7 @@ function dismissStreakRiskBanner() {
 ══════════════════════════════════════════════ */
 
 function openChoreSwapSheet(fromKid, chore) {
-  const otherKids = S.kids.filter(k => k.id !== fromKid.id);
+  const otherKids = S.kids.filter(k => k.id !== fromKid.id && !k.archived);
   if (!otherKids.length) return;
   let ov = document.getElementById('swapSheetOverlay'); if (ov) ov.remove();
   ov = document.createElement('div'); ov.id = 'swapSheetOverlay'; ov.className = 'overlay';
@@ -6930,7 +7039,7 @@ function updateSwapBadge() {
 
 function renderFamilyGoal() {
   const el = document.getElementById('familyGoalSection'); if (!el) return;
-  const kids = S.kids || [];
+  const kids = (S.kids || []).filter(k=>!k.archived);
   if (kids.length < 2) { el.style.display = 'none'; return; }
   el.style.display = '';
   const fg = S.familyGoal;
@@ -7028,6 +7137,239 @@ function updateFamilyGoalContrib(k) {
    PARENT NOTE ON APPROVAL
 ══════════════════════════════════════════════ */
 // Injected into renderApprovalPanel — see patch below
+
+/* ══════════════════════════════════════════════
+   ARCHIVE INSTEAD OF DELETE
+══════════════════════════════════════════════ */
+
+function openArchiveOrDelete(k, item, grp, secId) {
+  let ov = document.getElementById('arcChoiceOverlay'); if (ov) ov.remove();
+  ov = document.createElement('div'); ov.id = 'arcChoiceOverlay'; ov.className = 'overlay';
+  ov.style.zIndex = '4000';
+  ov.innerHTML = `<div class="sheet" style="max-width:400px">
+    <div class="sheet-handle"></div>
+    <div class="sheet-hdr">
+      <div class="sheet-title">Remove Chore</div>
+      <button class="sheet-close" onclick="document.getElementById('arcChoiceOverlay').remove()">&#x2715;</button>
+    </div>
+    <div class="sheet-body" style="padding:16px 18px 28px">
+      <div class="arc-sheet-title">&#x1F4E6; "${escHtml(item.title||'this chore')}"</div>
+      <div class="arc-sheet-sub">Archive it for later, or delete permanently.</div>
+      <div class="arc-option" id="arcArchiveBtn">
+        <div class="arc-option-icon">&#x1F4E6;</div>
+        <div class="arc-option-text">
+          <div class="arc-opt-title">Archive</div>
+          <div class="arc-opt-desc">Hide from the chore list. Restore it any time from the Archived Chores section.</div>
+        </div>
+      </div>
+      <div class="arc-option danger" id="arcDeleteBtn">
+        <div class="arc-option-icon">&#x1F5D1;&#xFE0F;</div>
+        <div class="arc-option-text">
+          <div class="arc-opt-title">Delete permanently</div>
+          <div class="arc-opt-desc">Remove all history and data. This cannot be undone.</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+  ov.classList.add('open');
+
+  document.getElementById('arcArchiveBtn').addEventListener('click', () => {
+    if (!k.archive) k.archive = [];
+    const archived = { ...item, archivedAt: Date.now(), origGrp: grp, origSecId: secId };
+    k.archive.push(archived);
+    const arr = getChoreArr(k, grp, secId);
+    if (arr) { const i = arr.findIndex(c => c.id === item.id); if (i !== -1) arr.splice(i, 1); }
+    save(); renderAll(); closeChoreEditModal(); ov.remove();
+    showInappNotif('📦', 'Chore archived', `"${item.title||'Chore'}" moved to Archive`);
+  });
+
+  document.getElementById('arcDeleteBtn').addEventListener('click', () => {
+    if (!confirm(`Permanently delete "${item.title||'this chore'}"? This cannot be undone.`)) return;
+    const arr = getChoreArr(k, grp, secId);
+    if (arr) { const i = arr.findIndex(c => c.id === item.id); if (i !== -1) arr.splice(i, 1); }
+    save(); renderAll(); closeChoreEditModal(); ov.remove();
+  });
+}
+
+function renderArchiveSection(k) {
+  const sec = document.getElementById('secArchive');
+  const el = document.getElementById('arcList'); if (!el) return;
+  el.innerHTML = '';
+  const arcs = k.archive || [];
+  if (sec) sec.style.display = (!kidsMode && arcs.length) ? '' : 'none';
+  if (!arcs.length) {
+    el.innerHTML = '<div class="arc-empty">No archived chores</div>'; return;
+  }
+  arcs.forEach((item, idx) => {
+    const grpLabel = item.origGrp || 'daily';
+    const row = document.createElement('div'); row.className = 'arc-item';
+    row.innerHTML = `
+      <div class="arc-item-icon">&#x1F4E6;</div>
+      <div class="arc-item-info">
+        <div class="arc-item-name">${escHtml(item.title||'(unnamed)')}</div>
+        <div class="arc-item-meta">${grpLabel} · ${item.tokens||0}⭐ · archived ${timeAgo(item.archivedAt||Date.now())}</div>
+      </div>
+      <div class="arc-item-acts">
+        <button class="arc-restore-btn" data-idx="${idx}">&#x21A9; Restore</button>
+        <button class="arc-permdelete-btn" data-idx="${idx}">&#x1F5D1;</button>
+      </div>`;
+    el.appendChild(row);
+  });
+
+  el.querySelectorAll('.arc-restore-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = parseInt(btn.dataset.idx);
+      const item = k.archive[i];
+      if (!item) return;
+      // Restore to original group
+      const arr = getChoreArr(k, item.origGrp, item.origSecId);
+      if (arr) {
+        const restored = { ...item };
+        delete restored.archivedAt; delete restored.origGrp; delete restored.origSecId;
+        restored.disabled = false;
+        arr.push(restored);
+      }
+      k.archive.splice(i, 1);
+      save(); renderAll(); renderArchiveSection(k);
+      showInappNotif('✅', 'Chore restored', `"${item.title||'Chore'}" is back`);
+    });
+  });
+
+  el.querySelectorAll('.arc-permdelete-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = parseInt(btn.dataset.idx);
+      const item = k.archive[i];
+      if (!confirm(`Permanently delete "${item?.title||'this chore'}"?`)) return;
+      k.archive.splice(i, 1);
+      save(); renderAll(); renderArchiveSection(k);
+    });
+  });
+}
+
+/* ══════════════════════════════════════════════
+   CHORE DUPLICATE
+══════════════════════════════════════════════ */
+
+function duplicateChore(k, item, grp, secId) {
+  const arr = getChoreArr(k, grp, secId);
+  if (!arr) return;
+  const copy = JSON.parse(JSON.stringify(item));
+  copy.id = uid();
+  copy.title = (copy.title||'Chore') + ' (copy)';
+  copy.lastDone = null;
+  copy.completions = [];
+  copy.disabled = false;
+  // Insert right after the original
+  const origIdx = arr.findIndex(c => c.id === item.id);
+  arr.splice(origIdx + 1, 0, copy);
+  save(); renderAll();
+  showInappNotif('📋', 'Chore duplicated', `"${copy.title}" added`);
+}
+
+/* ══════════════════════════════════════════════
+   ARCHIVE KIDS
+══════════════════════════════════════════════ */
+
+function archiveKid(id) {
+  const k = S.kids.find(k => k.id === id);
+  if (!k) return;
+  if (S.kids.filter(k => !k.archived).length <= 1) {
+    alert("Can't archive the last active kid!");
+    return;
+  }
+  if (!confirm('Archive ' + (k.name || 'this kid') + '? Their data is preserved and can be restored any time.')) return;
+  k.archived = true;
+  k.archivedAt = Date.now();
+  // Switch to another active kid if this was the active one
+  if (S.activeId === id) {
+    const next = S.kids.find(k => !k.archived && k.id !== id);
+    S.activeId = next ? next.id : null;
+  }
+  save(); renderAll(); closeKidDropdown();
+  showInappNotif('\uD83D\uDCE6', 'Kid archived', (k.name||'Kid') + ' archived');
+}
+
+function restoreKid(id) {
+  const k = S.kids.find(k => k.id === id);
+  if (!k) return;
+  k.archived = false;
+  delete k.archivedAt;
+  S.activeId = id;
+  save(); renderAll();
+  showInappNotif('\u2705', 'Kid restored', (k.name||'Kid') + ' is back!');
+}
+
+function permanentlyDeleteKid(id) {
+  const k = S.kids.find(k => k.id === id);
+  if (!confirm('Permanently delete ' + (k?.name||'this kid') + ' and ALL their data? This cannot be undone.')) return;
+  S.kids = S.kids.filter(k => k.id !== id);
+  if (S.activeId === id) S.activeId = S.kids.find(k => !k.archived)?.id || null;
+  save(); renderAll();
+}
+
+function openArchivedKidsSheet() {
+  closeKidDropdown();
+  const archived = S.kids.filter(k => k.archived);
+  let ov = document.getElementById('arcKidsOverlay'); if (ov) ov.remove();
+  ov = document.createElement('div'); ov.id = 'arcKidsOverlay'; ov.className = 'overlay';
+  ov.style.zIndex = '3500';
+  ov.innerHTML = `<div class="sheet" style="max-width:420px">
+    <div class="sheet-handle"></div>
+    <div class="sheet-hdr">
+      <div class="sheet-title">&#x1F4E6; Archived Kids</div>
+      <button class="sheet-close" onclick="document.getElementById('arcKidsOverlay').remove()">&#x2715;</button>
+    </div>
+    <div class="sheet-body" style="padding:12px 16px 28px" id="arcKidsBody"></div>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+  ov.classList.add('open');
+  renderArchivedKidsList();
+}
+
+function renderArchivedKidsList() {
+  const body = document.getElementById('arcKidsBody'); if (!body) return;
+  const archived = S.kids.filter(k => k.archived);
+  if (!archived.length) {
+    body.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:20px 0;font-style:italic">No archived kids</div>';
+    return;
+  }
+  body.innerHTML = '';
+  archived.forEach(k => {
+    const t = THEMES[(k.theme)||'galaxy'] || THEMES.galaxy;
+    const row = document.createElement('div'); row.className = 'arc-kid-item';
+    const sinceDate = k.archivedAt
+      ? new Date(k.archivedAt).toLocaleDateString(undefined, {month:'short', day:'numeric', year:'numeric'})
+      : 'Unknown date';
+    const bal = (k.tokens||[]).reduce((s,e)=>s+Number(e.amount||0), 0);
+    const streak = calcStreak(k);
+    row.innerHTML = `
+      <div class="arc-kid-dot" style="background:${t.accent};box-shadow:0 0 5px ${t.accent}60"></div>
+      <div class="arc-kid-info">
+        <div class="arc-kid-name">${escHtml(k.name||'Kid')}</div>
+        <div class="arc-kid-meta">Archived ${sinceDate} &middot; ${bal}⭐ &middot; ${streak}🔥 streak</div>
+      </div>
+      <div class="arc-kid-acts">
+        <button class="arc-restore-btn" data-kid="${k.id}">&#x21A9; Restore</button>
+        <button class="arc-permdelete-btn" data-kid="${k.id}" title="Delete permanently">&#x1F5D1;</button>
+      </div>`;
+    body.appendChild(row);
+  });
+  body.querySelectorAll('.arc-restore-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      restoreKid(btn.dataset.kid);
+      document.getElementById('arcKidsOverlay')?.remove();
+    });
+  });
+  body.querySelectorAll('.arc-permdelete-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      permanentlyDeleteKid(btn.dataset.kid);
+      renderArchivedKidsList();
+    });
+  });
+}
 
 function checkLevelUp(k) {
   if (!k) return;
@@ -7135,6 +7477,91 @@ function showChallengeToast(c) {
   _chalToastTimer = setTimeout(() => toast.classList.remove('show'), 3500);
 }
 
+/* ══════════════════════════════════════════════
+   SCHEDULED CHALLENGES
+══════════════════════════════════════════════ */
+
+const SCHED_OPTS = [
+  { id:'none',    label:'One-time',     icon:'' },
+  { id:'weekly',  label:'Weekly',       icon:'🔁' },
+  { id:'weekend', label:'Weekends',     icon:'🔁' },
+  { id:'monthly', label:'Monthly',      icon:'🔁' },
+];
+const SCHED_DAY_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+function getChalScheduleLabel(c) {
+  if (!c.schedule || c.schedule.type === 'none') return null;
+  const s = c.schedule;
+  if (s.type === 'weekly') return `🔁 Every ${DAY_SHORT[s.dayOfWeek ?? 1]}`;
+  if (s.type === 'weekend') return '🔁 Weekends';
+  if (s.type === 'monthly') return '🔁 Monthly';
+  return null;
+}
+
+function shouldResetScheduledChallenge(c) {
+  if (!c.schedule || c.schedule.type === 'none') return false;
+  if (!c.completed) return false; // only reset completed ones
+  const s = c.schedule;
+  const now = new Date();
+  const lastRun = c.lastScheduledRun ? new Date(c.lastScheduledRun) : null;
+  const today = todayStr();
+
+  // Don't reset twice on the same day
+  if (lastRun && dateStr(lastRun) === today) return false;
+
+  if (s.type === 'weekly') {
+    const targetDow = s.dayOfWeek ?? 1; // default Monday
+    return now.getDay() === targetDow;
+  }
+  if (s.type === 'weekend') {
+    return now.getDay() === 0 || now.getDay() === 6; // Sun or Sat
+  }
+  if (s.type === 'monthly') {
+    return now.getDate() === (s.dayOfMonth ?? 1);
+  }
+  return false;
+}
+
+function resetScheduledChallenge(c, k) {
+  c.completed = false;
+  c.completedAt = null;
+  c.progress = 0;
+  c.startDate = todayStr();
+  c.lastScheduledRun = todayStr();
+  // Bump deadline forward by one cycle
+  if (c.deadline && c.schedule) {
+    const s = c.schedule;
+    const d = new Date(c.deadline + 'T12:00:00');
+    if (s.type === 'weekly')  d.setDate(d.getDate() + 7);
+    if (s.type === 'weekend') d.setDate(d.getDate() + 7);
+    if (s.type === 'monthly') d.setMonth(d.getMonth() + 1);
+    c.deadline = dateStr(d);
+  }
+}
+
+function checkScheduledChallenges(k) {
+  if (!k || !k.challenges) return;
+  let changed = false;
+  k.challenges.forEach(c => {
+    if (shouldResetScheduledChallenge(c)) {
+      resetScheduledChallenge(c, k);
+      changed = true;
+      showChallengeToast(c.title || 'Challenge', 'reset');
+    }
+  });
+  if (changed) {
+    const cb = document.getElementById('chalBody');
+    if (cb) cb._chalCache = null; // force re-render
+    save();
+  }
+}
+
+function showChallengeToast(title, action) {
+  if (action === 'reset') {
+    showInappNotif('\uD83D\uDD01', 'Challenge reset!', title + ' starts fresh');
+  }
+}
+
 function openCreateChallenge() {
   const k = kid(); if (!k) return;
   let ov = document.getElementById('chalCreateOverlay'); if (ov) ov.remove();
@@ -7173,6 +7600,17 @@ function openCreateChallenge() {
         <label class="chal-form-label">Deadline <span style="font-weight:400;text-transform:none">(optional)</span></label>
         <input class="chal-form-inp" id="chalDeadline" type="date">
       </div>
+      <div class="chal-form-row">
+        <label class="chal-form-label">Recurring schedule <span style="font-weight:400;text-transform:none">(optional)</span></label>
+        <div class="chal-sched-row">
+          <div class="chal-sched-opts" id="chalSchedOpts">
+            ${SCHED_OPTS.map(s => `<button class="chal-sched-btn${s.id==='none'?' selected':''}" data-sched="${s.id}">${s.icon ? s.icon+' ' : ''}${s.label}</button>`).join('')}
+          </div>
+          <div class="chal-sched-day-row" id="chalSchedDayRow">
+            ${SCHED_DAY_SHORT.map((d,i) => `<button class="chal-sched-day-btn${i===1?' selected':''}" data-dow="${i}">${d}</button>`).join('')}
+          </div>
+        </div>
+      </div>
       <button id="btnSaveChallenge" style="width:100%;background:linear-gradient(135deg,var(--blue),#0288d1);color:#fff;font-family:var(--font);font-size:14px;font-weight:800;border:none;border-radius:10px;padding:13px 0;cursor:pointer;margin-top:4px">
         🎯 Create Challenge
       </button>
@@ -7190,6 +7628,25 @@ function openCreateChallenge() {
     });
   });
 
+  // Schedule picker wiring
+  let selSched = 'none'; let selDow = 1;
+  ov.querySelectorAll('.chal-sched-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      ov.querySelectorAll('.chal-sched-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selSched = btn.dataset.sched;
+      const dayRow = document.getElementById('chalSchedDayRow');
+      if (dayRow) dayRow.classList.toggle('show', selSched === 'weekly');
+    });
+  });
+  ov.querySelectorAll('.chal-sched-day-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      ov.querySelectorAll('.chal-sched-day-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selDow = parseInt(btn.dataset.dow);
+    });
+  });
+
   document.getElementById('btnSaveChallenge').addEventListener('click', () => {
     const title   = document.getElementById('chalTitle').value.trim();
     const target  = Math.max(1, parseInt(document.getElementById('chalTarget').value) || 5);
@@ -7200,6 +7657,7 @@ function openCreateChallenge() {
     const c = mkChallenge();
     c.title = title; c.type = selType; c.target = target;
     c.bonus = bonus; c.deadline = deadline;
+    c.schedule = { type: selSched, dayOfWeek: selDow, dayOfMonth: new Date().getDate() };
     k.challenges.push(c);
     save(); renderAll();
     ov.remove();
@@ -7220,7 +7678,7 @@ function openGiftTokens() {
   ov = document.createElement('div'); ov.id = 'giftOverlay'; ov.className = 'overlay';
   ov.style.zIndex = '3200';
 
-  const kids = S.kids || [];
+  const kids = (S.kids || []).filter(k=>!k.archived);
   if (!kids.length) { showInappNotif('🎁','No kids yet','Add a kid first!'); return; }
 
   let selKidId = S.activeId || kids[0]?.id;
@@ -7368,7 +7826,7 @@ function renderTabs(){
   const dd=document.getElementById('kidDropdown');
   if(!dd)return;
   dd.innerHTML='';
-  S.kids.forEach(kk=>{
+  S.kids.filter(kk=>!kk.archived).forEach(kk=>{
     const row=document.createElement('div');row.className='kd-kid-row'+(kk.id===S.activeId?' active-kid':'');
     const radio=document.createElement('div');radio.className='kd-radio'+(kk.id===S.activeId?' checked':'');
     const kt=THEMES[kk.theme||'galaxy']||THEMES.galaxy;
@@ -7383,11 +7841,21 @@ function renderTabs(){
     tdot.addEventListener('click',e=>{e.stopPropagation();S.activeId=kk.id;save();renderAll();closeKidDropdown();setTimeout(openThemePicker,80);});
     const del=document.createElement('button');del.className='kd-del';del.textContent='✕';
     del.addEventListener('click',e=>{e.stopPropagation();closeKidDropdown();setTimeout(()=>removeKid(kk.id),100);});
+    const arc=document.createElement('button');arc.className='kd-archive-btn';arc.title='Archive kid';arc.textContent='📦';
+    arc.addEventListener('click',e=>{e.stopPropagation();archiveKid(kk.id);});
+    if(!kidsMode)acts.appendChild(arc);
     acts.appendChild(tdot);acts.appendChild(del);
     row.appendChild(radio);row.appendChild(inp);row.appendChild(acts);
     row.addEventListener('click',()=>{S.activeId=kk.id;save();renderAll();closeKidDropdown();});
     dd.appendChild(row);
   });
+  const archivedKids=S.kids.filter(k=>k.archived);
+  if(archivedKids.length&&!kidsMode){
+    const arcRow=document.createElement('div');arcRow.className='kd-archived-row';
+    arcRow.innerHTML=`<span>&#x1F4E6;</span><span>Archived Kids (${archivedKids.length})</span>`;
+    arcRow.addEventListener('click',()=>openArchivedKidsSheet());
+    dd.appendChild(arcRow);
+  }
   const addRow=document.createElement('div');addRow.className='kd-add-row';
   addRow.innerHTML='<span>➕</span><span>Add Kid</span>';
   addRow.addEventListener('click',()=>{closeKidDropdown();addKid();});
@@ -7684,7 +8152,7 @@ function openFlashCompose(){
     </div>`;
   }).join(''):'<div style="font-size:11px;color:var(--muted);text-align:center;padding:10px 0">No messages sent yet</div>';
 
-  const kidOpts=(S.kids||[]).map(k=>`<button class="flash-target-btn" data-kid="${k.id}">${escHtml(k.name)}</button>`).join('');
+  const kidOpts=(S.kids||[]).filter(k=>!k.archived).map(k=>`<button class="flash-target-btn" data-kid="${k.id}">${escHtml(k.name)}</button>`).join('');
 
   ov.innerHTML=`<div class="modal" style="max-width:400px">
     <div class="m-hdr"><button class="set-sub-back" onclick="_backToSettingsCat('notifs')" title="Back" style="margin-right:6px;background:transparent;border:none;cursor:pointer;font-size:20px;color:var(--muted);line-height:1;padding:0">&#x2039;</button><div class="m-title" style="flex:1">&#x1F4E3; Flash Message</div><button class="m-close" onclick="closeAllSettings()">&#x2715;</button></div>
@@ -7843,6 +8311,9 @@ function checkAndFireNotifs(){
       else showInappNotif('⏰','Chore Time!','Time to check your chores and earn tokens!');
     }
   }
+  // Check scheduled challenge resets
+  if (kid()) checkScheduledChallenges(kid());
+
   // Streak at risk check (7pm+, streak≥3, no chores done today)
   checkStreakRisk();
 
