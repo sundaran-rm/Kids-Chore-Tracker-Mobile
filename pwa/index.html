@@ -1468,6 +1468,7 @@ body.kids-mode .chore-card.off-day{display:none!important}
   border-radius:7px;padding:5px 9px;cursor:pointer;touch-action:manipulation}
 .arc-empty{text-align:center;color:var(--muted);font-size:12px;padding:18px 0;font-style:italic}
 body.kids-mode #secArchive{display:none!important}
+body.kids-mode #btnBulkEdit{display:none!important}
 
 /* ── ARCHIVE KIDS ── */
 .kd-archive-btn{background:none;border:none;color:var(--orange);font-size:14px;
@@ -1511,6 +1512,56 @@ body.kids-mode #secArchive{display:none!important}
 .chal-reset-flash{animation:chalReset .6s ease}
 @keyframes chalReset{0%{opacity:.3;transform:scale(.97)}100%{opacity:1;transform:none}}
 
+/* ── BULK CHORE EDITOR ── */
+.bce-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.bce-select-all{background:var(--navy4);border:1.5px solid var(--border);color:var(--muted);
+  font-family:var(--font);font-size:11px;font-weight:700;border-radius:20px;
+  padding:5px 12px;cursor:pointer;touch-action:manipulation;transition:all .15s;white-space:nowrap}
+.bce-select-all.has-sel{border-color:var(--blue);color:var(--blue)}
+.bce-count{font-size:11px;color:var(--muted);flex:1;text-align:right}
+.bce-group{margin-bottom:16px}
+.bce-group-label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.5px;margin-bottom:6px;padding-left:2px}
+.bce-row{display:flex;align-items:center;gap:10px;padding:9px 10px;
+  background:var(--navy3);border:1.5px solid transparent;border-radius:10px;
+  margin-bottom:5px;cursor:pointer;transition:all .12s;touch-action:manipulation}
+.bce-row.selected{border-color:var(--blue);background:rgba(79,195,247,.08)}
+.bce-row.disabled-row{opacity:.5}
+.bce-cb{width:18px;height:18px;border-radius:5px;border:2px solid var(--border);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  background:var(--navy4);transition:all .12s}
+.bce-row.selected .bce-cb{background:var(--blue);border-color:var(--blue);color:#fff;font-size:12px}
+.bce-row.selected .bce-cb::after{content:'✓'}
+.bce-name{flex:1;font-size:13px;font-weight:600;color:var(--text);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.bce-meta{font-size:10px;color:var(--muted);white-space:nowrap;flex-shrink:0}
+.bce-actions{background:var(--navy2);border-top:1px solid var(--border);
+  padding:14px 16px 6px;margin:0 -16px;display:none}
+.bce-actions.show{display:block}
+.bce-act-title{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.5px;margin-bottom:10px}
+.bce-act-row{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.bce-act-label{font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap;min-width:60px}
+.bce-act-opts{display:flex;gap:5px;flex-wrap:wrap;flex:1}
+.bce-opt{background:var(--navy4);border:1.5px solid var(--border);color:var(--muted);
+  font-family:var(--font);font-size:11px;font-weight:700;border-radius:20px;
+  padding:4px 10px;cursor:pointer;touch-action:manipulation;transition:all .14s;white-space:nowrap}
+.bce-opt.active{background:rgba(79,195,247,.12);border-color:var(--blue);color:var(--blue)}
+.bce-tok-inp{width:60px;background:var(--navy4);border:1.5px solid var(--border);
+  color:var(--text);font-family:var(--font);font-size:13px;font-weight:700;
+  border-radius:8px;padding:5px 8px;outline:none;text-align:center}
+.bce-tok-inp:focus{border-color:var(--blue)}
+.bce-day-opts{display:flex;gap:3px}
+.bce-day-opt{width:30px;height:30px;background:var(--navy4);border:1.5px solid var(--border);
+  color:var(--muted);font-family:var(--font);font-size:10px;font-weight:800;
+  border-radius:8px;cursor:pointer;touch-action:manipulation;transition:all .12s;
+  display:flex;align-items:center;justify-content:center}
+.bce-day-opt.active{background:rgba(79,195,247,.14);border-color:var(--blue);color:var(--blue)}
+.bce-apply-btn{width:100%;background:linear-gradient(135deg,var(--blue),#0288d1);
+  color:#fff;font-family:var(--font);font-size:14px;font-weight:800;border:none;
+  border-radius:10px;padding:13px 0;cursor:pointer;touch-action:manipulation;margin-top:6px}
+.bce-empty{text-align:center;color:var(--muted);font-size:12px;padding:20px 0;font-style:italic}
+
 </style>
 </head>
 <body>
@@ -1538,6 +1589,7 @@ body.kids-mode #secArchive{display:none!important}
         <button class="icon-btn" id="btnFlash" title="Flash Message">&#x1F4E3;</button>
         <div class="flash-badge" id="flashBadge" style="display:none">0</div>
       </div>
+      <button class="icon-btn" id="btnBulkEdit" title="Bulk Edit Chores" style="color:var(--purple)">&#x1F4CB;</button>
       <button class="icon-btn" id="btnSettings" title="Settings">&#x2699;</button>
       <button class="icon-btn" id="btnHelp" title="Help" style="color:var(--blue)">&#x2753;</button>
       <button class="icon-btn" id="btnKidsHelp" title="How it works" style="color:var(--blue)">&#x2753;</button>
@@ -1901,54 +1953,75 @@ body.kids-mode #secArchive{display:none!important}
       <div class="help-section">
         <div class="help-section-title">&#x1F9D2; Managing Kids</div>
         <div class="help-item"><div class="help-item-icon">&#x2795;</div><div class="help-item-text"><div class="help-item-title">Add a kid</div><div class="help-item-desc">Tap the kid picker (top bar) &rarr; <strong>+ Add Kid</strong>. Each kid gets their own chores, tokens, streak, badges, rewards, and challenges.</div></div></div>
-        <div class="help-item"><div class="help-item-icon">&#x1F3E0;</div><div class="help-item-text"><div class="help-item-title">Overview (2+ kids)</div><div class="help-item-desc">With two or more kids the <strong>&#x1F3E0; Overview</strong> tab appears &mdash; all kids at a glance with today&rsquo;s progress, balance, streak, challenges, and approvals. Tap a card to switch to that kid.</div></div></div>
-        <div class="help-item"><div class="help-item-icon">&#x1F3A8;</div><div class="help-item-text"><div class="help-item-title">Themes</div><div class="help-item-desc">Settings &rarr; Appearance &rarr; <strong>Change Theme</strong>. In Kids Mode each kid picks their own theme from the kid picker.</div></div></div>
+        <div class="help-item"><div class="help-item-icon">&#x1F4E6;</div><div class="help-item-text"><div class="help-item-title">Archive a kid</div><div class="help-item-desc">Tap &#x1F4E6; next to a kid&rsquo;s name in the picker to archive them. All data is preserved. Archived kids are hidden from chores, overview, leaderboard, and settings. Restore or permanently delete from <strong>Archived Kids</strong> at the bottom of the picker.</div></div></div>
+        <div class="help-item"><div class="help-item-icon">&#x1F3E0;</div><div class="help-item-text"><div class="help-item-title">Overview (2+ kids)</div><div class="help-item-desc">With two or more active kids the <strong>&#x1F3E0; Overview</strong> tab appears &mdash; all kids at a glance with today&rsquo;s progress, balance, streak, and challenges. Tap a card to switch to that kid.</div></div></div>
+        <div class="help-item"><div class="help-item-icon">&#x1F3A8;</div><div class="help-item-text"><div class="help-item-title">Themes</div><div class="help-item-desc">Settings &rarr; Appearance &rarr; <strong>Change Theme</strong>. In Kids Mode each kid picks their own theme from the kid picker dot.</div></div></div>
       </div>
+
       <div class="help-section">
         <div class="help-section-title">&#x2600;&#xFE0F; Chores &amp; Tasks</div>
         <div class="help-item"><div class="help-item-icon">&#x2795;</div><div class="help-item-text"><div class="help-item-title">Add a chore</div><div class="help-item-desc">Tap <strong>+ Add</strong> in any section header. Set name, tokens, difficulty, schedule days, and optional instructions.</div></div></div>
         <div class="help-item"><div class="help-item-icon">&#x2714;&#xFE0F;</div><div class="help-item-text"><div class="help-item-title">Tick off &amp; undo</div><div class="help-item-desc">Tap the circle to mark done &mdash; tokens and XP added instantly. Tap &#x21A9; to undo today&rsquo;s manual adjustments.</div></div></div>
-        <div class="help-item"><div class="help-item-icon">&#x1F4C5;</div><div class="help-item-text"><div class="help-item-title">Schedule &amp; Vacation</div><div class="help-item-desc">Tap day buttons in the chore edit modal to choose schedule days. Unchecking all days auto-disables the chore. Use <strong>&#x1F3D6;&#xFE0F; Vacation</strong> (next to Save in the Daily Tasks header) to bulk-toggle all chores for any day &mdash; with Weekdays, Weekends, All days, and Pause all presets. Streaks <em>freeze</em> (not break) when all days are paused.</div></div></div>
-        <div class="help-item"><div class="help-item-icon">&#x1F6AB;</div><div class="help-item-text"><div class="help-item-title">Disable a chore</div><div class="help-item-desc">Toggle <strong>Disable chore</strong> in the edit modal to make a chore inactive. Shows faded to parents; hidden entirely from kids. The streak skips over days with no active chores.</div></div></div>
+        <div class="help-item"><div class="help-item-icon">&#x1F4CB;</div><div class="help-item-text"><div class="help-item-title">Duplicate a chore</div><div class="help-item-desc">Open the chore edit modal and tap <strong>&#x1F4CB; Duplicate</strong>. A copy is inserted immediately below with &ldquo; (copy)&rdquo; appended to the name, and a fresh completion history.</div></div></div>
+        <div class="help-item"><div class="help-item-icon">&#x1F4E6;</div><div class="help-item-text"><div class="help-item-title">Archive instead of delete</div><div class="help-item-desc">Tap <strong>&#x1F4E6; Archive / Delete</strong> in the chore edit modal. Archive hides the chore but keeps all history &mdash; restore it any time from the <strong>&#x1F4E6; Archived Chores</strong> section. Delete is permanent.</div></div></div>
+        <div class="help-item"><div class="help-item-icon">&#x1F4C5;</div><div class="help-item-text"><div class="help-item-title">Schedule &amp; Vacation</div><div class="help-item-desc">Tap day buttons in the chore edit modal to choose schedule days. Unchecking all days auto-disables the chore. Use <strong>&#x1F3D6;&#xFE0F; Vacation</strong> (next to Save in the Daily Tasks header) to bulk-toggle all chores &mdash; Weekdays, Weekends, All days, or Pause all. Streaks <em>freeze</em> (not break) when all days are paused.</div></div></div>
+        <div class="help-item"><div class="help-item-icon">&#x1F6AB;</div><div class="help-item-text"><div class="help-item-title">Disable a chore</div><div class="help-item-desc">Toggle <strong>Disable chore</strong> in the edit modal. Disabled chores show faded to parents. In Kids Mode, both disabled chores and off-day chores are hidden entirely so kids only see what&rsquo;s relevant today.</div></div></div>
+        <div class="help-item"><div class="help-item-icon">&#x1F4CB;</div><div class="help-item-text"><div class="help-item-title">Bulk Edit</div><div class="help-item-desc">Tap the &#x1F4CB; button in the parent header to open the Bulk Chore Editor. Select any chores across all sections and apply changes to tokens, difficulty, schedule days, or enable/disable status all at once. Use <strong>Select all</strong> for a full seasonal refresh.</div></div></div>
         <div class="help-item"><div class="help-item-icon">&#x2B50;</div><div class="help-item-text"><div class="help-item-title">Chore of the Week</div><div class="help-item-desc">Tap &#x2B50; on a chore to set it as Chore of the Week &mdash; earns <strong>2&times; tokens</strong> all week.</div></div></div>
         <div class="help-item"><div class="help-item-icon">&#x26A1;</div><div class="help-item-text"><div class="help-item-title">Bonus &amp; custom sections</div><div class="help-item-desc">Bonus chores are one-off extras. Add named sections via Settings &rarr; Appearance &rarr; <strong>Add Custom Section</strong>. Drag &#x2630; to reorder chores.</div></div></div>
       </div>
+
       <div class="help-section">
         <div class="help-section-title">&#x2B50; Tokens, Rewards &amp; Gifting</div>
-        <div class="help-item"><div class="help-item-icon">&#x1F381;</div><div class="help-item-text"><div class="help-item-title">Token Gifting</div><div class="help-item-desc">Tap <strong>&#x1F381; Gift</strong> in the header to send bonus tokens to a kid with a personal message. Quick amount presets (1, 2, 5, 10, 20, 50) or a custom amount. A Flash Message is sent automatically to the recipient.</div></div></div>
-        <div class="help-item"><div class="help-item-icon">&#x1F6CD;</div><div class="help-item-text"><div class="help-item-title">Rewards &amp; Shop</div><div class="help-item-desc">Tap <strong>Redeem</strong> to spend tokens. Browse suggested rewards via &#x1F6CD; Shop. Customise in Settings &rarr; Rewards System &rarr; Reward Shop Items.</div></div></div>
-        <div class="help-item"><div class="help-item-icon">&#x1F4B0;</div><div class="help-item-text"><div class="help-item-title">Weekly Allowance &amp; Token Expiry</div><div class="help-item-desc"><strong>Allowance</strong> &mdash; automatic weekly payouts per kid. <strong>Expiry</strong> &mdash; unspent tokens lock after a set number of days; a 3-day warning badge appears. Both in Settings &rarr; Rewards System.</div></div></div>
-        <div class="help-item"><div class="help-item-icon">&#x1F3AF;</div><div class="help-item-text"><div class="help-item-title">Goals &amp; savings lock</div><div class="help-item-desc">Set a savings goal in the Wallet section linked to a reward. Enable Savings Lock to prevent spending until the goal is reached.</div></div></div>
+        <div class="help-item"><div class="help-item-icon">&#x1F381;</div><div class="help-item-text"><div class="help-item-title">Token Gifting</div><div class="help-item-desc">Tap <strong>&#x1F381; Gift</strong> in the header to send bonus tokens to a kid with a personal note. Quick amount presets or a custom amount. A Flash Message fires automatically to the recipient.</div></div></div>
+        <div class="help-item"><div class="help-item-icon">&#x1F6CD;</div><div class="help-item-text"><div class="help-item-title">Rewards &amp; Shop</div><div class="help-item-desc">Tap <strong>Redeem</strong> to spend tokens. Browse suggested rewards via &#x1F6CD; Shop. Spending History (in the Wallet tab) shows a timeline of all past redemptions.</div></div></div>
+        <div class="help-item"><div class="help-item-icon">&#x1F4B0;</div><div class="help-item-text"><div class="help-item-title">Weekly Allowance &amp; Token Expiry</div><div class="help-item-desc"><strong>Allowance</strong> &mdash; automatic payouts per kid on a chosen day. <strong>Expiry</strong> &mdash; unspent tokens lock after a set number of days; a warning badge appears 3 days before. Both in Settings &rarr; Rewards System. Archived kids are excluded from both.</div></div></div>
+        <div class="help-item"><div class="help-item-icon">&#x1F3AF;</div><div class="help-item-text"><div class="help-item-title">Goals &amp; savings lock</div><div class="help-item-desc">Set a savings goal in the Wallet section linked to a reward. Enable Savings Lock to prevent spending until reached.</div></div></div>
       </div>
+
       <div class="help-section">
         <div class="help-section-title">&#x1F3AF; Challenges</div>
-        <div class="help-item"><div class="help-item-icon">&#x1F3AF;</div><div class="help-item-text"><div class="help-item-title">Create a challenge</div><div class="help-item-desc">Tap <strong>+ Add</strong> in the Challenges section or Settings &rarr; Rewards System &rarr; <strong>Challenges</strong>. Types: <strong>Complete N chores</strong>, <strong>Reach N-day streak</strong>, <strong>Earn N tokens</strong>, <strong>All dailies N days</strong>. Set an optional deadline and bonus token reward.</div></div></div>
-        <div class="help-item"><div class="help-item-icon">&#x1F4C8;</div><div class="help-item-text"><div class="help-item-title">Auto-completion &amp; rewards</div><div class="help-item-desc">When a kid hits the target, bonus tokens are awarded automatically and a toast notification appears. Completed challenges stay visible as a record.</div></div></div>
+        <div class="help-item"><div class="help-item-icon">&#x1F3AF;</div><div class="help-item-text"><div class="help-item-title">Create a challenge</div><div class="help-item-desc">Tap <strong>+ Add</strong> in the Challenges section. Types: <strong>Complete N chores</strong>, <strong>Reach N-day streak</strong>, <strong>Earn N tokens</strong>, <strong>All dailies N days</strong>. Set an optional deadline and bonus token reward.</div></div></div>
+        <div class="help-item"><div class="help-item-icon">&#x1F501;</div><div class="help-item-text"><div class="help-item-title">Scheduled (recurring) challenges</div><div class="help-item-desc">Set a <strong>Recurring schedule</strong> when creating a challenge: Weekly (choose a day), Weekends, or Monthly. When the challenge is completed, it automatically resets on the next trigger day and a &#x1F501; badge appears on the card. The deadline bumps forward by one cycle.</div></div></div>
+        <div class="help-item"><div class="help-item-icon">&#x1F4C8;</div><div class="help-item-text"><div class="help-item-title">Auto-completion &amp; rewards</div><div class="help-item-desc">When a kid hits the target, bonus tokens are awarded automatically and a toast appears. Completed challenges stay visible as a record.</div></div></div>
       </div>
+
       <div class="help-section">
         <div class="help-section-title">&#x1F4AA; XP, Levels, Streaks &amp; Badges</div>
-        <div class="help-item"><div class="help-item-icon">&#x1F4C8;</div><div class="help-item-text"><div class="help-item-title">XP &amp; levels</div><div class="help-item-desc">XP is earned from chore completions and never reduced by spending tokens. Levels: &#x1F331; Rookie &rarr; &#x2B50; Helper &rarr; &#x1F31F; Star &rarr; &#x1F3C6; Champion &rarr; &#x1F451; Legend &rarr; &#x1F52E; Master. Customise thresholds in Settings &rarr; Rewards System &rarr; XP Levels.</div></div></div>
-        <div class="help-item"><div class="help-item-icon">&#x1F525;</div><div class="help-item-text"><div class="help-item-title">Streaks &amp; vacation</div><div class="help-item-desc">Streak grows each day at least one Daily Task is completed. Disabled chores are excluded. Use Vacation / Pause all to <em>freeze</em> the streak during holidays &mdash; it resumes on the next active day.</div></div></div>
+        <div class="help-item"><div class="help-item-icon">&#x1F4C8;</div><div class="help-item-text"><div class="help-item-title">XP &amp; level-up celebration</div><div class="help-item-desc">XP is earned from chore completions and never reduced by spending tokens. When a kid levels up, a full-screen celebration fires with confetti and sound. Levels: &#x1F331; Rookie &rarr; &#x2B50; Helper &rarr; &#x1F31F; Star &rarr; &#x1F3C6; Champion &rarr; &#x1F451; Legend &rarr; &#x1F52E; Master. Customise in Settings &rarr; Rewards System &rarr; XP Levels.</div></div></div>
+        <div class="help-item"><div class="help-item-icon">&#x1F525;</div><div class="help-item-text"><div class="help-item-title">Streaks &amp; vacation</div><div class="help-item-desc">Streak grows each day at least one Daily Task is completed. Disabled and off-day chores are excluded. Use Vacation / Pause all to <em>freeze</em> the streak during holidays &mdash; it resumes automatically on the next active day. A <strong>Streak at Risk</strong> alert appears after 7pm if no chores have been done and a streak of 3+ days is at risk.</div></div></div>
         <div class="help-item"><div class="help-item-icon">&#x1F3C5;</div><div class="help-item-text"><div class="help-item-title">Badges</div><div class="help-item-desc">Unlock automatically for streaks, chore counts, and token milestones. Tap any badge on the Stats tab to see its requirement and earned date. Create custom badges in Settings &rarr; Rewards System &rarr; Achievements &amp; Badges.</div></div></div>
       </div>
+
+      <div class="help-section">
+        <div class="help-section-title">&#x1F3C6; Leaderboard &amp; Family Goals</div>
+        <div class="help-item"><div class="help-item-icon">&#x1F3C6;</div><div class="help-item-text"><div class="help-item-title">Sibling Leaderboard</div><div class="help-item-desc">Appears in the Overview tab (2+ active kids). Three modes: <strong>&#x2B50; Tokens</strong> (weekly earned), <strong>&#x2705; Chores</strong> (weekly done), <strong>&#x1F525; Streak</strong>. Each resets Monday. The leading kid gets a &#x1F451; crown.</div></div></div>
+        <div class="help-item"><div class="help-item-icon">&#x1F3AF;</div><div class="help-item-text"><div class="help-item-title">Family Goals</div><div class="help-item-desc">Set a shared token goal in the Wallet tab (2+ active kids). All kids contribute their XP toward a combined target &mdash; e.g. &ldquo;Family Movie Night: 500 tokens combined.&rdquo; A progress bar tracks contributions per kid. Achieved goals show a &#x1F3C6; banner and fire an in-app notification.</div></div></div>
+      </div>
+
       <div class="help-section">
         <div class="help-section-title">&#x1F512; Kids Mode, Approval &amp; PIN</div>
-        <div class="help-item"><div class="help-item-icon">&#x1F512;</div><div class="help-item-text"><div class="help-item-title">Kids Mode</div><div class="help-item-desc">Hides all editing controls. Kids can tick chores, read instructions, browse rewards, view challenges and badges, and pick their own theme. Disabled chores are hidden entirely.</div></div></div>
-        <div class="help-item"><div class="help-item-icon">&#x270D;&#xFE0F;</div><div class="help-item-text"><div class="help-item-title">Require Parent Approval</div><div class="help-item-desc">Chore ticks go into a pending queue. Review via the &#x23F3; button &mdash; approve (awards tokens) or reject. Kids can attach a note and photo as proof.</div></div></div>
-        <div class="help-item"><div class="help-item-icon">&#x1F4E3;</div><div class="help-item-text"><div class="help-item-title">Flash Messages &amp; Gifts</div><div class="help-item-desc">Tap &#x1F4E3; to send a mood-tagged message (Praise, Reminder, Heads Up, Just Because, Challenge) that pops up in Kids Mode. Token Gifts automatically fire a Flash Message to the recipient.</div></div></div>
+        <div class="help-item"><div class="help-item-icon">&#x1F512;</div><div class="help-item-text"><div class="help-item-title">Kids Mode</div><div class="help-item-desc">Hides all editing controls. Kids can tick chores, read instructions, browse rewards, view challenges and badges, and pick their own theme. Disabled chores and off-day chores are hidden entirely so kids only see today&rsquo;s active tasks.</div></div></div>
+        <div class="help-item"><div class="help-item-icon">&#x270D;&#xFE0F;</div><div class="help-item-text"><div class="help-item-title">Require Parent Approval</div><div class="help-item-desc">Chore ticks go into a pending queue. Review via the &#x23F3; button &mdash; approve (awards tokens) or reject. Add a <strong>parent note</strong> before approving &mdash; it fires as a Flash Message to the kid. Kids can attach a note and photo as proof.</div></div></div>
+        <div class="help-item"><div class="help-item-icon">&#x1F504;</div><div class="help-item-text"><div class="help-item-title">Chore Swap Requests</div><div class="help-item-desc">In Kids Mode, tap <strong>&#x1F504; Swap</strong> on a daily chore to request a swap with a sibling. Parent reviews and approves or declines via the &#x1F504; header button. On approval, the chore moves to the sibling for the day.</div></div></div>
+        <div class="help-item"><div class="help-item-icon">&#x1F4E3;</div><div class="help-item-text"><div class="help-item-title">Flash Messages &amp; Gifts</div><div class="help-item-desc">Tap &#x1F4E3; to send a mood-tagged message (Praise, Reminder, Heads Up, Just Because, Challenge) that pops up in Kids Mode. Token Gifts automatically send a Flash Message to the recipient.</div></div></div>
         <div class="help-item"><div class="help-item-icon">&#x1F511;</div><div class="help-item-text"><div class="help-item-title">Parent PIN</div><div class="help-item-desc">Settings &rarr; Profile &amp; Permissions &rarr; <strong>PIN Management</strong>. 4-digit PIN protects Kids Mode and settings. Syncs via Firebase.</div></div></div>
       </div>
+
       <div class="help-section">
-        <div class="help-section-title">&#x2611;&#xFE0F; All-Time Summary &amp; Charts</div>
-        <div class="help-item"><div class="help-item-icon">&#x1F4CA;</div><div class="help-item-text"><div class="help-item-title">Summary</div><div class="help-item-desc">Tap <strong>&#x1F4CA; Summary</strong> to see all-time stats: tokens earned, redeemed (purple bars), mischief (red bars), chores done, best day, streak, level, and badges. Includes bar charts for top redeemed rewards and mischief entries.</div></div></div>
-        <div class="help-item"><div class="help-item-icon">&#x1F4C8;</div><div class="help-item-text"><div class="help-item-title">Charts (Stats tab)</div><div class="help-item-desc">Earned, redeemed, and mischief charts for the last 7 days and last 12 months, plus a streak history chart showing your best runs.</div></div></div>
+        <div class="help-section-title">&#x1F4CA; Reports &amp; History</div>
+        <div class="help-item"><div class="help-item-icon">&#x1F4CB;</div><div class="help-item-text"><div class="help-item-title">Weekly Report Card</div><div class="help-item-desc">Tap <strong>&#x1F4CB; Weekly</strong> in the Stats header. Grades the week S/A/B/C/D based on completion %, shows trend vs last week for tokens and chores done, best day, badges earned, challenges completed, and a per-chore heatmap. With 2+ active kids, tab between them. <strong>&#x1F4E3; Send to Kid</strong> fires a summary Flash Message. Opens automatically every Monday morning.</div></div></div>
+        <div class="help-item"><div class="help-item-icon">&#x1F4CA;</div><div class="help-item-text"><div class="help-item-title">All-Time Summary &amp; Charts</div><div class="help-item-desc">Tap <strong>&#x1F4CA; Summary</strong> to see all-time stats: tokens earned, redeemed (purple), mischief (red), chores done, best day, streak, level, badges. Charts in the Stats tab show 7-day and 12-month trends.</div></div></div>
+        <div class="help-item"><div class="help-item-icon">&#x1F4B8;</div><div class="help-item-text"><div class="help-item-title">Spending History</div><div class="help-item-desc">The <strong>&#x1F4B8; Spending History</strong> section in the Wallet tab shows a timeline of all past reward redemptions &mdash; reward name, date, and token cost in purple.</div></div></div>
       </div>
+
       <div class="help-section">
         <div class="help-section-title">&#x2601; Cloud Sync &amp; Data</div>
         <div class="help-item"><div class="help-item-icon">&#x2601;</div><div class="help-item-text"><div class="help-item-title">Connect Firebase</div><div class="help-item-desc">Settings &rarr; Data &amp; Backup &rarr; <strong>Cloud Database</strong>. Link a free Firebase project (~5 min). All data syncs in real time. Use the same <strong>Household ID</strong> on every device.</div></div></div>
-        <div class="help-item"><div class="help-item-icon">&#x1F4BE;</div><div class="help-item-text"><div class="help-item-title">Export &amp; Import</div><div class="help-item-desc"><strong>App Data</strong> &mdash; JSON backup of all kids and chores. <strong>Connection Details</strong> &mdash; AES-encrypted Firebase config (requires PIN). <strong>Export Everything</strong> &mdash; combined encrypted backup. Import reverses each option.</div></div></div>
+        <div class="help-item"><div class="help-item-icon">&#x1F4BE;</div><div class="help-item-text"><div class="help-item-title">Export &amp; Import</div><div class="help-item-desc"><strong>App Data</strong> &mdash; JSON backup. <strong>Connection Details</strong> &mdash; AES-encrypted Firebase config (requires PIN). <strong>Export Everything</strong> &mdash; combined encrypted backup. Import reverses each option.</div></div></div>
       </div>
-      <div class="help-tip"><strong>Tip:</strong> Tap a dotted-underlined chore name to reveal instructions. Drag &#x2630; to reorder. Tap a section header to collapse it. Press <strong>Escape</strong> to collapse or expand all sections at once.</div>
+
+      <div class="help-tip"><strong>Tips:</strong> Tap a dotted-underlined chore name to reveal instructions. Drag &#x2630; to reorder. Tap a section header to collapse it. Press <strong>Escape</strong> to collapse or expand all at once. The &#x1F4CB; Bulk Edit button lets you update many chores in one go &mdash; great for seasonal refreshes.</div>
    
     </div>
   </div>
@@ -4071,6 +4144,7 @@ function setupCommonEvents(){
   const setAllow=document.getElementById('setAllowance');if(setAllow)setAllow.addEventListener('click',openAllowanceSheet);
   // Flash message + notifications event wiring
   const btnSwap=document.getElementById('btnSwapRequests');if(btnSwap)btnSwap.addEventListener('click',openSwapRequestsPanel);
+  const bbce=document.getElementById('btnBulkEdit');if(bbce)bbce.addEventListener('click',openBulkChoreEditor);
   const btnGift=document.getElementById('btnGift');if(btnGift)btnGift.addEventListener('click',openGiftTokens);
   const btnFlash=document.getElementById('btnFlash');
   if(btnFlash)btnFlash.addEventListener('click',openFlashCompose);
@@ -7142,6 +7216,225 @@ function updateFamilyGoalContrib(k) {
    ARCHIVE INSTEAD OF DELETE
 ══════════════════════════════════════════════ */
 
+/* ══════════════════════════════════════════════
+   BULK CHORE EDITOR
+══════════════════════════════════════════════ */
+
+function openBulkChoreEditor() {
+  const k = kid(); if (!k) return;
+  let ov = document.getElementById('bceOverlay'); if (ov) ov.remove();
+  ov = document.createElement('div'); ov.id = 'bceOverlay'; ov.className = 'overlay';
+  ov.style.zIndex = '3300';
+
+  // Collect all editable chores
+  const sections = [
+    { label: 'Daily Tasks',  chores: k.daily || [],  grp: 'daily',  secId: null },
+    { label: 'Bonus Chores', chores: k.bonus || [],  grp: 'bonus',  secId: null },
+    { label: 'One-Time',     chores: k.oneTime || [], grp: 'onetime', secId: null },
+    ...(k.customSections || []).map(s => ({
+      label: s.title || 'Custom', chores: s.chores || [], grp: 'custom', secId: s.id
+    }))
+  ].filter(s => s.chores.length > 0);
+
+  const allChores = sections.flatMap(s => s.chores.map(c => ({
+    chore: c, grp: s.grp, secId: s.secId, sectionLabel: s.label
+  })));
+
+  if (!allChores.length) {
+    showInappNotif('📋', 'No chores', 'Add some chores first!');
+    return;
+  }
+
+  const selected = new Set();
+
+  // Pending changes state
+  let pendingDiff = null;    // null = no change, or 'none'/'easy'/'medium'/'hard'
+  let pendingTokens = null;  // null = no change, or a number
+  let pendingDays = null;    // null = no change, or array of day indices
+  let pendingDisabled = null;// null = no change, or true/false
+
+  ov.innerHTML = `<div class="sheet" style="max-width:560px">
+    <div class="sheet-handle"></div>
+    <div class="sheet-hdr">
+      <div class="sheet-title">📋 Bulk Edit Chores</div>
+      <button class="sheet-close" onclick="document.getElementById('bceOverlay').remove()">&#x2715;</button>
+    </div>
+    <div class="sheet-body" style="padding:14px 16px 0">
+      <div class="bce-toolbar">
+        <button class="bce-select-all" id="bceSelAll">Select all</button>
+        <div class="bce-count" id="bceCount">0 selected</div>
+      </div>
+      <div id="bceList"></div>
+    </div>
+    <div class="bce-actions" id="bceActions">
+      <div class="bce-act-title">Apply to selected chores</div>
+      <div class="bce-act-row">
+        <div class="bce-act-label">Tokens</div>
+        <div class="bce-act-opts">
+          <input class="bce-tok-inp" id="bceTokInp" type="number" min="0" max="999"
+            placeholder="—" inputmode="numeric">
+          <button class="bce-opt" id="bceTokClear" title="Don't change tokens">Keep</button>
+        </div>
+      </div>
+      <div class="bce-act-row">
+        <div class="bce-act-label">Difficulty</div>
+        <div class="bce-act-opts" id="bceDiffOpts">
+          <button class="bce-opt" data-diff="keep">Keep</button>
+          <button class="bce-opt" data-diff="none">☐ None</button>
+          <button class="bce-opt" data-diff="easy">🟢 Easy</button>
+          <button class="bce-opt" data-diff="medium">🟡 Med</button>
+          <button class="bce-opt" data-diff="hard">🔴 Hard</button>
+        </div>
+      </div>
+      <div class="bce-act-row">
+        <div class="bce-act-label">Schedule</div>
+        <div class="bce-act-opts" id="bceDayOpts">
+          <button class="bce-opt" id="bceKeepDays">Keep</button>
+          <div class="bce-day-opts" id="bceDayBtns">
+            ${['S','M','T','W','T','F','S'].map((d,i)=>`<button class="bce-day-opt" data-dow="${i}">${d}</button>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="bce-act-row">
+        <div class="bce-act-label">Status</div>
+        <div class="bce-act-opts" id="bceStatusOpts">
+          <button class="bce-opt active" data-status="keep">Keep</button>
+          <button class="bce-opt" data-status="enable">✅ Enable</button>
+          <button class="bce-opt" data-status="disable">🚫 Disable</button>
+        </div>
+      </div>
+      <button class="bce-apply-btn" id="bceApply">Apply Changes</button>
+      <div style="height:20px"></div>
+    </div>
+  </div>`;
+
+  document.body.appendChild(ov);
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+  ov.classList.add('open');
+
+  // Render chore list grouped by section
+  function renderList() {
+    const list = document.getElementById('bceList'); if (!list) return;
+    list.innerHTML = '';
+    sections.forEach(sec => {
+      if (!sec.chores.length) return;
+      const grpDiv = document.createElement('div'); grpDiv.className = 'bce-group';
+      const lbl = document.createElement('div'); lbl.className = 'bce-group-label';
+      lbl.textContent = sec.label;
+      grpDiv.appendChild(lbl);
+      sec.chores.forEach(c => {
+        const row = document.createElement('div');
+        row.className = 'bce-row' + (selected.has(c.id) ? ' selected' : '') + (c.disabled ? ' disabled-row' : '');
+        const daysLabel = c.grp === 'onetime' ? 'one-time' :
+          (c.days && c.days.length < 7 ? c.days.map(d=>['S','M','T','W','T','F','S'][d]).join('') : 'daily');
+        row.innerHTML = `
+          <div class="bce-cb"></div>
+          <div class="bce-name">${escHtml(c.title||'(unnamed)')}</div>
+          <div class="bce-meta">${c.tokens||0}⭐ ${c.disabled?'· off':daysLabel}</div>`;
+        row.addEventListener('click', () => {
+          if (selected.has(c.id)) selected.delete(c.id);
+          else selected.add(c.id);
+          row.classList.toggle('selected', selected.has(c.id));
+          updateToolbar();
+        });
+        grpDiv.appendChild(row);
+      });
+      list.appendChild(grpDiv);
+    });
+  }
+
+  function updateToolbar() {
+    const count = document.getElementById('bceCount');
+    const selAll = document.getElementById('bceSelAll');
+    const actions = document.getElementById('bceActions');
+    if (count) count.textContent = selected.size + ' selected';
+    if (selAll) {
+      const allSel = selected.size === allChores.length;
+      selAll.classList.toggle('has-sel', selected.size > 0);
+      selAll.textContent = allSel ? 'Deselect all' : 'Select all';
+    }
+    if (actions) actions.classList.toggle('show', selected.size > 0);
+  }
+
+  // Select all / deselect all
+  document.getElementById('bceSelAll').addEventListener('click', () => {
+    if (selected.size === allChores.length) {
+      selected.clear();
+    } else {
+      allChores.forEach(({ chore }) => selected.add(chore.id));
+    }
+    renderList(); updateToolbar();
+  });
+
+  // Difficulty picker
+  document.getElementById('bceDiffOpts').querySelectorAll('.bce-opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('bceDiffOpts').querySelectorAll('.bce-opt').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      pendingDiff = btn.dataset.diff === 'keep' ? null : btn.dataset.diff;
+    });
+  });
+
+  // Tokens
+  document.getElementById('bceTokInp').addEventListener('input', e => {
+    const v = parseInt(e.target.value);
+    pendingTokens = isNaN(v) ? null : Math.max(0, v);
+  });
+  document.getElementById('bceTokClear').addEventListener('click', () => {
+    document.getElementById('bceTokInp').value = '';
+    pendingTokens = null;
+  });
+
+  // Schedule day toggles
+  let dayChanging = false;
+  document.getElementById('bceKeepDays').addEventListener('click', () => {
+    dayChanging = false; pendingDays = null;
+    document.getElementById('bceDayBtns').querySelectorAll('.bce-day-opt').forEach(b => b.classList.remove('active'));
+    document.getElementById('bceKeepDays').classList.add('active');
+  });
+  document.getElementById('bceKeepDays').classList.add('active');
+  document.getElementById('bceDayBtns').querySelectorAll('.bce-day-opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.classList.toggle('active');
+      document.getElementById('bceKeepDays').classList.remove('active');
+      const activeDays = [...document.getElementById('bceDayBtns').querySelectorAll('.bce-day-opt.active')].map(b => parseInt(b.dataset.dow));
+      pendingDays = activeDays;
+    });
+  });
+
+  // Status picker
+  document.getElementById('bceStatusOpts').querySelectorAll('.bce-opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('bceStatusOpts').querySelectorAll('.bce-opt').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      pendingDisabled = btn.dataset.status === 'keep' ? null : btn.dataset.status === 'disable';
+    });
+  });
+
+  // Apply
+  document.getElementById('bceApply').addEventListener('click', () => {
+    if (!selected.size) return;
+    let changed = 0;
+    allChores.forEach(({ chore }) => {
+      if (!selected.has(chore.id)) return;
+      if (pendingTokens !== null) chore.tokens = pendingTokens;
+      if (pendingDiff !== null) chore.difficulty = pendingDiff;
+      if (pendingDays !== null) {
+        chore.days = [...pendingDays];
+        if (pendingDays.length === 0) chore.disabled = true;
+      }
+      if (pendingDisabled !== null) chore.disabled = pendingDisabled;
+      changed++;
+    });
+    save(); renderAll();
+    ov.remove();
+    showInappNotif('✅', 'Bulk edit applied', `Updated ${changed} chore${changed!==1?'s':''}`);
+  });
+
+  renderList();
+  updateToolbar();
+}
+
 function openArchiveOrDelete(k, item, grp, secId) {
   let ov = document.getElementById('arcChoiceOverlay'); if (ov) ov.remove();
   ov = document.createElement('div'); ov.id = 'arcChoiceOverlay'; ov.className = 'overlay';
@@ -8451,7 +8744,9 @@ function closeReportCard(){const ov=document.getElementById('reportOverlay');if(
         <div class="kh-item"><div class="kh-icon">&#x2B50;</div><div class="kh-text"><div class="kh-title">Chore of the Week</div><div class="kh-desc">The chore with a gold glow earns <strong>2&times; tokens</strong> this week &mdash; do it first!</div></div></div>
         <div class="kh-item"><div class="kh-icon">&#x23F3;</div><div class="kh-text"><div class="kh-title">Waiting for approval</div><div class="kh-desc">Sometimes a grown-up checks your work first. Your chore shows &#x23F3; while waiting &mdash; once approved your tokens arrive!</div></div></div>
         <div class="kh-item"><div class="kh-icon">&#x1F4AC;</div><div class="kh-text"><div class="kh-title">Add a note or photo</div><div class="kh-desc">When submitting for approval you can write a short message and attach a photo as proof. A photo helps get approved faster!</div></div></div>
+        <div class="kh-item"><div class="kh-icon">&#x1F504;</div><div class="kh-text"><div class="kh-title">Swap a chore</div><div class="kh-desc">Tap the <strong>&#x1F504; Swap</strong> button between the difficulty badge and token badge to offer a daily chore to a sibling. A grown-up will approve or decline the swap.</div></div></div>
       </div>
+
       <div class="kh-section">
         <div class="kh-section-title">&#x2B50; Tokens &amp; rewards</div>
         <div class="kh-item"><div class="kh-icon">&#x2B50;</div><div class="kh-text"><div class="kh-title">Your tokens</div><div class="kh-desc">The gold number at the top is your balance. Every chore adds more &mdash; tokens only disappear when you spend them or if they expire!</div></div></div>
@@ -8460,21 +8755,31 @@ function closeReportCard(){const ov=document.getElementById('reportOverlay');if(
         <div class="kh-item"><div class="kh-icon">&#x26A0;&#xFE0F;</div><div class="kh-text"><div class="kh-title">Expiring tokens</div><div class="kh-desc">A warning badge means some tokens will lock soon. Spend them before they lock!</div></div></div>
         <div class="kh-item"><div class="kh-icon">&#x1F3AF;</div><div class="kh-text"><div class="kh-title">Savings goal</div><div class="kh-desc">Check the Wallet tab for a savings goal &mdash; the progress bar shows how close you are to your reward!</div></div></div>
       </div>
+
       <div class="kh-section">
         <div class="kh-section-title">&#x1F3AF; Challenges</div>
         <div class="kh-item"><div class="kh-icon">&#x1F3AF;</div><div class="kh-text"><div class="kh-title">What are challenges?</div><div class="kh-desc">Special goals your grown-up sets &mdash; like completing 10 chores or keeping a 5-day streak. Finish one to earn <strong>bonus tokens!</strong></div></div></div>
         <div class="kh-item"><div class="kh-icon">&#x1F4C8;</div><div class="kh-text"><div class="kh-title">Track your progress</div><div class="kh-desc">Each challenge shows a progress bar. Keep doing chores &mdash; it fills up by itself!</div></div></div>
-        <div class="kh-item"><div class="kh-icon">&#x23F0;</div><div class="kh-text"><div class="kh-title">Deadlines</div><div class="kh-desc">Some challenges have a deadline. You can see days left next to the name &mdash; finish in time for the bonus!</div></div></div>
+        <div class="kh-item"><div class="kh-icon">&#x1F501;</div><div class="kh-text"><div class="kh-title">Recurring challenges</div><div class="kh-desc">A &#x1F501; badge means the challenge resets automatically every week or month &mdash; a chance to earn bonus tokens again and again!</div></div></div>
+        <div class="kh-item"><div class="kh-icon">&#x23F0;</div><div class="kh-text"><div class="kh-title">Deadlines</div><div class="kh-desc">Some challenges have a deadline. Days left shows next to the name &mdash; finish in time for the bonus!</div></div></div>
       </div>
+
       <div class="kh-section">
         <div class="kh-section-title">&#x1F525; Streaks, XP &amp; badges</div>
         <div class="kh-item"><div class="kh-icon">&#x1F525;</div><div class="kh-text"><div class="kh-title">Keep your streak going</div><div class="kh-desc">Do at least one daily chore every day to grow your streak. Miss a day and it resets &mdash; but if a grown-up pauses chores for a holiday, your streak freezes safely and picks back up!</div></div></div>
-        <div class="kh-item"><div class="kh-icon">&#x26A1;</div><div class="kh-text"><div class="kh-title">Level up</div><div class="kh-desc">The bar at the top of the Chores tab shows your XP. Keep completing chores to level up from Rookie all the way to Master!</div></div></div>
+        <div class="kh-item"><div class="kh-icon">&#x26A1;</div><div class="kh-text"><div class="kh-title">Level up</div><div class="kh-desc">The bar at the top of the Chores tab shows your XP. Fill it up to level up &mdash; from Rookie all the way to Master! Watch for the level-up celebration &#x1F389;</div></div></div>
         <div class="kh-item"><div class="kh-icon">&#x1F3C5;</div><div class="kh-text"><div class="kh-title">Earn badges</div><div class="kh-desc">Build streaks, earn tokens, and complete chores to unlock badges. Tap any badge on the Stats tab to see how you earned it!</div></div></div>
       </div>
+
+      <div class="kh-section">
+        <div class="kh-section-title">&#x1F3C6; Leaderboard &amp; Family Goal</div>
+        <div class="kh-item"><div class="kh-icon">&#x1F3C6;</div><div class="kh-text"><div class="kh-title">Sibling leaderboard</div><div class="kh-desc">Check the Overview tab to see how you rank against siblings for tokens earned, chores done, or streak length this week. The leader gets a &#x1F451; crown. Resets every Monday!</div></div></div>
+        <div class="kh-item"><div class="kh-icon">&#x1F3AF;</div><div class="kh-text"><div class="kh-title">Family Goal</div><div class="kh-desc">Your family might have a shared goal in the Wallet tab &mdash; everyone chips in together. Watch the progress bar grow as you all complete chores!</div></div></div>
+      </div>
+
       <div class="kh-section">
         <div class="kh-section-title">&#x1F4E3; Flash messages</div>
-        <div class="kh-item"><div class="kh-icon">&#x1F4E3;</div><div class="kh-text"><div class="kh-title">Messages from your grown-up</div><div class="kh-desc">Sometimes a grown-up sends you a surprise message or gift &mdash; it pops up on your screen. It might be praise, a reminder, or bonus tokens!</div></div></div>
+        <div class="kh-item"><div class="kh-icon">&#x1F4E3;</div><div class="kh-text"><div class="kh-title">Messages from your grown-up</div><div class="kh-desc">Sometimes a grown-up sends you a message, a surprise gift, or a note after approving your chore &mdash; it pops up on your screen. It might be praise, a reminder, or bonus tokens!</div></div></div>
       </div>
    
     </div>
