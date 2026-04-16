@@ -78,6 +78,7 @@ body{background-image:radial-gradient(ellipse 80% 50% at 10% 10%,rgba(79,195,247
 .pb-label{font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.4px;text-transform:uppercase;white-space:nowrap;flex-shrink:0}
 .pb-track{flex:1;height:8px;background:var(--navy4);border-radius:999px;overflow:hidden;min-width:0}
 .pb-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--blue),var(--green));transition:width .4s ease}
+.pb-fill.multiplier-active{background:linear-gradient(90deg,var(--yellow),var(--orange),#ff6e40);box-shadow:0 0 8px rgba(255,215,64,.4)}
 .pb-nums{font-size:12px;font-weight:800;color:var(--blue);white-space:nowrap;flex-shrink:0}
 .pb-pct{font-size:10px;color:var(--muted);flex-shrink:0}
 
@@ -1570,6 +1571,29 @@ body.kids-mode #btnBulkEdit{display:none!important}
 body.kids-mode #themePatternCanvas{opacity:.7}
 body.no-animations #themePatternCanvas{display:none}
 
+/* ── TOKEN MULTIPLIER DAYS ── */
+.multi-day-row{display:flex;align-items:center;gap:10px;padding:10px 0;
+  border-bottom:1px solid rgba(42,56,84,.4)}
+.multi-day-row:last-child{border-bottom:none}
+.multi-day-name{font-size:13px;font-weight:700;color:var(--text);min-width:48px}
+.multi-day-opts{display:flex;gap:5px;flex:1}
+.multi-day-opt{background:var(--navy4);border:1.5px solid var(--border);color:var(--muted);
+  font-family:var(--font);font-size:11px;font-weight:800;border-radius:20px;
+  padding:4px 10px;cursor:pointer;touch-action:manipulation;transition:all .12s}
+.multi-day-opt.active{background:rgba(255,215,64,.14);border-color:var(--yellow);color:var(--yellow)}
+.multi-day-opt.active.x3{background:rgba(255,107,107,.12);border-color:var(--orange);color:var(--orange)}
+.multi-day-toggle{flex-shrink:0}
+.multi-hdr-badge{display:none;font-size:11px;font-weight:700;color:var(--yellow);background:rgba(255,215,64,.12);border:1.5px solid rgba(255,215,64,.4);border-radius:7px;padding:4px 9px;vertical-align:middle;letter-spacing:.2px;cursor:default}
+.multi-banner{display:flex;align-items:center;gap:8px;padding:8px 12px;
+  background:linear-gradient(135deg,rgba(255,215,64,.15),rgba(255,183,77,.08));
+  border:1.5px solid rgba(255,215,64,.4);border-radius:11px;margin-bottom:10px;
+  animation:multiBannerPop .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes multiBannerPop{from{transform:scale(.95);opacity:.5}to{transform:none;opacity:1}}
+.multi-banner-icon{font-size:20px;flex-shrink:0}
+.multi-banner-text{flex:1}
+.multi-banner-title{font-size:13px;font-weight:800;color:var(--yellow)}
+.multi-banner-sub{font-size:10px;color:var(--muted);margin-top:1px}
+
 </style>
 </head>
 <body>
@@ -1651,7 +1675,7 @@ body.no-animations #themePatternCanvas{display:none}
     <div class="section" id="secDaily">
       <div class="sec-hdr" onclick="toggleSection('secDaily')">
         <div class="sec-title"><div class="dot" style="background:var(--blue);box-shadow:0 0 6px var(--blue)"></div>&#x2600;&#xFE0F; Daily Tasks</div>
-        <div class="sec-hdr-acts"><button class="btn-save-tpl" onclick="event.stopPropagation();openSaveTemplateModal('daily')" title="Save daily as template">&#x1F4BE;</button><button class="btn-save-tpl" onclick="event.stopPropagation();openVacationModal()" title="Bulk day toggle / Vacation mode" style="color:var(--orange)">&#x1F3D6;&#xFE0F;</button><button class="btn-add" id="btnTemplates" onclick="event.stopPropagation();openTemplates()" style="border-color:rgba(79,195,247,0.4);color:var(--blue)">&#x1F4CB;</button><button class="btn-add" id="btnAddDaily" onclick="event.stopPropagation()">+ Add</button></div>
+        <div class="sec-hdr-acts"><span class="multi-hdr-badge btn-save-tpl" id="multiBadgeDaily" style="display:none"></span><button class="btn-save-tpl" onclick="event.stopPropagation();openSaveTemplateModal('daily')" title="Save daily as template">&#x1F4BE;</button><button class="btn-save-tpl" onclick="event.stopPropagation();openVacationModal()" title="Bulk day toggle / Vacation mode" style="color:var(--orange)">&#x1F3D6;&#xFE0F;</button><button class="btn-add" id="btnTemplates" onclick="event.stopPropagation();openTemplates()" style="border-color:rgba(79,195,247,0.4);color:var(--blue)">&#x1F4CB;</button><button class="btn-add" id="btnAddDaily" onclick="event.stopPropagation()">+ Add</button></div>
       </div>
       <div class="sec-body" id="listDaily"></div>
       <div class="sec-tip">Tap days to set schedule. Grey = not today.</div>
@@ -1659,7 +1683,7 @@ body.no-animations #themePatternCanvas{display:none}
     <div class="section" id="secBonus">
       <div class="sec-hdr" onclick="toggleSection('secBonus')">
         <div class="sec-title"><div class="dot" style="background:var(--yellow);box-shadow:0 0 6px var(--yellow)"></div>&#x26A1; Bonus Chores</div>
-        <div class="sec-hdr-acts"><button class="btn-save-tpl" onclick="event.stopPropagation();openSaveTemplateModal('bonus')" title="Save bonus as template">&#x1F4BE;</button><button class="btn-add" id="btnAddBonus" onclick="event.stopPropagation()">+ Add</button></div>
+        <div class="sec-hdr-acts"><span class="multi-hdr-badge btn-save-tpl" id="multiBadgeBonus" style="display:none"></span><button class="btn-save-tpl" onclick="event.stopPropagation();openSaveTemplateModal('bonus')" title="Save bonus as template">&#x1F4BE;</button><button class="btn-add" id="btnAddBonus" onclick="event.stopPropagation()">+ Add</button></div>
       </div>
       <div class="sec-body" id="listBonus"></div>
     </div>
@@ -2588,7 +2612,7 @@ function startListener(hid){
         if(!S.customBadges)S.customBadges=[];
         if(!S.levelThresholds)S.levelThresholds={};
         if(!S.customLevels)S.customLevels=[];
-        if(!S.flashMessages)S.flashMessages=[];if(!S.swapRequests)S.swapRequests=[];if(S.familyGoal===undefined)S.familyGoal=null;
+        if(!S.flashMessages)S.flashMessages=[];if(!S.swapRequests)S.swapRequests=[];if(!S.multiplierDays)S.multiplierDays=[];if(S.familyGoal===undefined)S.familyGoal=null;
         S.kids.forEach(k=>{if(!k.customSections)k.customSections=[];if(!k.oneTime)k.oneTime=[];if(!k.theme)k.theme='galaxy';if(k.kidsTheme===undefined)k.kidsTheme=null;if(!k.goal)k.goal={name:'',target:100,rewardId:null,savingsLock:false};if(k.goal.savingsLock===undefined)k.goal.savingsLock=false;if(!k.badges)k.badges=[];if(!k.allowance)k.allowance={amount:0,day:1,lastPaid:null,lastWeekPaid:null};if(!k.badgeThresholds)k.badgeThresholds={};if(!k.customBadges)k.customBadges=[];if(!k.pendingApprovals)k.pendingApprovals=[];if(k.archived===undefined)k.archived=false;if(!k.archive)k.archive=[];if(!k.lastLevelCls){const _lv=getLevel(getXP(k));k.lastLevelCls=_lv.cls;}if(!k.challenges)k.challenges=[];
 k.challenges.forEach(c=>{if(!c.schedule)c.schedule={type:'none',dayOfWeek:1,dayOfMonth:1};if(c.lastScheduledRun===undefined)c.lastScheduledRun=null;});if(!k.tokenExpiry)k.tokenExpiry={enabled:false,days:30,lockedTokens:[]};k.daily.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';if(c.disabled===undefined)c.disabled=false;});k.bonus.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';if(c.disabled===undefined)c.disabled=false;});(k.customSections||[]).forEach(s=>s.chores.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';}));});
         saveLocal();
@@ -2843,7 +2867,9 @@ function buildChoreCard(grp,secId,idx,item,k){
         openKidNoteModal(item.title||'Chore',result=>{
           const kidNote=(typeof result==='object'?result.note:result)||'';
           const photoBase64=(typeof result==='object'?result.photo:null)||null;
-          const baseT=Number(item.tokens||0);const multi=isCOTW(item.id)?2:1;
+          const baseT=Number(item.tokens||0);const cotwMulti=isCOTW(item.id)?2:1;
+    const dayMulti=getTodayMultiplier();
+    const multi=Math.max(cotwMulti,dayMulti);
           k.pendingApprovals.push({id:uid(),choreId:item.id,choreTitle:item.title||'Chore',tokens:baseT,multi,grp,secId,requestedAt:Date.now(),kidNote,photoBase64});
           save();renderAll();
         });
@@ -2853,8 +2879,12 @@ function buildChoreCard(grp,secId,idx,item,k){
     // Normal immediate completion
     item.lastDone=today;if(!item.completions)item.completions=[];
     if(!item.completions.includes(today))item.completions.push(today);
-    const baseT=Number(item.tokens||0);const multi=isCOTW(item.id)?2:1;const awarded=baseT*multi;
-    const note=(item.title||'Task')+' ('+grp+')'+(multi>1?' \u2B502\u00D7':'');
+    const baseT=Number(item.tokens||0);
+    const cotwMulti=isCOTW(item.id)?2:1;
+    const dayMulti=getTodayMultiplier();
+    const multi=Math.max(cotwMulti,dayMulti);
+    const awarded=baseT*multi;
+    const note=(item.title||'Task')+' ('+grp+')'+(multi>1?' ⭐'+multi+'×':'');
     k.tokens.unshift({amount:awarded,note,timestamp:Date.now()});
     if(grp==='daily')refreshStreak(k);updateFamilyGoalContrib(k);save();playTick();
     const r=chk.getBoundingClientRect();confetti(r.left+r.width/2,r.top+r.height/2);
@@ -2866,8 +2896,9 @@ function buildChoreCard(grp,secId,idx,item,k){
   undo.addEventListener('click',e=>{
     e.stopPropagation();if(item.lastDone!==today)return;
     item.lastDone=null;if(item.completions)item.completions=item.completions.filter(d=>d!==today);
-    const baseT=Number(item.tokens||0);const multi=isCOTW(item.id)?2:1;
-    k.tokens.unshift({amount:-(baseT*multi),note:'Undo: '+(item.title||'Task'),timestamp:Date.now()});
+    const baseT=Number(item.tokens||0);
+    const undoMulti=Math.max(isCOTW(item.id)?2:1,getTodayMultiplier());
+    k.tokens.unshift({amount:-(baseT*undoMulti),note:'Undo: '+(item.title||'Task'),timestamp:Date.now()});
     if(grp==='daily')refreshStreak(k);save();renderAll();
   });
 
@@ -2974,7 +3005,8 @@ function renderPointsBanner(k){
   const pct=achievable>0?Math.min(100,Math.round(earned/achievable*100)):0;
   document.getElementById('pbEarned').textContent=earned;
   document.getElementById('pbMax').textContent=achievable;
-  document.getElementById('pbFill').style.width=pct+'%';
+  const pbFill=document.getElementById('pbFill');
+  if(pbFill)pbFill.style.width=pct+'%';
   document.getElementById('pbPct').textContent=pct+'%';
 }
 
@@ -2988,6 +3020,7 @@ function renderCustomSections(k){
     const hdr=document.createElement('div');hdr.className='sec-hdr';
     hdr.addEventListener('click',()=>section.classList.toggle('collapsed'));
     const titleWrap=document.createElement('div');titleWrap.className='sec-title';
+
     const emojiBtn=document.createElement('button');emojiBtn.className='sec-emoji-btn';emojiBtn.textContent=sec.emoji||'\u2728';emojiBtn.title='Change icon';
     emojiBtn.addEventListener('click',e=>{e.stopPropagation();openEmojiPicker(emojiBtn,sec);});
     const inp=document.createElement('input');inp.className='custom-sec-title';inp.type='text';inp.value=sec.title||'Custom';inp.placeholder='Section name\u2026';
@@ -3004,6 +3037,8 @@ function renderCustomSections(k){
     });
     const saveB=document.createElement('button');saveB.className='btn-save-tpl';saveB.title='Save as template';saveB.textContent='\uD83D\uDCBE';
     saveB.addEventListener('click',e=>{e.stopPropagation();openSaveTemplateModal(sec.id);});
+    const cmBadge=document.createElement('span');cmBadge.className='multi-hdr-badge btn-save-tpl';
+    acts.insertBefore(cmBadge,acts.firstChild);
     acts.appendChild(saveB);acts.appendChild(addB);acts.appendChild(delB);
     hdr.appendChild(titleWrap);hdr.appendChild(acts);
     const body=document.createElement('div');body.className='sec-body';body.id='listCustom_'+sec.id;
@@ -3285,8 +3320,10 @@ function renderApprovalPanel(){
           if(!actualChore.completions)actualChore.completions=[];
           if(!actualChore.completions.includes(requestDate))actualChore.completions.push(requestDate);
         }
-        const awarded=p.tokens*p.multi;
-        const note=p.choreTitle+' ('+p.grp+')'+(p.multi>1?' ⭐2×':'');
+        const dayMultiApproval=getTodayMultiplier();
+        const effectiveMulti=Math.max(p.multi,dayMultiApproval);
+        const awarded=p.tokens*effectiveMulti;
+        const note=p.choreTitle+' ('+p.grp+')'+(effectiveMulti>1?' ⭐'+effectiveMulti+'×':'');
         k.tokens.unshift({amount:awarded,note,timestamp:p.requestedAt});
         k.pendingApprovals=k.pendingApprovals.filter(x=>x.id!==p.id);
         if(p.parentNote){if(!S.flashMessages)S.flashMessages=[];S.flashMessages.push({id:uid(),text:'💬 '+p.parentNote,mood:'praise',targetKidId:k.id,sentAt:Date.now(),readBy:[]});}
@@ -3396,6 +3433,7 @@ function renderAll(){
   const tb=document.querySelector('.tabbar');if(tb)tb.style.display=has?'flex':'none';
   renderTabs();
   if(has){processTokenExpiry(k);applyTheme((kidsMode&&k.kidsTheme)||k.theme||'galaxy');renderLeft();renderRight();checkAchievements(k);checkLevelUp(k);
+  renderMultiplierBanner();
   setTimeout(()=>{ checkChallenges(kid()); checkScheduledChallenges(kid()); }, 0);renderBadges(k);renderCalendar('calBody');renderChallenges(k);renderXPHeaderBar(k);}
   renderDashboard();
   updateApprovalBadge();
@@ -4263,6 +4301,7 @@ const SETTINGS_CATS = {
       { id:'setShopItems',    icon:'&#x1F6CD;', label:'Reward Shop Items',      desc:()=>'Edit default costs and add custom items' },
       { id:'setAllowance',    icon:'&#x1F4B0;', label:'Weekly Allowance',       desc:()=>'Automatic weekly token payouts per kid' },
       { id:'setChallenges',   icon:'&#x1F3AF;', label:'Challenges',            desc:()=>'Time-limited goals with bonus token rewards' },
+      { id:'setMultiplierDays', icon:'&#x26A1;', label:'Token Multiplier Days',  desc:()=>'Bonus token days (2× or 3×)' },
       { id:'setTokenExpiry',  icon:'&#x23F3;',  label:'Token Expiry',           desc:()=>document.getElementById('tokenExpiryDesc')?.textContent||'Tokens expire if not spent' },
     ]
   },
@@ -4368,6 +4407,7 @@ function _settingsRowAction(id){
   else if(id==='setShopItems') { closeSub(); openShopItemsManager(); }
   else if(id==='setAllowance') { closeSettingsSub(); openAllowanceSheet(); }
   else if(id==='setChallenges') { closeSettingsSub(); openCreateChallenge(); }
+  else if(id==='setMultiplierDays'){ closeSettingsSub(); openMultiplierDaysSheet(); }
   else if(id==='setTokenExpiry'){ closeSettingsSub(); openTokenExpirySheet(); }
   else if(id==='setNotifs')    { closeSub(); openNotifSettings(); }
   else if(id==='setFlashMsg')  { closeSub(); openFlashCompose(); }
@@ -7760,6 +7800,120 @@ function openBulkChoreEditor() {
 
   renderList();
   updateToolbar();
+}
+
+/* ══════════════════════════════════════════════
+   TOKEN MULTIPLIER DAYS
+══════════════════════════════════════════════ */
+
+function getTodayMultiplier() {
+  const days = S.multiplierDays || [];
+  const dow = new Date().getDay();
+  let best = 1;
+  days.forEach(d => {
+    if (d.enabled && d.dow === dow && (d.multi || 1) > best)
+      best = d.multi || 1;
+  });
+  return best;
+}
+
+function renderMultiplierBanner() {
+  const multi = getTodayMultiplier();
+  // Update all section header badges
+  document.querySelectorAll('.multi-hdr-badge').forEach(el => {
+    if (multi > 1) { el.style.display = 'inline'; el.textContent = '\u26A1 ' + multi + '\u00D7'; }
+    else el.style.display = 'none';
+  });
+  // Progress bar gradient
+  const pbFill = document.getElementById('pbFill');
+  if (pbFill) pbFill.classList.toggle('multiplier-active', multi > 1);
+}
+
+function openMultiplierDaysSheet() {
+  if (!S.multiplierDays) S.multiplierDays = [];
+  // Ensure all 7 days are represented
+  for (let d = 0; d < 7; d++) {
+    if (!S.multiplierDays.find(x => x.dow === d)) {
+      S.multiplierDays.push({ dow: d, multi: 2, enabled: false });
+    }
+  }
+  S.multiplierDays.sort((a, b) => a.dow - b.dow);
+
+  let ov = document.getElementById('multiplierOverlay'); if (ov) ov.remove();
+  ov = document.createElement('div'); ov.id = 'multiplierOverlay'; ov.className = 'overlay';
+  ov.style.zIndex = '3200';
+  ov.innerHTML = `<div class="sheet"><div class="sheet-handle"></div>
+    <div class="sheet-hdr">
+      <div class="sheet-title">⚡ Token Multiplier Days</div>
+      <button class="sheet-close" onclick="document.getElementById('multiplierOverlay').remove()">&#x2715;</button>
+    </div>
+    <div class="sheet-body" style="padding:14px 16px 28px">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.5">
+        Set days where all chores earn bonus tokens. A banner shows in the Daily Tasks section on those days.
+      </p>
+      <div id="multiDayList"></div>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+  ov.classList.add('open');
+
+  function renderList() {
+    const list = document.getElementById('multiDayList'); if (!list) return;
+    list.innerHTML = '';
+    S.multiplierDays.forEach((d, idx) => {
+      const isToday = d.dow === new Date().getDay();
+      const row = document.createElement('div');
+      row.className = 'multi-day-row';
+      row.innerHTML = `
+        <div class="multi-day-name">${DAY_NAMES[d.dow]}${isToday?' <span style="font-size:9px;color:var(--blue)">today</span>':''}</div>
+        <div class="multi-day-opts">
+          <button class="multi-day-opt" data-multi="2">2×</button>
+          <button class="multi-day-opt" data-multi="3">3×</button>
+          <button class="multi-day-opt" data-multi="5">5×</button>
+          <input class="bce-tok-inp" type="number" min="2" max="99"
+            style="width:52px" placeholder="N×"
+            value="${d.enabled?(d.multi||2):''}"
+            title="Custom multiplier">
+        </div>
+        <label class="tog-wrap multi-day-toggle">
+          <input type="checkbox" ${d.enabled ? 'checked' : ''}>
+          <span class="tog-sl"></span>
+        </label>`;
+      // Wire preset buttons (quick picks)
+      // Highlight matching preset
+      row.querySelectorAll('.multi-day-opt').forEach(btn => {
+        if (d.enabled && parseInt(btn.dataset.multi) === (d.multi||2)) btn.classList.add('active');
+      });
+      row.querySelectorAll('.multi-day-opt').forEach(btn => {
+        btn.addEventListener('click', () => {
+          row.querySelectorAll('.multi-day-opt').forEach(b=>b.classList.remove('active'));
+          btn.classList.add('active');
+          const m = parseInt(btn.dataset.multi);
+          d.enabled = true; d.multi = m;
+          const inp = row.querySelector('input[type="number"]');
+          if (inp) inp.value = m;
+          save(); renderMultiplierBanner(); renderList();
+        });
+      });
+      // Wire custom number input
+      const numInp = row.querySelector('input[type="number"]');
+      if (numInp) numInp.addEventListener('change', () => {
+        const v = Math.max(2, Math.min(99, parseInt(numInp.value) || 2));
+        numInp.value = v;
+        d.enabled = true; d.multi = v;
+        save(); renderMultiplierBanner();
+      });
+      // Wire toggle
+      const tog = row.querySelector('input[type="checkbox"]');
+      tog.addEventListener('change', () => {
+        d.enabled = tog.checked;
+        save(); renderMultiplierBanner(); renderList();
+      });
+      list.appendChild(row);
+    });
+  }
+  renderList();
 }
 
 function openArchiveOrDelete(k, item, grp, secId) {
