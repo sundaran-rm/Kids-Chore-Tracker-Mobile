@@ -4364,7 +4364,8 @@ function closeAllSettings(){
   // Remove dynamic overlays
   ['tokenExpiryOverlay','allowanceOverlay','notifOverlay',
    'flashComposeOverlay','resetConfirmOverlay',
-   'xpLevelManagerOverlay','achievementManagerOverlay','shopItemsManagerOverlay'
+   'xpLevelManagerOverlay','achievementManagerOverlay','shopItemsManagerOverlay',
+   'chalCreateOverlay','multiplierOverlay'
   ].forEach(id=>{const el=document.getElementById(id);if(el)el.remove();});
   // Hide fixed overlays
   ['themeOverlay','pinMgmtOverlay','dmOverlay','dbOverlay'].forEach(id=>{
@@ -7843,9 +7844,8 @@ function openMultiplierDaysSheet() {
   ov = document.createElement('div'); ov.id = 'multiplierOverlay'; ov.className = 'overlay';
   ov.style.zIndex = '3200';
   ov.innerHTML = `<div class="sheet"><div class="sheet-handle"></div>
-    <div class="sheet-hdr">
-      <div class="sheet-title">⚡ Token Multiplier Days</div>
-      <button class="sheet-close" onclick="document.getElementById('multiplierOverlay').remove()">&#x2715;</button>
+    <div class="sheet-hdr"><button class="set-sub-back" onclick="_backToSettingsCat('rewards')" title="Back" style="margin-right:6px">&#x2039;</button><div class="sheet-title" style="flex:1">⚡ Token Multiplier Days</div>
+      <button class="sheet-close" onclick="closeAllSettings()">&#x2715;</button>
     </div>
     <div class="sheet-body" style="padding:14px 16px 28px">
       <p style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.5">
@@ -8345,9 +8345,8 @@ function openCreateChallenge() {
   let selType = 'chores_n';
 
   ov.innerHTML = `<div class="sheet"><div class="sheet-handle"></div>
-    <div class="sheet-hdr">
-      <div class="sheet-title">🎯 New Challenge</div>
-      <button class="sheet-close" onclick="document.getElementById('chalCreateOverlay').remove()">&#x2715;</button>
+    <div class="sheet-hdr"><button class="set-sub-back" onclick="_backToSettingsCat('rewards')" title="Back" style="margin-right:6px">&#x2039;</button><div class="sheet-title" style="flex:1">🎯 New Challenge</div>
+      <button class="sheet-close" onclick="closeAllSettings()">&#x2715;</button>
     </div>
     <div class="sheet-body" style="padding:16px 18px 28px">
       <div class="chal-form-row">
