@@ -1594,6 +1594,25 @@ body.no-animations #themePatternCanvas{display:none}
 .multi-banner-title{font-size:13px;font-weight:800;color:var(--yellow)}
 .multi-banner-sub{font-size:10px;color:var(--muted);margin-top:1px}
 
+/* ── DIFFICULTY PAY SCALE ── */
+.dps-row{display:flex;align-items:center;gap:10px;padding:11px 0;
+  border-bottom:1px solid rgba(42,56,84,.4)}
+.dps-row:last-child{border-bottom:none}
+.dps-diff-label{display:flex;align-items:center;gap:6px;min-width:90px;
+  font-size:12px;font-weight:700;color:var(--text)}
+.dps-tok-inp{width:60px;background:var(--navy4);border:1.5px solid var(--border);
+  color:var(--text);font-family:var(--font);font-size:14px;font-weight:800;
+  border-radius:8px;padding:6px 8px;outline:none;text-align:center}
+.dps-tok-inp:focus{border-color:var(--blue)}
+.dps-apply-btn{flex:1;background:linear-gradient(135deg,var(--green),#00c853);
+  color:#0a1a0a;font-family:var(--font);font-size:13px;font-weight:800;border:none;
+  border-radius:10px;padding:11px 0;cursor:pointer;touch-action:manipulation}
+.dps-scope-toggle{display:flex;gap:6px;margin-bottom:16px}
+.dps-scope-btn{flex:1;background:var(--navy4);border:1.5px solid var(--border);
+  color:var(--muted);font-family:var(--font);font-size:11px;font-weight:700;
+  border-radius:20px;padding:6px 0;cursor:pointer;touch-action:manipulation;transition:all .14s}
+.dps-scope-btn.active{background:rgba(79,195,247,.12);border-color:var(--blue);color:var(--blue)}
+
 </style>
 </head>
 <body>
@@ -2612,7 +2631,7 @@ function startListener(hid){
         if(!S.customBadges)S.customBadges=[];
         if(!S.levelThresholds)S.levelThresholds={};
         if(!S.customLevels)S.customLevels=[];
-        if(!S.flashMessages)S.flashMessages=[];if(!S.swapRequests)S.swapRequests=[];if(!S.multiplierDays)S.multiplierDays=[];if(S.familyGoal===undefined)S.familyGoal=null;
+        if(!S.flashMessages)S.flashMessages=[];if(!S.swapRequests)S.swapRequests=[];if(!S.multiplierDays)S.multiplierDays=[];if(!S.diffPayScale)S.diffPayScale=null;if(S.familyGoal===undefined)S.familyGoal=null;
         S.kids.forEach(k=>{if(!k.customSections)k.customSections=[];if(!k.oneTime)k.oneTime=[];if(!k.theme)k.theme='galaxy';if(k.kidsTheme===undefined)k.kidsTheme=null;if(!k.goal)k.goal={name:'',target:100,rewardId:null,savingsLock:false};if(k.goal.savingsLock===undefined)k.goal.savingsLock=false;if(!k.badges)k.badges=[];if(!k.allowance)k.allowance={amount:0,day:1,lastPaid:null,lastWeekPaid:null};if(!k.badgeThresholds)k.badgeThresholds={};if(!k.customBadges)k.customBadges=[];if(!k.pendingApprovals)k.pendingApprovals=[];if(k.archived===undefined)k.archived=false;if(!k.archive)k.archive=[];if(!k.lastLevelCls){const _lv=getLevel(getXP(k));k.lastLevelCls=_lv.cls;}if(!k.challenges)k.challenges=[];
 k.challenges.forEach(c=>{if(!c.schedule)c.schedule={type:'none',dayOfWeek:1,dayOfMonth:1};if(c.lastScheduledRun===undefined)c.lastScheduledRun=null;});if(!k.tokenExpiry)k.tokenExpiry={enabled:false,days:30,lockedTokens:[]};k.daily.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';if(c.disabled===undefined)c.disabled=false;});k.bonus.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';if(c.disabled===undefined)c.disabled=false;});(k.customSections||[]).forEach(s=>s.chores.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';}));});
         saveLocal();
@@ -2828,8 +2847,17 @@ function buildChoreCard(grp,secId,idx,item,k){
     const cur=cycle.indexOf(item.difficulty||'');
     item.difficulty=cycle[(cur+1)%cycle.length];
     diff.className='diff-badge '+(item.difficulty||'none');
+    // Auto-fill token if pay scale is set
+    const dpt=getDiffPayToken(item.difficulty);
+    if(dpt!==null){
+      item.tokens=dpt;
+      // Update tok-val span in-place (no full re-render needed)
+      const tv=tb&&tb.querySelector('.tok-val');if(tv)tv.textContent=dpt;
+    }
     diff.textContent=DIFF_LABELS[item.difficulty||'none'];
     save();
+    // Refresh progress bar immediately
+    renderPointsBanner(k);
   });
 
   /* token badge — display only */
@@ -4301,6 +4329,7 @@ const SETTINGS_CATS = {
       { id:'setShopItems',    icon:'&#x1F6CD;', label:'Reward Shop Items',      desc:()=>'Edit default costs and add custom items' },
       { id:'setAllowance',    icon:'&#x1F4B0;', label:'Weekly Allowance',       desc:()=>'Automatic weekly token payouts per kid' },
       { id:'setChallenges',   icon:'&#x1F3AF;', label:'Challenges',            desc:()=>'Time-limited goals with bonus token rewards' },
+      { id:'setDiffPayScale',   icon:'&#x1F4B0;', label:'Difficulty Pay Scale',  desc:()=>'Auto token values by difficulty' },
       { id:'setMultiplierDays', icon:'&#x26A1;', label:'Token Multiplier Days',  desc:()=>'Bonus token days (2× or 3×)' },
       { id:'setTokenExpiry',  icon:'&#x23F3;',  label:'Token Expiry',           desc:()=>document.getElementById('tokenExpiryDesc')?.textContent||'Tokens expire if not spent' },
     ]
@@ -4365,7 +4394,7 @@ function closeAllSettings(){
   ['tokenExpiryOverlay','allowanceOverlay','notifOverlay',
    'flashComposeOverlay','resetConfirmOverlay',
    'xpLevelManagerOverlay','achievementManagerOverlay','shopItemsManagerOverlay',
-   'chalCreateOverlay','multiplierOverlay'
+   'chalCreateOverlay','multiplierOverlay','diffPayScaleOverlay'
   ].forEach(id=>{const el=document.getElementById(id);if(el)el.remove();});
   // Hide fixed overlays
   ['themeOverlay','pinMgmtOverlay','dmOverlay','dbOverlay'].forEach(id=>{
@@ -4408,6 +4437,7 @@ function _settingsRowAction(id){
   else if(id==='setShopItems') { closeSub(); openShopItemsManager(); }
   else if(id==='setAllowance') { closeSettingsSub(); openAllowanceSheet(); }
   else if(id==='setChallenges') { closeSettingsSub(); openCreateChallenge(); }
+  else if(id==='setDiffPayScale'){ closeSettingsSub(); openDiffPayScaleSheet(); }
   else if(id==='setMultiplierDays'){ closeSettingsSub(); openMultiplierDaysSheet(); }
   else if(id==='setTokenExpiry'){ closeSettingsSub(); openTokenExpirySheet(); }
   else if(id==='setNotifs')    { closeSub(); openNotifSettings(); }
@@ -5980,6 +6010,12 @@ function openChoreEditModal(item,k,grp,secId,onCancel){
       diffRow.querySelectorAll('.ced-diff-btn').forEach(x=>{
         const d=x.getAttribute('data-diff');x.className='ced-diff-btn'+(d===ds?' active '+d:'');
       });
+      // Auto-fill token from pay scale when difficulty changes in edit modal
+      const dpt2=getDiffPayToken(ds);
+      if(dpt2!==null){
+        item.tokens=dpt2;
+        const tokInp2=document.getElementById('cedTok');if(tokInp2)tokInp2.value=dpt2;
+      }
     });
     diffRow.appendChild(b);
   });
@@ -7914,6 +7950,117 @@ function openMultiplierDaysSheet() {
     });
   }
   renderList();
+}
+
+/* ══════════════════════════════════════════════
+   CHORE DIFFICULTY PAY SCALE
+══════════════════════════════════════════════ */
+
+function getDiffPayScale() {
+  return S.diffPayScale || null;
+}
+
+function applyDiffPayScale(scale, scope) {
+  const targets = scope === 'active_kid' ? [kid()] : (S.kids || []).filter(k => !k.archived);
+  let count = 0;
+  targets.forEach(k => {
+    if (!k) return;
+    const allChores = [
+      ...(k.daily || []),
+      ...(k.bonus || []),
+      ...(k.oneTime || []),
+      ...(k.customSections || []).flatMap(s => s.chores || []),
+    ];
+    allChores.forEach(c => {
+      const diff = c.difficulty || 'none';
+      if (diff !== 'none' && scale[diff] !== undefined) {
+        c.tokens = scale[diff];
+        count++;
+      }
+    });
+  });
+  save(); renderAll();
+  showInappNotif('\uD83D\uDCB0', 'Pay scale applied', count + ' chore' + (count !== 1 ? 's' : '') + ' updated');
+}
+
+function openDiffPayScaleSheet() {
+  if (!S.diffPayScale) S.diffPayScale = { easy: 2, medium: 4, hard: 7 };
+  const scale = S.diffPayScale;
+  const DIFFS = [
+    { key: 'easy',   emoji: '\uD83D\uDFE2', label: 'Easy' },
+    { key: 'medium', emoji: '\uD83D\uDFE1', label: 'Medium' },
+    { key: 'hard',   emoji: '\uD83D\uDD34', label: 'Hard' },
+  ];
+
+  let ov = document.getElementById('diffPayScaleOverlay'); if (ov) ov.remove();
+  ov = document.createElement('div'); ov.id = 'diffPayScaleOverlay'; ov.className = 'overlay';
+  ov.style.zIndex = '3200';
+  ov.innerHTML = `<div class="sheet"><div class="sheet-handle"></div>
+    <div class="sheet-hdr">
+      <button class="set-sub-back" onclick="_backToSettingsCat('rewards')" title="Back" style="margin-right:6px">&#x2039;</button>
+      <div class="sheet-title" style="flex:1">&#x1F4B0; Difficulty Pay Scale</div>
+      <button class="sheet-close" onclick="closeAllSettings()">&#x2715;</button>
+    </div>
+    <div class="sheet-body" style="padding:14px 16px 28px">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.5">
+        Set token values per difficulty. Tap <strong>Apply</strong> to bulk-update existing chores.
+        Chores with no difficulty (&#x25A1; None) are never affected.
+      </p>
+      <div class="dps-scope-toggle">
+        <button class="dps-scope-btn active" id="dpsScopeAll">All kids</button>
+        <button class="dps-scope-btn" id="dpsScopeKid">Active kid only</button>
+      </div>
+      ${DIFFS.map(d => `<div class="dps-row">
+        <div class="dps-diff-label"><span style="font-size:16px">${d.emoji}</span>${d.label}</div>
+        <input class="dps-tok-inp" id="dpsInp_${d.key}" type="number" min="0" max="999"
+          value="${scale[d.key] || 0}" inputmode="numeric">
+        <span style="font-size:12px;color:var(--muted)">tokens</span>
+      </div>`).join('')}
+      <div style="margin-top:18px;display:flex;gap:8px">
+        <button class="dps-apply-btn" id="dpsApplyBtn">&#x2713; Apply to chores</button>
+      </div>
+      <p style="font-size:10px;color:var(--muted);margin-top:10px;line-height:1.4">
+        Values save as defaults. Existing chores only update when you tap Apply.
+      </p>
+    </div>
+  </div>`;
+
+  document.body.appendChild(ov);
+  ov.addEventListener('click', e => { if (e.target === ov) closeAllSettings(); });
+  ov.classList.add('open');
+
+  let scope = 'all';
+  ov.querySelector('#dpsScopeAll').addEventListener('click', () => {
+    scope='all'; ov.querySelector('#dpsScopeAll').classList.add('active');
+    ov.querySelector('#dpsScopeKid').classList.remove('active');
+  });
+  ov.querySelector('#dpsScopeKid').addEventListener('click', () => {
+    scope='active_kid'; ov.querySelector('#dpsScopeKid').classList.add('active');
+    ov.querySelector('#dpsScopeAll').classList.remove('active');
+  });
+
+  ov.querySelector('#dpsApplyBtn').addEventListener('click', () => {
+    const newScale = {};
+    DIFFS.forEach(d => {
+      newScale[d.key] = Math.max(0, parseInt(ov.querySelector('#dpsInp_'+d.key).value)||0);
+    });
+    S.diffPayScale = newScale;
+    applyDiffPayScale(newScale, scope);
+    ov.remove();
+  });
+
+  DIFFS.forEach(d => {
+    ov.querySelector('#dpsInp_'+d.key).addEventListener('change', e => {
+      S.diffPayScale[d.key] = Math.max(0, parseInt(e.target.value)||0);
+      save();
+    });
+  });
+}
+
+function getDiffPayToken(difficulty) {
+  const scale = getDiffPayScale();
+  if (!scale || !difficulty || difficulty === 'none') return null;
+  return scale[difficulty] || null;
 }
 
 function openArchiveOrDelete(k, item, grp, secId) {
