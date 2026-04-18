@@ -8454,7 +8454,10 @@ function resetScheduledChallenge(c, k) {
   c.completed = false;
   c.completedAt = null;
   c.progress = 0;
-  c.startDate = todayStr();
+  // Set startDate to TOMORROW so chores done today don't immediately re-complete the challenge
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  c.startDate = dateStr(tomorrow);
   c.lastScheduledRun = todayStr();
   // Bump deadline forward by one cycle
   if (c.deadline && c.schedule) {
@@ -8470,17 +8473,19 @@ function resetScheduledChallenge(c, k) {
 function checkScheduledChallenges(k) {
   if (!k || !k.challenges) return;
   let changed = false;
+  // Set lastScheduledRun IMMEDIATELY to prevent double-firing before save completes
   k.challenges.forEach(c => {
     if (shouldResetScheduledChallenge(c)) {
+      c.lastScheduledRun = todayStr(); // mark NOW to block re-entry this call
       resetScheduledChallenge(c, k);
       changed = true;
       showChallengeToast(c.title || 'Challenge', 'reset');
     }
   });
   if (changed) {
+    save(); // save once after all resets
     const cb = document.getElementById('chalBody');
     if (cb) cb._chalCache = null; // force re-render
-    save();
   }
 }
 
