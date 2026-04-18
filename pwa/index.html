@@ -3057,7 +3057,9 @@ function renderCustomSections(k){
     titleWrap.appendChild(emojiBtn);titleWrap.appendChild(inp);
     const acts=document.createElement('div');acts.style.cssText='display:flex;gap:5px;align-items:center;flex-shrink:0';
     const addB=document.createElement('button');addB.className='btn-add';addB.textContent='+ Add';
-    addB.addEventListener('click',e=>{e.stopPropagation();const c=mkChore(ALL_DAYS);sec.chores.push(c);save();renderAll();openChoreEditModal(c,k,'custom',sec.id);});
+    addB.addEventListener('click',e=>{e.stopPropagation();const c=mkChore(ALL_DAYS);sec.chores.push(c);save();renderAll();openChoreEditModal(c,k,'custom',sec.id,()=>{
+      sec.chores=sec.chores.filter(x=>x.id!==c.id);save();renderAll();
+    });});
     const delB=document.createElement('button');delB.className='ic-btn del';delB.title='Delete section';delB.textContent='\ud83d\uddd1';
     delB.addEventListener('click',e=>{
       e.stopPropagation();if(!confirm('Delete section "'+(sec.title||'Custom')+'"?'))return;
@@ -3237,7 +3239,8 @@ function renderCharts(k){
   if(k)(k.tokens||[]).forEach(ev=>{
     const t=Number(ev.amount||0);if(t===0)return;
     const note=ev.note||'';
-    const isRedeem=note.startsWith('\ud83c\udf81');
+    const isGift=note.startsWith('\ud83c\udf81 Gift')&&t>0; // gift tokens are positive
+    const isRedeem=note.startsWith('\ud83c\udf81')&&t<0&&!isGift; // redemptions are negative
     const isUndo=note.startsWith('Undo:');
     const isMischief=!isRedeem&&!isUndo&&t<0&&ev.manual;
     const evDate=new Date(ev.timestamp);
@@ -4453,8 +4456,12 @@ function setupCommonEvents(){
   const b=document.getElementById('btnAddKid');if(b)b.addEventListener('click',addKid);
   const bKH=document.getElementById('btnKidsHelp');if(bKH)bKH.addEventListener('click',()=>document.getElementById('kidsHelpOverlay').classList.add('open'));
   const b2=document.getElementById('btnAddKidBig');if(b2)b2.addEventListener('click',addKid);
-  const b3=document.getElementById('btnAddDaily');if(b3)b3.addEventListener('click',()=>{const k=kid();if(!k)return;const c=mkChore(ALL_DAYS);k.daily.push(c);save();renderAll();openChoreEditModal(c,k,'daily',null);});
-  const b4=document.getElementById('btnAddBonus');if(b4)b4.addEventListener('click',()=>{const k=kid();if(!k)return;const c=mkChore(ALL_DAYS);k.bonus.push(c);save();renderAll();openChoreEditModal(c,k,'bonus',null);});
+  const b3=document.getElementById('btnAddDaily');if(b3)b3.addEventListener('click',()=>{const k=kid();if(!k)return;const c=mkChore(ALL_DAYS);k.daily.push(c);save();renderAll();openChoreEditModal(c,k,'daily',null,()=>{
+      k.daily=k.daily.filter(x=>x.id!==c.id);save();renderAll();
+    });});
+  const b4=document.getElementById('btnAddBonus');if(b4)b4.addEventListener('click',()=>{const k=kid();if(!k)return;const c=mkChore(ALL_DAYS);k.bonus.push(c);save();renderAll();openChoreEditModal(c,k,'bonus',null,()=>{
+      k.bonus=k.bonus.filter(x=>x.id!==c.id);save();renderAll();
+    });});
   const b5=document.getElementById('btnAddReward');if(b5)b5.addEventListener('click',()=>{const k=kid();if(!k)return;k.rewards.push(mkReward());save();renderAll();});
   const bExpiry=document.getElementById('setTokenExpiry');if(bExpiry)bExpiry.addEventListener('click',openTokenExpirySheet);
   const b6=document.getElementById('setAddSection');if(b6)b6.addEventListener('click',()=>{const k=kid();if(!k)return;if(!k.customSections)k.customSections=[];k.customSections.push(mkCustomSection('Section '+(k.customSections.length+1)));save();renderAll();const so=document.getElementById('settingsOverlay');if(so)so.classList.remove('open');});
@@ -5947,7 +5954,7 @@ function openChoreEditModal(item,k,grp,secId,onCancel){
   const isOneTime=grp==='onetime';
   ov=document.createElement('div');ov.id='choreEditOverlay';ov.className='overlay';
   ov.innerHTML=`<div class="modal" style="max-width:400px">
-    <div class="m-hdr"><div class="m-title">\u270F\uFE0F Edit Chore</div><button class="m-close" onclick="closeChoreEditModal()">\u2715</button></div>
+    <div class="m-hdr"><div class="m-title" id="chorEditTitle">${onCancel ? "\u2795 Add Chore" : "\u270F\uFE0F Edit Chore"}</div><button class="m-close" onclick="closeChoreEditModal()">\u2715</button></div>
     <div class="m-body ced-body">
       <div class="ced-label">Type</div>
       <div class="ced-type-row" id="cedTypeRow">
