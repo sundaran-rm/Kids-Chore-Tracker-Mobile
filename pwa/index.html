@@ -1137,6 +1137,8 @@ body.kids-mode #btnKidsHelp{display:flex!important}
 .pwa-inst-num{background:var(--blue);color:#fff;font-size:11px;font-weight:800;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
 /* ── CHALLENGES ── */
 .chal-item{background:var(--navy3);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;position:relative}
+.chal-item.chal-disabled{opacity:.5;filter:grayscale(.3)}
+.chal-item:not(.chal-disabled)[data-edit]{cursor:pointer}
 .chal-item.complete{border-color:rgba(105,240,174,0.4);background:rgba(105,240,174,0.05)}
 .chal-hdr{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px}
 .chal-icon{font-size:20px;line-height:1;flex-shrink:0;margin-top:1px}
@@ -1167,7 +1169,9 @@ body.kids-mode #btnKidsHelp{display:flex!important}
 .chal-form-inp{background:var(--navy4);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:13px;border-radius:8px;padding:9px 11px;outline:none;width:100%;box-sizing:border-box}
 .chal-form-inp:focus{border-color:var(--blue)}
 .chal-type-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.chal-type-btn{background:var(--navy4);border:1px solid var(--border);color:var(--muted);font-family:var(--font);font-size:11px;font-weight:700;border-radius:8px;padding:8px 6px;cursor:pointer;text-align:center;transition:all .15s}
+.chal-type-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.chal-type-btn{background:var(--navy4);border:1.5px solid var(--border);color:var(--muted);font-family:var(--font);font-size:11px;font-weight:700;border-radius:20px;padding:5px 12px;cursor:pointer;white-space:nowrap;transition:all .15s;touch-action:manipulation}
+.chal-type-btn.active{background:rgba(79,195,247,.14);border-color:var(--blue);color:var(--blue)}
 .chal-type-btn.selected{background:rgba(79,195,247,0.15);border-color:var(--blue);color:var(--blue)}
 
 /* ── TOKEN GIFTING ── */
@@ -1771,6 +1775,13 @@ body.no-animations #themePatternCanvas{display:none}
       </div>
     </div>
     <div id="familyGoalSection" style="display:none;padding:4px 0 2px"></div>
+    <div class="section" id="secChallenges">
+      <div class="sec-hdr" onclick="toggleSection('secChallenges')">
+        <div class="sec-title">&#x1F3AF; Challenges</div>
+        <div class="sec-hdr-acts"><button class="btn-add" id="btnAddChallenge" onclick="event.stopPropagation();openCreateChallenge()">+ Add</button></div>
+      </div>
+      <div class="sec-body" id="chalBody"></div>
+    </div>
     <div class="section" id="secHistory">
       <div class="sec-hdr" onclick="toggleSection('secHistory')">
         <div class="sec-title">&#x1F4DC; History</div>
@@ -1794,13 +1805,7 @@ body.no-animations #themePatternCanvas{display:none}
       </div>
       <div class="sec-body" style="padding:6px 6px 8px"><div id="badgesGrid" class="badges-grid"></div></div>
     </div>
-    <div class="section" id="secChallenges">
-      <div class="sec-hdr" onclick="toggleSection('secChallenges')">
-        <div class="sec-title">&#x1F3AF; Challenges</div>
-        <div class="sec-hdr-acts"><button class="btn-add" id="btnAddChallenge" onclick="event.stopPropagation();openCreateChallenge()">+ Add</button></div>
-      </div>
-      <div class="sec-body" id="chalBody"></div>
-    </div>
+    
     <div class="section" id="secCalendar">
       <div class="sec-hdr" onclick="toggleSection('secCalendar')">
         <div class="sec-title">&#x1F4C5; Calendar</div>
@@ -2633,7 +2638,7 @@ function startListener(hid){
         if(!S.customLevels)S.customLevels=[];
         if(!S.flashMessages)S.flashMessages=[];if(!S.swapRequests)S.swapRequests=[];if(!S.multiplierDays)S.multiplierDays=[];if(!S.diffPayScale)S.diffPayScale=null;if(S.familyGoal===undefined)S.familyGoal=null;
         S.kids.forEach(k=>{if(!k.customSections)k.customSections=[];if(!k.oneTime)k.oneTime=[];if(!k.theme)k.theme='galaxy';if(k.kidsTheme===undefined)k.kidsTheme=null;if(!k.goal)k.goal={name:'',target:100,rewardId:null,savingsLock:false};if(k.goal.savingsLock===undefined)k.goal.savingsLock=false;if(!k.badges)k.badges=[];if(!k.allowance)k.allowance={amount:0,day:1,lastPaid:null,lastWeekPaid:null};if(!k.badgeThresholds)k.badgeThresholds={};if(!k.customBadges)k.customBadges=[];if(!k.pendingApprovals)k.pendingApprovals=[];if(k.archived===undefined)k.archived=false;if(!k.archive)k.archive=[];if(!k.lastLevelCls){const _lv=getLevel(getXP(k));k.lastLevelCls=_lv.cls;}if(!k.challenges)k.challenges=[];
-k.challenges.forEach(c=>{if(!c.schedule)c.schedule={type:'none',dayOfWeek:1,dayOfMonth:1};if(c.lastScheduledRun===undefined)c.lastScheduledRun=null;});if(!k.tokenExpiry)k.tokenExpiry={enabled:false,days:30,lockedTokens:[]};k.daily.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';if(c.disabled===undefined)c.disabled=false;});k.bonus.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';if(c.disabled===undefined)c.disabled=false;});(k.customSections||[]).forEach(s=>s.chores.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';}));});
+k.challenges.forEach(c=>{if(!c.schedule)c.schedule={type:'none',dayOfWeek:1,dayOfMonth:1};if(c.lastScheduledRun===undefined)c.lastScheduledRun=null;if(c.disabled===undefined)c.disabled=false;});if(!k.tokenExpiry)k.tokenExpiry={enabled:false,days:30,lockedTokens:[]};k.daily.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';if(c.disabled===undefined)c.disabled=false;});k.bonus.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';if(c.disabled===undefined)c.disabled=false;});(k.customSections||[]).forEach(s=>s.chores.forEach(c=>{if(c.difficulty===undefined)c.difficulty=null;if(c.notes===undefined)c.notes='';}));});
         saveLocal();
         // Defer DOM rebuild to next animation frame so pending touch events
         // are processed first. Cancels any previous pending frame to avoid stacking.
@@ -3201,6 +3206,7 @@ function renderRight(){
   if(_statPane&&_statPane.classList.contains('active'))renderCharts(k);
   renderSpendingHistory(k);
   renderFamilyGoal();
+  renderChallenges(k);
 }
 
 /* ── CHARTS ── */
@@ -6967,7 +6973,24 @@ function chalProgress(c, k) {
     ).reduce((s, e) => s + Number(e.amount), 0);
   }
   if (c.type === 'streak_n') {
-    return calcStreak(k);
+    // Only count streak days on or after the challenge startDate
+    const startDs = c.startDate || dateStr(new Date());
+    const streakSet = new Set(k.streakDates || []);
+    let streak = 0, cur = new Date();
+    const dow2 = cur.getDay();
+    if (!streakSet.has(todayStr())) cur.setDate(cur.getDate() - 1);
+    let _safe = 730;
+    while (_safe-- > 0) {
+      const ds = dateStr(cur);
+      if (ds < startDs) break; // don't count before challenge created
+      if (streakSet.has(ds)) { streak++; cur.setDate(cur.getDate() - 1); continue; }
+      // Streak freeze: skip days with no chores scheduled
+      const dayDow = cur.getDay();
+      const hasChores = (k.daily || []).some(ch => (ch.days || []).includes(dayDow) && !ch.disabled);
+      if (!hasChores) { cur.setDate(cur.getDate() - 1); continue; }
+      break;
+    }
+    return streak;
   }
   if (c.type === 'daily_all') {
     // Count consecutive days where all daily tasks were completed, going back from today
@@ -7229,7 +7252,10 @@ function renderChallenges(k) {
   const addBtn = document.getElementById('btnAddChallenge');
   // Only rebuild DOM if challenge data actually changed — prevents layout
   // thrash on every Firebase onSnapshot which blocks touch events on Android.
-  const _cacheKey = JSON.stringify(k ? (k.challenges||[]) : []) + (kidsMode?'1':'0');
+  // Include progress-relevant data in cache key so it updates in real time
+  const _progKey = k ? (k.streakDates||[]).length + '|' + (k.tokens||[]).length + '|' +
+    (k.daily||[]).reduce((s,c)=>(c.completions||[]).length+s,0) : '0';
+  const _cacheKey = JSON.stringify(k ? (k.challenges||[]) : []) + (kidsMode?'1':'0') + _progKey;
   if (body._chalCache === _cacheKey) return;
   body._chalCache = _cacheKey;
   body.innerHTML = '';
@@ -7238,11 +7264,27 @@ function renderChallenges(k) {
   if(addBtn)addBtn.style.display = kidsMode ? 'none' : '';
 
   const challenges = k.challenges || [];
+  // FIX: hide full section when no challenges, show standalone CTA instead
+  const secEl = document.getElementById('secChallenges');
+  const ctaEl = document.getElementById('chalCtaBtn');
   if (!challenges.length) {
-    const em = document.createElement('div'); em.className = 'chal-empty';
-    em.textContent = kidsMode ? 'No challenges yet — ask a parent!' : 'No challenges yet. Tap + Add to create one!';
-    body.appendChild(em); return;
+    if (secEl) secEl.style.display = 'none';
+    if (!kidsMode) {
+      if (!ctaEl) {
+        const btn = document.createElement('button');
+        btn.id = 'chalCtaBtn'; btn.className = 'fg-setup-btn';
+        btn.style.marginBottom = '10px';
+        btn.innerHTML = '&#x1F3AF; Create a Challenge';
+        btn.addEventListener('click', openCreateChallenge);
+        const fg = document.getElementById('familyGoalSection');
+        if (fg && fg.parentNode) fg.parentNode.insertBefore(btn, secEl || fg.nextSibling);
+      }
+    }
+    return;
   }
+  // Has challenges: hide CTA, show full section
+  if (ctaEl) ctaEl.remove();
+  if (secEl) secEl.style.display = '';
 
   const active = challenges.filter(c => !c.completed);
   const done   = challenges.filter(c =>  c.completed);
@@ -7254,22 +7296,24 @@ function renderChallenges(k) {
     const dl = chalDeadlineLabel(c);
 
     const item = document.createElement('div');
-    item.className = 'chal-item' + (c.completed ? ' complete' : '');
+    item.className = 'chal-item' + (c.completed ? ' complete' : '') + (c.disabled ? ' chal-disabled' : '');
 
     const dlHtml = dl
       ? `<span class="chal-deadline${dl.urgent ? ' urgent' : ''}">${dl.text}</span>` : '';
     const bonusHtml = c.bonus ? `<span class="chal-bonus">+${c.bonus}⭐ bonus</span>` : '';
     const schedLabel = getChalScheduleLabel(c);
     const schedHtml = schedLabel ? `<span class="chal-sched-badge">${schedLabel}</span>` : '';
+    // Show Paused ONLY when disabled but not completed
+    const disabledHtml = (c.disabled && !c.completed) ? '<span class="chal-sched-badge" style="color:var(--muted);border-color:var(--border)">⏸ Paused</span>' : '';
 
     item.innerHTML = `
       <div class="chal-hdr">
         <div class="chal-icon">${ct.icon}</div>
         <div class="chal-info">
           <div class="chal-title">${escHtml(c.title||ct.label)}</div>
-          <div class="chal-meta">${dlHtml}${bonusHtml}${schedHtml}</div>
+          <div class="chal-meta">${dlHtml}${bonusHtml}${schedHtml}${disabledHtml||''}</div>
         </div>
-        ${!kidsMode?`<button class="chal-del-btn" title="Delete">&#x2715;</button>`:''}
+        ${!kidsMode?`<button class="chal-del-btn" title="Edit challenge" style="font-size:13px">&#x270F;&#xFE0F;</button>`:''}
       </div>
       <div class="chal-track"><div class="chal-fill" style="width:${pct}%"></div></div>
       <div class="chal-foot">
@@ -7282,9 +7326,11 @@ function renderChallenges(k) {
     if (!kidsMode) {
       item.querySelector('.chal-del-btn').addEventListener('click', e => {
         e.stopPropagation();
-        k.challenges = (k.challenges||[]).filter(x => x.id !== c.id);
-        const _cb=document.getElementById('chalBody');if(_cb)_cb._chalCache=null;
-        save(); renderAll();
+        openChallengeModal(c);
+      });
+      // Tap card body = edit
+      item.addEventListener('click', e => {
+        if (!e.target.closest('.chal-del-btn')) openChallengeModal(c);
       });
     }
     body.appendChild(item);
@@ -8359,7 +8405,7 @@ function checkChallenges(k) {
   if (!k || !k.challenges) return;
   let changed = false;
   k.challenges.forEach(c => {
-    if (c.completed) return;
+    if (c.completed || c.disabled) return; // skip disabled
     const progress = chalProgress(c, k);
     // Check deadline expiry
     if (c.deadline) {
@@ -8373,6 +8419,12 @@ function checkChallenges(k) {
       c.completed = true;
       c.completedAt = Date.now();
       c.progress = progress;
+      // Auto-disable on completion
+      if (!c.schedule || c.schedule.type === 'none') {
+        c.disabled = true; // one-time: disable permanently
+      } else {
+        c.disabled = true; // scheduled: disable until next reset
+      }
       // Award bonus tokens
       if (c.bonus) {
         k.tokens.unshift({
@@ -8454,6 +8506,7 @@ function resetScheduledChallenge(c, k) {
   c.completed = false;
   c.completedAt = null;
   c.progress = 0;
+  c.disabled = false; // re-enable on schedule reset
   // Set startDate to TOMORROW so chores done today don't immediately re-complete the challenge
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -8495,73 +8548,98 @@ function showChallengeToast(title, action) {
   }
 }
 
-function openCreateChallenge() {
+/* ══════════════════════════════════════════════
+   CHALLENGE EDIT / ADD MODAL (unified)
+══════════════════════════════════════════════ */
+
+function openChallengeModal(existingChallenge) {
+  // Pass null/undefined for new challenge, or the challenge object to edit
   const k = kid(); if (!k) return;
+  const isEdit = !!existingChallenge;
+
+  // For editing: work on a deep copy so X discards changes
+  const c = isEdit ? JSON.parse(JSON.stringify(existingChallenge)) : mkChallenge();
+
+  let selType  = c.type || 'chores_n';
+  let selSched = (c.schedule && c.schedule.type) || 'none';
+  let selDow   = (c.schedule && c.schedule.dayOfWeek != null) ? c.schedule.dayOfWeek : 1;
+
   let ov = document.getElementById('chalCreateOverlay'); if (ov) ov.remove();
   ov = document.createElement('div'); ov.id = 'chalCreateOverlay'; ov.className = 'overlay';
   ov.style.zIndex = '3200';
 
-  let selType = 'chores_n';
+  const typeOpts = CHAL_TYPES.map(t =>
+    `<button class="chal-type-btn${selType===t.id?' active':''}" data-type="${t.id}">${t.icon} ${t.label}</button>`
+  ).join('');
 
   ov.innerHTML = `<div class="sheet"><div class="sheet-handle"></div>
-    <div class="sheet-hdr"><button class="set-sub-back" onclick="_backToSettingsCat('rewards')" title="Back" style="margin-right:6px">&#x2039;</button><div class="sheet-title" style="flex:1">🎯 New Challenge</div>
-      <button class="sheet-close" onclick="closeAllSettings()">&#x2715;</button>
+    <div class="sheet-hdr">
+      <button class="set-sub-back" onclick="_backToSettingsCat('rewards')" title="Back" style="margin-right:6px">&#x2039;</button>
+      <div class="sheet-title" style="flex:1">${isEdit ? '✏️ Edit Challenge' : '🎯 New Challenge'}</div>
+      <button class="sheet-close" onclick="document.getElementById('chalCreateOverlay').remove()">&#x2715;</button>
     </div>
-    <div class="sheet-body" style="padding:16px 18px 28px">
+    <div class="sheet-body" style="padding:14px 16px 28px">
       <div class="chal-form-row">
         <label class="chal-form-label">Challenge name</label>
-        <input class="chal-form-inp" id="chalTitle" placeholder="e.g. Weekend Warrior" maxlength="40">
+        <input class="chal-form-inp" id="chalTitle" placeholder="e.g. Weekend Warrior" maxlength="60" value="${escHtml(c.title||'')}">
       </div>
       <div class="chal-form-row">
         <label class="chal-form-label">Type</label>
-        <div class="chal-type-grid" id="chalTypeGrid">
-          ${CHAL_TYPES.map(t => `<button class="chal-type-btn${t.id==='chores_n'?' selected':''}" data-type="${t.id}">${t.icon} ${t.label}</button>`).join('')}
-        </div>
+        <div class="chal-type-row" id="chalTypeRow">${typeOpts}</div>
       </div>
-      <div class="chal-form-row" style="display:flex;gap:12px">
-        <div style="flex:1">
-          <label class="chal-form-label">Target</label>
-          <input class="chal-form-inp" id="chalTarget" type="number" min="1" max="999" value="5" inputmode="numeric">
-        </div>
-        <div style="flex:1">
-          <label class="chal-form-label">Bonus tokens 🌟</label>
-          <input class="chal-form-inp" id="chalBonus" type="number" min="0" max="999" value="10" inputmode="numeric">
-        </div>
+      <div class="chal-form-row">
+        <label class="chal-form-label">Target</label>
+        <input class="chal-form-inp" id="chalTarget" type="number" min="1" max="9999" value="${c.target||5}" inputmode="numeric">
+      </div>
+      <div class="chal-form-row">
+        <label class="chal-form-label">Bonus tokens <span style="font-weight:400;text-transform:none">(on completion)</span></label>
+        <input class="chal-form-inp" id="chalBonus" type="number" min="0" max="9999" value="${c.bonus||0}" inputmode="numeric">
       </div>
       <div class="chal-form-row">
         <label class="chal-form-label">Deadline <span style="font-weight:400;text-transform:none">(optional)</span></label>
-        <input class="chal-form-inp" id="chalDeadline" type="date">
+        <input class="chal-form-inp" id="chalDeadline" type="date" value="${c.deadline||''}">
       </div>
       <div class="chal-form-row">
         <label class="chal-form-label">Recurring schedule <span style="font-weight:400;text-transform:none">(optional)</span></label>
         <div class="chal-sched-row">
           <div class="chal-sched-opts" id="chalSchedOpts">
-            ${SCHED_OPTS.map(s => `<button class="chal-sched-btn${s.id==='none'?' selected':''}" data-sched="${s.id}">${s.icon ? s.icon+' ' : ''}${s.label}</button>`).join('')}
+            ${SCHED_OPTS.map(s => `<button class="chal-sched-btn${(s.id===selSched)?' selected':''}" data-sched="${s.id}">${s.icon ? s.icon+' ' : ''}${s.label}</button>`).join('')}
           </div>
-          <div class="chal-sched-day-row" id="chalSchedDayRow">
-            ${SCHED_DAY_SHORT.map((d,i) => `<button class="chal-sched-day-btn${i===1?' selected':''}" data-dow="${i}">${d}</button>`).join('')}
+          <div class="chal-sched-day-row${selSched==='weekly'?' show':''}" id="chalSchedDayRow">
+            ${SCHED_DAY_SHORT.map((d,i) => `<button class="chal-sched-day-btn${i===selDow?' selected':''}" data-dow="${i}">${d}</button>`).join('')}
           </div>
         </div>
       </div>
-      <button id="btnSaveChallenge" style="width:100%;background:linear-gradient(135deg,var(--blue),#0288d1);color:#fff;font-family:var(--font);font-size:14px;font-weight:800;border:none;border-radius:10px;padding:13px 0;cursor:pointer;margin-top:4px">
-        🎯 Create Challenge
-      </button>
+      ${isEdit ? `
+      <div class="ced-disabled-row" style="margin-top:10px">
+        <div>
+          <div class="ced-disabled-lbl">&#x1F6AB; Disable challenge</div>
+          <div class="ced-disabled-sub">Pauses progress tracking and token awards</div>
+        </div>
+        <label class="tog-wrap"><input type="checkbox" id="chalDisabled"${c.disabled?' checked':''}><span class="tog-sl"></span></label>
+      </div>` : ''}
+      <div style="display:flex;gap:8px;margin-top:16px">
+        <button id="btnSaveChallenge" style="flex:1;background:linear-gradient(135deg,var(--blue),#0288d1);color:#fff;font-family:var(--font);font-size:13px;font-weight:800;border:none;border-radius:10px;padding:12px 0;cursor:pointer">
+          ${isEdit ? '&#x2713; Save' : '🎯 Create Challenge'}
+        </button>
+        ${isEdit ? `<button id="btnDeleteChallenge" style="background:rgba(255,107,107,.12);border:1.5px solid rgba(255,107,107,.4);color:var(--red);font-family:var(--font);font-size:13px;font-weight:800;border-radius:10px;padding:12px 16px;cursor:pointer">&#x1F5D1;</button>` : ''}
+      </div>
     </div></div>`;
 
   document.body.appendChild(ov);
   ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+  ov.classList.add('open');
 
   // Type selection
   ov.querySelectorAll('.chal-type-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      ov.querySelectorAll('.chal-type-btn').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
+      ov.querySelectorAll('.chal-type-btn').forEach(b => b.classList.remove('active','selected'));
+      btn.classList.add('active');
       selType = btn.dataset.type;
     });
   });
 
-  // Schedule picker wiring
-  let selSched = 'none'; let selDow = 1;
+  // Schedule picker
   ov.querySelectorAll('.chal-sched-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       ov.querySelectorAll('.chal-sched-btn').forEach(b => b.classList.remove('selected'));
@@ -8579,26 +8657,60 @@ function openCreateChallenge() {
     });
   });
 
+  // Save
   document.getElementById('btnSaveChallenge').addEventListener('click', () => {
     const title   = document.getElementById('chalTitle').value.trim();
     const target  = Math.max(1, parseInt(document.getElementById('chalTarget').value) || 5);
     const bonus   = Math.max(0, parseInt(document.getElementById('chalBonus').value) || 0);
     const deadline = document.getElementById('chalDeadline').value || null;
     if (!title) { document.getElementById('chalTitle').focus(); return; }
+
+    const wasDisabled = isEdit && existingChallenge.disabled;
+    const nowDisabled = isEdit && document.getElementById('chalDisabled')?.checked;
+
+    // If re-enabling (was disabled, now enabled), reset startDate to today so progress is fresh
+    const reEnabled = wasDisabled && !nowDisabled;
+
     if (!k.challenges) k.challenges = [];
-    const c = mkChallenge();
-    c.title = title; c.type = selType; c.target = target;
-    c.bonus = bonus; c.deadline = deadline;
-    c.schedule = { type: selSched, dayOfWeek: selDow, dayOfMonth: new Date().getDate() };
-    k.challenges.push(c);
-    save(); renderAll();
-    ov.remove();
-    showInappNotif('🎯', 'Challenge created!', title);
+    if (isEdit) {
+      // Update existing in-place
+      const orig = k.challenges.find(x => x.id === existingChallenge.id);
+      if (orig) {
+        orig.title    = title;
+        orig.type     = selType;
+        orig.target   = target;
+        orig.bonus    = bonus;
+        orig.deadline = deadline;
+        orig.schedule = { type: selSched, dayOfWeek: selDow, dayOfMonth: new Date().getDate() };
+        orig.disabled = nowDisabled;
+        if (reEnabled) { orig.startDate = dateStr(new Date()); orig.completed = false; orig.progress = 0; }
+      }
+    } else {
+      const newC = mkChallenge();
+      newC.title    = title;
+      newC.type     = selType;
+      newC.target   = target;
+      newC.bonus    = bonus;
+      newC.deadline = deadline;
+      newC.schedule = { type: selSched, dayOfWeek: selDow, dayOfMonth: new Date().getDate() };
+      k.challenges.push(newC);
+    }
+
+    const _cb = document.getElementById('chalBody'); if (_cb) _cb._chalCache = null;
+    save(); renderAll(); ov.remove();
   });
 
-  ov.classList.add('open');
-  setTimeout(() => document.getElementById('chalTitle').focus(), 200);
+  // Delete (edit mode only)
+  const delBtn = document.getElementById('btnDeleteChallenge');
+  if (delBtn) delBtn.addEventListener('click', () => {
+    k.challenges = (k.challenges||[]).filter(x => x.id !== existingChallenge.id);
+    const _cb = document.getElementById('chalBody'); if (_cb) _cb._chalCache = null;
+    save(); renderAll(); ov.remove();
+  });
 }
+
+// Keep openCreateChallenge as alias
+function openCreateChallenge() { openChallengeModal(null); }
 
 
 /* ══════════════════════════════════════════════

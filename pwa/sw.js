@@ -1,4 +1,4 @@
-const CACHE = 'chore-quest-v52';
+const CACHE = 'chore-quest-v56';
 
 const LOCAL_ASSETS = [
   './index.html',
