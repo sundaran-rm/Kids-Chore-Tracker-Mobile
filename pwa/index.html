@@ -2801,6 +2801,39 @@ function pruneOneTime(k){
 }
 
 /* ── CHORE CARD ── */
+function undoChallengeIfNeeded(k) {
+  // Called after a chore is undone: reverse any challenge completions from today
+  // that no longer hold true given the updated state
+  const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+  const todayTs = todayStart.getTime();
+  let changed = false;
+
+  (k.challenges || []).forEach(c => {
+    if (!c.completed || !c.completedAt || c.completedAt < todayTs) return;
+    // Challenge was completed today — recheck progress
+    const progress = chalProgress(c, k);
+    if (progress < c.target) {
+      // No longer complete: reverse
+      c.completed = false;
+      c.completedAt = null;
+      c.progress = progress;
+      c.disabled = false; // re-enable
+      // Remove the challenge bonus token entry from today
+      k.tokens = k.tokens.filter(ev =>
+        !(ev.amount > 0 &&
+          (ev.note || '').startsWith('\uD83C\uDFAF Challenge: ') &&
+          ev.timestamp >= todayTs)
+      );
+      changed = true;
+    }
+  });
+
+  if (changed) {
+    const cb = document.getElementById('chalBody'); if (cb) cb._chalCache = null;
+  }
+  return changed;
+}
+
 function buildChoreCard(grp,secId,idx,item,k){
   const today=todayStr(),dow=todayDow();
   const done=item.lastDone===today,sched=scheduledToday(item)&&!item.disabled;
@@ -2932,7 +2965,9 @@ function buildChoreCard(grp,secId,idx,item,k){
     const baseT=Number(item.tokens||0);
     const undoMulti=Math.max(isCOTW(item.id)?2:1,getTodayMultiplier());
     k.tokens.unshift({amount:-(baseT*undoMulti),note:'Undo: '+(item.title||'Task'),timestamp:Date.now()});
-    if(grp==='daily')refreshStreak(k);save();renderAll();
+    if(grp==='daily')refreshStreak(k);
+    undoChallengeIfNeeded(k);
+    save();renderAll();
   });
 
   /* edit button */
@@ -8439,7 +8474,11 @@ function checkChallenges(k) {
       playTick();
     }
   });
-  if (changed) save();
+  if (changed) {
+    save();
+    // Full re-render so token balance, history, XP, and challenges all update immediately
+    renderAll();
+  }
 }
 
 let _chalToastTimer = null;
