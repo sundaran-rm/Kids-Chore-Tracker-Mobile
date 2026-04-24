@@ -2884,24 +2884,7 @@ function buildChoreCard(grp,secId,idx,item,k){
   /* difficulty — display, click to cycle */
   const diff=document.createElement('div');diff.className='diff-badge '+(item.difficulty||'none');
   diff.textContent=DIFF_LABELS[item.difficulty||'none'];diff.title='Click to change difficulty';
-  diff.addEventListener('click',e=>{
-    e.stopPropagation();
-    const cycle=['easy','medium','hard'];
-    const cur=cycle.indexOf(item.difficulty||'');
-    item.difficulty=cycle[(cur+1)%cycle.length];
-    diff.className='diff-badge '+(item.difficulty||'none');
-    // Auto-fill token if pay scale is set
-    const dpt=getDiffPayToken(item.difficulty);
-    if(dpt!==null){
-      item.tokens=dpt;
-      // Update tok-val span in-place (no full re-render needed)
-      const tv=tb&&tb.querySelector('.tok-val');if(tv)tv.textContent=dpt;
-    }
-    diff.textContent=DIFF_LABELS[item.difficulty||'none'];
-    save();
-    // Refresh progress bar immediately
-    renderPointsBanner(k);
-  });
+
 
   /* token badge — display only */
   const tb=document.createElement('div');tb.className='tok-badge';
